@@ -321,3 +321,26 @@ Debug build installed with `adb install -r` (standing approval). The user picked
 - Behaviour with a bad or missing `.art` file; not tested.
 - Other Artemis versions (only 20.2.6 observed), and the release build.
 - Whether the second pick started a new session or resumed the first.
+
+## 2026-11-02: Artemis with bad or missing `.art` files (adb, temporary copies)
+
+With the maintainer's approval, five temporary files were created on the Odin in a scratch folder under `Download` (not in `Games/pc`) and each was sent to Artemis as `ACTION_VIEW` on a `file://` URI from adb, with `NEW_TASK | CLEAR_TASK` and the Home key between cases. The scratch folder was deleted afterwards; the original in `Games/pc` was not touched (still byte-identical to the local sample).
+
+### Verified (observed on the device)
+
+| File sent | What Artemis showed |
+|---|---|
+| empty (0 bytes) | dialog "Connection Error: Provided PC is not valid" |
+| text "this is not a shortcut" | same |
+| 40 random bytes | same |
+| `fixtures/Synthetic.art` (well-formed, placeholder host that does not exist) | dialog "Connection Error: PC not found" |
+| path that does not exist | "Provided PC is not valid" |
+
+- In every case Artemis stayed in `ShortcutTrampoline` showing a dialog with HELP and OK; no crash, no stream started.
+- So Artemis reports a bad or missing `.art` file itself, with its own wording. GameBridge cannot tell the player more, which is consistent with the spec's decision not to parse the file.
+
+### Assumed / not verified
+
+- These were `file://` URIs from the adb shell. Bad files reached through LaunchBox's `content://` URI and GameBridge were not tried, so GameBridge's own handling of an unreadable name (`readName` failing) is covered only by the instrumented tests.
+- A well-formed file for a real host that is asleep or offline, and a real host with an unknown app UUID, were not tried.
+- The wording of the Artemis dialogs may differ in other versions (only 20.2.6 observed).
