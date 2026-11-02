@@ -6,6 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 
+sealed interface ArtemisDispatchResult {
+    /** startActivity returned normally. This is NOT proof that the stream started. */
+    data object Dispatched : ArtemisDispatchResult
+
+    data object NotInstalled : ArtemisDispatchResult
+
+    data object Refused : ArtemisDispatchResult
+}
+
 /**
  * Dispatches a Remote Shortcut (`.art`) to Artemis. The file is not read or parsed: Artemis owns the format.
  * No fallback to GameNative or a deep link.
@@ -16,7 +25,7 @@ import android.net.Uri
 class ArtemisDispatcher(
     private val context: Context,
 ) {
-    fun dispatch(shortcut: Uri): DispatchResult {
+    fun dispatch(shortcut: Uri): ArtemisDispatchResult {
         val intent =
             Intent(Intent.ACTION_VIEW)
                 .setComponent(ComponentName(PACKAGE, TRAMPOLINE_CLASS))
@@ -24,11 +33,11 @@ class ArtemisDispatcher(
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         return try {
             context.startActivity(intent)
-            DispatchResult.Dispatched
+            ArtemisDispatchResult.Dispatched
         } catch (_: ActivityNotFoundException) {
-            DispatchResult.ArtemisNotInstalled
+            ArtemisDispatchResult.NotInstalled
         } catch (_: SecurityException) {
-            DispatchResult.ArtemisRefused
+            ArtemisDispatchResult.Refused
         }
     }
 

@@ -6,24 +6,20 @@ import android.content.Context
 import android.content.Intent
 import com.allourmedia.gamebridge.core.DispatchRequest
 
-sealed interface DispatchResult {
+sealed interface GameNativeDispatchResult {
     /** startActivity returned normally. This is NOT proof that the game started. */
-    data object Dispatched : DispatchResult
+    data object Dispatched : GameNativeDispatchResult
 
-    data object GameNativeNotInstalled : DispatchResult
+    data object NotInstalled : GameNativeDispatchResult
 
-    data object GameNativeRefused : DispatchResult
-
-    data object ArtemisNotInstalled : DispatchResult
-
-    data object ArtemisRefused : DispatchResult
+    data object Refused : GameNativeDispatchResult
 }
 
 /** Dispatches a validated request to GameNative. No fallback to a deep link or another app. */
 class GameNativeDispatcher(
     private val context: Context,
 ) {
-    fun dispatch(request: DispatchRequest): DispatchResult {
+    fun dispatch(request: DispatchRequest): GameNativeDispatchResult {
         // Only the action, component and two extras. The incoming URI and its grant are never forwarded.
         val intent =
             Intent(ACTION)
@@ -33,11 +29,11 @@ class GameNativeDispatcher(
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         return try {
             context.startActivity(intent)
-            DispatchResult.Dispatched
+            GameNativeDispatchResult.Dispatched
         } catch (_: ActivityNotFoundException) {
-            DispatchResult.GameNativeNotInstalled
+            GameNativeDispatchResult.NotInstalled
         } catch (_: SecurityException) {
-            DispatchResult.GameNativeRefused
+            GameNativeDispatchResult.Refused
         }
     }
 
