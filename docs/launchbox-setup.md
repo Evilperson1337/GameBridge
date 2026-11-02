@@ -50,7 +50,7 @@ Notes:
 ## 3. Configure the Windows platform
 
 1. Set the Windows platform's default emulator to Custom Emulator (With Code). Verified as the end state (`DefaultEmulator`). Assumed: where this is done in LaunchBox. Custom Emulator (With Code) is at the top of the emulator picker in LaunchBox 1.23 per the handoff document; the other screens are not recorded. LaunchBox's own guide: https://feedback.launchbox-app.com/en/help/articles/7096169-custom-emulator-with-code
-2. Paste the Setup command as the launch arguments. Verified as the end state (`CustomEmulatorLaunchArguments`). Assumed: the field's label and screen.
+2. Paste the Setup command into the field LaunchBox labels "launch arguments". Verified as the end state (`CustomEmulatorLaunchArguments`). Assumed: the field's label and screen.
 3. Clear any per-game emulator override on the Windows games you want to go through GameBridge, for example an old `GameNative` entry, so that the platform setting applies. Assumed: the screens used to clear it were not recorded. Verified: in the working setup the games' `EmulatorOverride` values are empty, but whether they were cleared by hand or by LaunchBox is not known.
 4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
 

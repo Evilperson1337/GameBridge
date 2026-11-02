@@ -4,10 +4,10 @@ package com.allourmedia.gamebridge.core
 enum class FailureCategory(
     val reason: String,
 ) {
-    NoShortcut("GameBridge is meant to be started from LaunchBox. Pick a game there."),
+    NoShortcut("LaunchBox didn't pass a Shortcut. The emulator command must end with -d {file.uri}."),
     WrongAction(
         "LaunchBox sent GameBridge an unexpected request. In the emulator command, " +
-            "use the action com.allourmedia.gamebridge.action.DISPATCH. " +
+            "use the action $DISPATCH_ACTION. " +
             "Copy the command from GameBridge's setup screen.",
     ),
     NotContentUri(
@@ -19,8 +19,8 @@ enum class FailureCategory(
             "then pick the game again.",
     ),
     UnsupportedType(
-        "This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used " +
-            "for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame).",
+        "This isn't a Shortcut type GameBridge supports. Import the Shortcut file exported by GameNative " +
+            "(.gog, .steam, .epic, .amazon, .pcgame).",
     ),
     StorefrontNotVerified("This Storefront isn't verified yet."),
     RemoteUnsupported("Remote Shortcuts aren't supported yet."),

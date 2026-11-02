@@ -14,7 +14,7 @@ Requirements: JDK 21 and the Android SDK (setup steps in `docs/device-testing.md
 
 Modules: `:core` (pure Kotlin: Shortcut interpretation, Setup command, failure reasons) and `:app` (Android integration: the bridge activity that dispatches, and the setup screen opened from the app drawer).
 
-Without the signing secrets the release build is unsigned and `./gradlew check` still passes. Tagged releases are built and signed by `.github/workflows/release.yml`.
+Without the signing secrets the release build is unsigned and `./gradlew check` still passes. Tagged releases are built and signed by `.github/workflows/release.yml`. Before tagging, set `versionName` in `app/build.gradle.kts` to the tag without the `v` (the workflow fails otherwise) and increment `versionCode` for every release; Android refuses to install an update whose `versionCode` is not higher. The workflow does not check `versionCode`.
 
 ## Deploy to a device
 
@@ -26,7 +26,7 @@ The debug build is `com.allourmedia.gamebridge.debug` and can sit beside a relea
 
 ## Enabling another Storefront
 
-Each Storefront is one row in the Storefront table in `:core`. Enabling one means marking its row verified, adding a fixture Shortcut, and a device check that a real Dispatch reaches the game's Ready screen. No new parsing or dispatch code is needed. The README support table moves a row to verified only with a device observation recorded in `docs/investigation-log.md`.
+Each Storefront is one row in the Storefront table in `:core`. Enabling one means marking its row verified, adding a fixture Shortcut, and a device check where a person sees the game start in the Target App after a real Dispatch (that is a Launch, which GameBridge cannot observe). No new parsing or dispatch code is needed. The README support table moves a row to verified only with a device observation recorded in `docs/investigation-log.md`.
 
 ## Documents
 

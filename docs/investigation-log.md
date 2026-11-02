@@ -76,7 +76,7 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 
 ## 2026-11-02: Ticket 05, LaunchBox setup guide, README and rollback (docs only)
 
-### Verified (by reading the repo; nothing run on a device)
+### Taken from repo documents (not re-observed; nothing run on a device)
 
 - `app/src/main/AndroidManifest.xml`: the exported activity is `.BridgeActivity`, the action is `com.allourmedia.gamebridge.action.DISPATCH`, data scheme `content`. `app/build.gradle.kts`: namespace `com.allourmedia.gamebridge`, applicationId `com.allourmedia.gamebridge`, debug suffix `.debug`.
 - Consequence: the debug build's activity class stays in the `com.allourmedia.gamebridge` package while its application ID is `...gamebridge.debug`, so the setup guide writes the component with a fully qualified class (`<applicationId>/com.allourmedia.gamebridge.BridgeActivity`). This follows from Android resolving a leading-dot class name against the applicationId-derived package; it was not tested through `am start` or LaunchBox.
