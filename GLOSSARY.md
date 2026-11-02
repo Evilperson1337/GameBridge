@@ -34,6 +34,10 @@ _Avoid_: launcher
 An app GameBridge hands a game to: GameNative for Local Shortcuts, Artemis for Remote Shortcuts.
 _Avoid_: launcher, emulator
 
+**Setup command**:
+The exact text a user enters in LaunchBox's Custom Emulator (With Code) so that LaunchBox hands a Shortcut to GameBridge. There is one for each build of GameBridge.
+_Avoid_: launch arguments, command line
+
 ### Outcomes
 
 **Dispatch**:

@@ -160,3 +160,19 @@ Report: `docs/gamebridge-g1-launchbox-test-report-20261102.md`.
 
 - Why GameNative stays on a blank screen after an Epic exit, and whether the GOG exit path differs (the GOG comparison snapshot has not been taken). Whether Back on the blank screen returns to LaunchBox has not been checked.
 - Steam, Amazon and Custom have no device observation yet.
+
+## 2026-11-02: Working LaunchBox configuration, read from the device
+
+Read-only `adb pull` of `/storage/emulated/0/LaunchBox/Data/Platforms/Windows.xml`, compared with the pre-test backup. The user approved the pull. Nothing on the device was changed.
+
+### Verified (file contents)
+
+- The working setup is platform-wide: on the Windows platform, `DefaultEmulator` is `Custom Emulator (With Code)` and `CustomEmulatorLaunchArguments` is the debug Setup command from `docs/launchbox-setup.md`, byte for byte.
+- The games' per-game `EmulatorOverride` values (`GameNative` in the backup) are now empty, so the games follow the platform default. The per-game `CustomEmulator*` fields are empty.
+- Games are imported with `ApplicationPath` set to the Shortcut file under `/storage/emulated/0/Games/pc/` (`.epic`, `.gog`, `.amazon` seen).
+- Whether the per-game `EmulatorOverride` was cleared by hand or by LaunchBox is not known.
+
+### Assumed / not verified
+
+- The LaunchBox screens and field names used to set this up. The XML shows the result, not the path taken.
+- The user reports removing the per-game `GameNative` overrides in LaunchBox after testing, to use the platform-wide setup. The screens used are not recorded, so the guide's "clear per-game override" step is assumed, not verified.
