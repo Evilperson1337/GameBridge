@@ -24,6 +24,9 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.lifecycle.ActivityLifecycleCallback
 import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
 import androidx.test.runner.lifecycle.Stage
+import com.allourmedia.gamebridge.core.BridgeFailure
+import com.allourmedia.gamebridge.core.FailureCategory
+import com.allourmedia.gamebridge.core.Storefront
 import org.hamcrest.Matchers.allOf
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -41,7 +44,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 class BridgeActivityTest {
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val targetPackage = instrumentation.targetContext.packageName
-    private val gameNative = ComponentName("app.gamenative", "app.gamenative.MainActivity")
+    private val gameNative = ComponentName(GameNativeDispatcher.PACKAGE, "${GameNativeDispatcher.PACKAGE}.MainActivity")
     private val seen = CopyOnWriteArrayList<Activity>()
     private val callback = ActivityLifecycleCallback { activity, _ -> if (activity !in seen) seen.add(activity) }
 
@@ -63,18 +66,18 @@ class BridgeActivityTest {
 
     /** Stubs GameNative's side: the Dispatch is captured and answered, GameNative itself is not involved. */
     private fun stubGameNative() {
-        intending(hasAction(GAMENATIVE_ACTION)).respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
+        intending(hasAction(GameNativeDispatcher.ACTION)).respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
     }
 
     private fun fixtureUri(name: String): Uri = Uri.withAppendedPath(FixtureProvider.BASE, name)
 
     /** Dispatches only: Espresso-Intents also records the intents the tests themselves start. */
-    private fun dispatches() = Intents.getIntents().filter { it.action == GAMENATIVE_ACTION }
+    private fun dispatches() = Intents.getIntents().filter { it.action == GameNativeDispatcher.ACTION }
 
     private fun bridgeIntent(
         uri: Uri?,
         activity: Class<*> = BridgeActivity::class.java,
-        action: String? = BRIDGE_ACTION,
+        action: String? = BridgeActivity.ACTION,
     ) = Intent(action).setClassName(targetPackage, activity.name).also { it.data = uri }
 
     /** Starts [intent] through the stand-in for LaunchBox and returns the bridge activity that appears. */
@@ -117,30 +120,27 @@ class BridgeActivityTest {
 
     private fun awaitFinished(activity: Activity) = await("the activity to finish") { activity.takeIf { it.isFinishing || it.isDestroyed } }
 
-    private fun assertDialog(
-        category: FailureCategory,
-        fileName: String?,
-        storefront: String? = null,
-    ) {
-        val reason = BridgeFailure(category, fileName, storefront).reason
-        val message = if (fileName == null) reason else "$fileName\n\n$reason"
-        onView(withText(message)).inRoot(isDialog()).check(matches(isDisplayed()))
+    private fun assertDialog(failure: BridgeFailure) {
+        onView(withText(failure.message)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText("Close")).inRoot(isDialog()).check(matches(isDisplayed()))
     }
 
     private fun failureDialogFor(
         intent: Intent,
-        category: FailureCategory,
-        fileName: String? = null,
+        failure: BridgeFailure,
         grant: String = "grant",
         dispatchAttempts: Int = 0,
-        storefront: String? = null,
     ): Activity {
         val activity = start(intent, grant)
-        assertDialog(category, fileName, storefront)
+        assertDialog(failure)
         assertEquals(dispatchAttempts, dispatches().size)
         return activity
     }
+
+    /** A launcher-style start with no data at all: the app drawer sends MAIN. */
+    private fun startWithoutShortcut() = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
+
+    private val noShortcut = BridgeFailure(FailureCategory.NoShortcut)
 
     @Test
     fun gogShortcutIsDispatchedToGameNativeAndActivityFinishes() {
@@ -149,7 +149,7 @@ class BridgeActivityTest {
         awaitFinished(activity)
         intended(
             allOf(
-                hasAction(GAMENATIVE_ACTION),
+                hasAction(GameNativeDispatcher.ACTION),
                 hasComponent(gameNative),
                 hasExtra("app_id", 1207666073),
                 hasExtra("game_source", "GOG"),
@@ -179,19 +179,19 @@ class BridgeActivityTest {
 
     @Test
     fun startedWithoutDataExplainsItIsStartedFromLaunchBox() {
-        failureDialogFor(bridgeIntent(null, action = Intent.ACTION_MAIN), FailureCategory.NoShortcut, grant = "none")
+        failureDialogFor(bridgeIntent(null, action = Intent.ACTION_MAIN), noShortcut, grant = "none")
     }
 
     @Test
     fun startedWithItsOwnActionButNoDataExplainsItIsStartedFromLaunchBox() {
-        failureDialogFor(bridgeIntent(null), FailureCategory.NoShortcut, grant = "none")
+        failureDialogFor(bridgeIntent(null), noShortcut, grant = "none")
     }
 
     @Test
     fun wrongActionShowsItsOwnReason() {
         failureDialogFor(
             bridgeIntent(fixtureUri("Akalabeth.gog"), action = Intent.ACTION_VIEW),
-            FailureCategory.WrongAction,
+            BridgeFailure(FailureCategory.WrongAction),
         )
     }
 
@@ -199,34 +199,34 @@ class BridgeActivityTest {
     fun nonContentSchemeShowsItsOwnReason() {
         failureDialogFor(
             bridgeIntent(Uri.parse("file:///sdcard/Akalabeth.gog")),
-            FailureCategory.NotContentUri,
+            BridgeFailure(FailureCategory.NotContentUri),
             grant = "direct",
         )
     }
 
     @Test
     fun missingGrantShowsTheShortcutCouldNotBeRead() {
-        failureDialogFor(bridgeIntent(fixtureUri("Akalabeth.gog")), FailureCategory.Unreadable, grant = "none")
+        failureDialogFor(bridgeIntent(fixtureUri("Akalabeth.gog")), BridgeFailure(FailureCategory.Unreadable), grant = "none")
     }
 
     @Test
     fun revokedGrantShowsTheShortcutCouldNotBeRead() {
-        failureDialogFor(bridgeIntent(fixtureUri("Akalabeth.gog")), FailureCategory.Unreadable, grant = "revoke")
+        failureDialogFor(bridgeIntent(fixtureUri("Akalabeth.gog")), BridgeFailure(FailureCategory.Unreadable), grant = "revoke")
     }
 
     @Test
     fun missingFileShowsTheFilenameAndTheShortcutCouldNotBeRead() {
-        failureDialogFor(bridgeIntent(fixtureUri("Missing.gog")), FailureCategory.Unreadable, "Missing.gog")
+        failureDialogFor(bridgeIntent(fixtureUri("Missing.gog")), BridgeFailure(FailureCategory.Unreadable, "Missing.gog"))
     }
 
     @Test
     fun providerErrorShowsTheShortcutCouldNotBeRead() {
-        failureDialogFor(bridgeIntent(fixtureUri("Error.gog")), FailureCategory.Unreadable)
+        failureDialogFor(bridgeIntent(fixtureUri("Error.gog")), BridgeFailure(FailureCategory.Unreadable))
     }
 
     @Test
     fun unreadableDisplayNameShowsTheShortcutCouldNotBeRead() {
-        failureDialogFor(bridgeIntent(fixtureUri("NoName.gog")), FailureCategory.Unreadable)
+        failureDialogFor(bridgeIntent(fixtureUri("NoName.gog")), BridgeFailure(FailureCategory.Unreadable))
     }
 
     @Test
@@ -234,8 +234,7 @@ class BridgeActivityTest {
         // No stub: the emulator has no GameNative, so startActivity really throws ActivityNotFoundException.
         failureDialogFor(
             bridgeIntent(fixtureUri("Akalabeth.gog")),
-            FailureCategory.GameNativeNotInstalled,
-            "Akalabeth.gog",
+            BridgeFailure(FailureCategory.GameNativeNotInstalled, "Akalabeth.gog"),
             dispatchAttempts = 1,
         )
         assertTrue(BridgeFailure(FailureCategory.GameNativeNotInstalled).reason.contains("github.com/utkarshdalal/GameNative/releases"))
@@ -246,7 +245,7 @@ class BridgeActivityTest {
         // Simulated refusal: a debug-only activity makes startActivity throw SecurityException.
         val intent = bridgeIntent(fixtureUri("Akalabeth.gog"), RefusingBridgeActivity::class.java)
         val activity = start(intent)
-        assertDialog(FailureCategory.GameNativeRefused, "Akalabeth.gog")
+        assertDialog(BridgeFailure(FailureCategory.GameNativeRefused, "Akalabeth.gog"))
         tapClose()
         awaitFinished(activity)
     }
@@ -254,27 +253,27 @@ class BridgeActivityTest {
     private fun interpretationFailure(
         fileName: String,
         category: FailureCategory,
-        storefront: String? = null,
-    ) = failureDialogFor(bridgeIntent(fixtureUri(fileName)), category, fileName, storefront = storefront)
+        storefront: Storefront? = null,
+    ) = failureDialogFor(bridgeIntent(fixtureUri(fileName)), BridgeFailure(category, fileName, storefront))
 
     @Test
     fun steamShortcutShowsStorefrontNotVerifiedNamingSteam() {
-        interpretationFailure("Broforce.steam", FailureCategory.StorefrontNotVerified, "Steam")
+        interpretationFailure("Broforce.steam", FailureCategory.StorefrontNotVerified, Storefront.Steam)
     }
 
     @Test
     fun epicShortcutShowsStorefrontNotVerifiedNamingEpic() {
-        interpretationFailure("ABZU.epic", FailureCategory.StorefrontNotVerified, "Epic")
+        interpretationFailure("ABZU.epic", FailureCategory.StorefrontNotVerified, Storefront.Epic)
     }
 
     @Test
     fun amazonShortcutShowsStorefrontNotVerifiedNamingAmazon() {
-        interpretationFailure("Synthetic.amazon", FailureCategory.StorefrontNotVerified, "Amazon")
+        interpretationFailure("Synthetic.amazon", FailureCategory.StorefrontNotVerified, Storefront.Amazon)
     }
 
     @Test
     fun customShortcutShowsStorefrontNotVerifiedNamingCustom() {
-        interpretationFailure("Synthetic.pcgame", FailureCategory.StorefrontNotVerified, "Custom")
+        interpretationFailure("Synthetic.pcgame", FailureCategory.StorefrontNotVerified, Storefront.Custom)
     }
 
     @Test
@@ -319,31 +318,31 @@ class BridgeActivityTest {
 
     @Test
     fun closeButtonFinishesTheActivity() {
-        val activity = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
+        val activity = startWithoutShortcut()
         tapClose()
         awaitFinished(activity)
     }
 
     @Test
     fun backFinishesTheActivity() {
-        val activity = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
-        assertDialog(FailureCategory.NoShortcut, null)
+        val activity = startWithoutShortcut()
+        assertDialog(noShortcut)
         pressBackUnconditionally()
         awaitFinished(activity)
     }
 
     @Test
     fun controllerAButtonClosesTheDialog() {
-        val activity = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
-        assertDialog(FailureCategory.NoShortcut, null)
+        val activity = startWithoutShortcut()
+        assertDialog(noShortcut)
         instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_BUTTON_A)
         awaitFinished(activity)
     }
 
     @Test
     fun dpadCenterClosesTheDialog() {
-        val activity = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
-        assertDialog(FailureCategory.NoShortcut, null)
+        val activity = startWithoutShortcut()
+        assertDialog(noShortcut)
         instrumentation.sendKeySync(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER))
         instrumentation.sendKeySync(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER))
         awaitFinished(activity)
@@ -351,16 +350,14 @@ class BridgeActivityTest {
 
     @Test
     fun controllerBButtonClosesTheDialog() {
-        val activity = start(bridgeIntent(null, action = Intent.ACTION_MAIN), grant = "none")
-        assertDialog(FailureCategory.NoShortcut, null)
+        val activity = startWithoutShortcut()
+        assertDialog(noShortcut)
         instrumentation.sendKeySync(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BUTTON_B))
         instrumentation.sendKeySync(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BUTTON_B))
         awaitFinished(activity)
     }
 
     private companion object {
-        const val BRIDGE_ACTION = "com.allourmedia.gamebridge.action.DISPATCH"
-        const val GAMENATIVE_ACTION = "app.gamenative.LAUNCH_GAME"
         const val TIMEOUT_MS = 10_000L
         const val SETTLE_MS = 1_500L
     }

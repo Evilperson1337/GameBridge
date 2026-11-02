@@ -82,3 +82,15 @@ fun interpretShortcut(
     if (!storefront.verified) return ShortcutResult.Rejected(Rejection.StorefrontNotVerified(storefront))
     return ShortcutResult.Request(DispatchRequest(storefront, id))
 }
+
+/** Reads at most [limit] bytes (InputStream.readNBytes needs API 33; minSdk is 30). Never reads past the limit. */
+fun java.io.InputStream.readCapped(limit: Int): ByteArray {
+    val buffer = ByteArray(limit)
+    var total = 0
+    while (total < limit) {
+        val n = read(buffer, total, limit - total)
+        if (n < 0) break
+        total += n
+    }
+    return buffer.copyOf(total)
+}

@@ -8,9 +8,16 @@ import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
-import com.allourmedia.gamebridge.core.Rejection
+import com.allourmedia.gamebridge.core.BridgeFailure
+import com.allourmedia.gamebridge.core.DISPATCH_ACTION
+import com.allourmedia.gamebridge.core.DispatchRequest
+import com.allourmedia.gamebridge.core.FailureCategory
+import com.allourmedia.gamebridge.core.IntentTriage
 import com.allourmedia.gamebridge.core.ShortcutResult
+import com.allourmedia.gamebridge.core.Storefront
 import com.allourmedia.gamebridge.core.interpretShortcut
+import com.allourmedia.gamebridge.core.toFailure
+import com.allourmedia.gamebridge.core.triageIntent
 
 /**
  * Receives a Shortcut from the Frontend, dispatches it to GameNative and finishes. On failure it shows an error
@@ -36,13 +43,14 @@ open class BridgeActivity : Activity() {
         shown?.let {
             outState.putString(KEY_CATEGORY, it.category.name)
             outState.putString(KEY_FILE_NAME, it.fileName)
-            outState.putString(KEY_STOREFRONT, it.storefront)
+            outState.putString(KEY_STOREFRONT, it.storefront?.name)
         }
     }
 
     private fun restoreFailure(state: Bundle): BridgeFailure? {
         val category = FailureCategory.entries.firstOrNull { it.name == state.getString(KEY_CATEGORY) }
-        return category?.let { BridgeFailure(it, state.getString(KEY_FILE_NAME), state.getString(KEY_STOREFRONT)) }
+        val storefront = Storefront.all.firstOrNull { it.name == state.getString(KEY_STOREFRONT) }
+        return category?.let { BridgeFailure(it, state.getString(KEY_FILE_NAME), storefront) }
     }
 
     /** The context used to start the Target App. Debug-only subclasses override it to simulate refusals. */
@@ -50,81 +58,60 @@ open class BridgeActivity : Activity() {
 
     private fun handle(intent: Intent): BridgeFailure? {
         val uri = intent.data
-        val action = intent.action
-        // Started without data (for example from the app drawer, which sends MAIN).
-        if (uri == null && (action == null || action == Intent.ACTION_MAIN || action == ACTION)) {
-            return fail(FailureCategory.NoShortcut)
+        when (val triage = triageIntent(intent.action, uri?.scheme, hasData = uri != null)) {
+            is IntentTriage.Failed -> return fail(BridgeFailure(triage.category))
+            IntentTriage.Accepted -> Unit
         }
-        if (action != ACTION || uri == null) return fail(FailureCategory.WrongAction)
-        if (uri.scheme != "content") return fail(FailureCategory.NotContentUri)
         val file =
-            when (val read = ShortcutReader(contentResolver).read(uri)) {
-                is ReadResult.Unreadable -> return fail(FailureCategory.Unreadable, read.displayName)
-                is ReadResult.Read -> read.file
+            when (val read = ShortcutReader(contentResolver).read(checkNotNull(uri))) {
+                is ReadResult.Unreadable -> {
+                    debugLog("unreadable kind=${read.kind} error=${read.errorClass}")
+                    return fail(BridgeFailure(FailureCategory.Unreadable, read.displayName))
+                }
+
+                is ReadResult.Read -> {
+                    read.file
+                }
             }
-        when (val result = interpretShortcut(file.displayName, file.bytes)) {
+        return when (val result = interpretShortcut(file.displayName, file.bytes)) {
             is ShortcutResult.Rejected -> {
-                return rejection(result.reason, file.displayName)
+                fail(result.reason.toFailure(file.displayName))
             }
 
             is ShortcutResult.Request -> {
-                val outcome = GameNativeDispatcher(dispatchContext()).dispatch(result.request)
-                debugLog(
-                    "storefront=${result.request.storefront} storeId=${result.request.storeId} " +
-                        "scheme=${uri.scheme} dispatch=$outcome",
-                )
-                return when (outcome) {
-                    DispatchResult.Dispatched -> {
-                        null
-                    }
-
-                    DispatchResult.GameNativeNotInstalled -> {
-                        fail(FailureCategory.GameNativeNotInstalled, file.displayName)
-                    }
-
-                    DispatchResult.GameNativeRefused -> {
-                        fail(FailureCategory.GameNativeRefused, file.displayName)
-                    }
-                }
+                dispatch(result.request, file.displayName)
             }
         }
     }
 
-    private fun rejection(
-        reason: Rejection,
+    private fun dispatch(
+        request: DispatchRequest,
         fileName: String,
-    ): BridgeFailure =
-        when (reason) {
-            Rejection.UnsupportedType -> fail(FailureCategory.UnsupportedType, fileName)
-            is Rejection.StorefrontNotVerified -> fail(FailureCategory.StorefrontNotVerified, fileName, reason.storefront.name)
-            Rejection.RemoteUnsupported -> fail(FailureCategory.RemoteUnsupported, fileName)
-            Rejection.InvalidContents -> fail(FailureCategory.InvalidContents, fileName)
-            Rejection.TooLarge -> fail(FailureCategory.TooLarge, fileName)
-        }
+    ): BridgeFailure? {
+        val outcome = GameNativeDispatcher(dispatchContext()).dispatch(request)
+        debugLog("storefront=${request.storefront} storeId=${request.storeId} dispatch=$outcome")
+        val category =
+            when (outcome) {
+                DispatchResult.Dispatched -> return null
+                DispatchResult.GameNativeNotInstalled -> FailureCategory.GameNativeNotInstalled
+                DispatchResult.GameNativeRefused -> FailureCategory.GameNativeRefused
+            }
+        return fail(BridgeFailure(category, fileName))
+    }
 
-    private fun fail(
-        category: FailureCategory,
-        fileName: String? = null,
-        storefront: String? = null,
-    ): BridgeFailure {
+    private fun fail(failure: BridgeFailure): BridgeFailure {
         // Release builds log the category only: never contents, URIs or paths.
-        Log.w(TAG, "failure=$category")
-        return BridgeFailure(category, fileName, storefront)
+        Log.w(TAG, "failure=${failure.category}")
+        return failure
     }
 
     private fun showDialog(failure: BridgeFailure) {
         shown = failure
-        val message =
-            if (failure.fileName == null) {
-                failure.reason
-            } else {
-                "${failure.fileName.take(MAX_NAME)}\n\n${failure.reason}"
-            }
         val dialog =
             AlertDialog
                 .Builder(this)
                 .setTitle("GameBridge")
-                .setMessage(message)
+                .setMessage(failure.message)
                 .setPositiveButton("Close", null)
                 .setOnDismissListener { finish() }
                 .create()
@@ -143,12 +130,11 @@ open class BridgeActivity : Activity() {
     }
 
     companion object {
-        const val ACTION = "com.allourmedia.gamebridge.action.DISPATCH"
+        const val ACTION = DISPATCH_ACTION
         const val TAG = "GameBridge"
         private const val KEY_CATEGORY = "failure.category"
         private const val KEY_FILE_NAME = "failure.fileName"
         private const val KEY_STOREFRONT = "failure.storefront"
-        private const val MAX_NAME = 80
         private val CONFIRM_KEYS =
             setOf(
                 KeyEvent.KEYCODE_BUTTON_A,

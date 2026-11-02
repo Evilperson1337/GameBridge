@@ -16,8 +16,8 @@ See the spec's "Storefront table", "Shortcut parsing rules" and "Testing Decisio
 - [x] A JVM test shows that flipping a row to verified is enough to produce a dispatch request for that Storefront, with its `game_source` value.
 - [x] Extensions match the table case-insensitively, plus `.art` → Remote Shortcut. Anything else is unsupported.
 - [x] Local Shortcut contents are decoded as UTF-8 with an optional BOM stripped and surrounding whitespace, CR/LF and blank lines trimmed. They must be exactly one positive decimal integer within signed 32-bit range. Zero, negative, out-of-range, non-numeric, multi-number and empty contents are rejected as invalid, never truncated.
-- [ ] Shortcuts over 4 KiB are rejected as too large, and reading stops at the cap without reading the whole file.
-  - Half verified: the too-large rejection is tested (JVM and on the emulator). That the reader stops at 4 KiB + 1 bytes is only by code inspection (`ShortcutReader.readCapped`); no test observes it, so this stays unticked.
+- [x] Shortcuts over 4 KiB are rejected as too large, and reading stops at the cap without reading the whole file.
+  - Verified: too-large is tested (JVM and emulator); a JVM test with a counting stream observes that `readCapped` consumes exactly 4 KiB + 1 bytes of a 10 MB stream.
 - [x] `.steam`, `.epic`, `.amazon` and `.pcgame` with valid contents produce the "Storefront not verified yet" rejection, naming the Storefront. `.art` produces the "Remote Shortcut unsupported" rejection.
 - [x] Fixtures are added:
   - `Broforce.gog` (1470490225), `Broforce.steam` (274190), `ABZU.epic` (64)
@@ -31,4 +31,4 @@ See the spec's "Storefront table", "Shortcut parsing rules" and "Testing Decisio
 
 ## Answer
 
-Implemented on `ticket-04` (merged, tip 58454c6). One criterion unticked: no test observes that reading stops at the 4 KiB cap (checked by code reading only).
+Implemented on `ticket-04` (merged, tip 58454c6). All criteria ticked; the 4 KiB read cap is now observed by a JVM test (review fixes).

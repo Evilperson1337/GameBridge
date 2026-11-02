@@ -2,9 +2,53 @@ package com.allourmedia.gamebridge.core
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 
 class ShortcutInterpreterTest {
+    @Test
+    fun leadingZerosAreAcceptedAsTheNumberTheyWrite() {
+        // Unspecified in the spec: pinned as current behaviour (see docs/investigation-log.md).
+        assertEquals(request(Storefront.GOG, 7), interpretShortcut("x.gog", "007".toByteArray()))
+        assertEquals(rejected(Rejection.InvalidContents), interpretShortcut("x.gog", "000".toByteArray()))
+    }
+
+    private class CountingStream(
+        private val size: Int,
+    ) : InputStream() {
+        var consumed = 0
+            private set
+
+        override fun read(): Int = if (consumed < size) consumed++.let { '1'.code } else -1
+
+        override fun read(
+            b: ByteArray,
+            off: Int,
+            len: Int,
+        ): Int {
+            if (consumed >= size) return -1
+            val n = minOf(len, size - consumed, 1000)
+            b.fill('1'.code.toByte(), off, off + n)
+            consumed += n
+            return n
+        }
+    }
+
+    @Test
+    fun readingStopsAtTheCapPlusOneByteWithoutReadingTheWholeStream() {
+        val stream = CountingStream(size = 10_000_000)
+        val bytes = stream.readCapped(MAX_LOCAL_SHORTCUT_BYTES + 1)
+        assertEquals(MAX_LOCAL_SHORTCUT_BYTES + 1, bytes.size)
+        assertEquals(MAX_LOCAL_SHORTCUT_BYTES + 1, stream.consumed)
+    }
+
+    @Test
+    fun readingShorterStreamsReturnsEverythingAndEmptyIsEmpty() {
+        assertEquals(3, ByteArrayInputStream(ByteArray(3)).readCapped(10).size)
+        assertEquals(0, ByteArrayInputStream(ByteArray(0)).readCapped(10).size)
+    }
+
     private fun fixture(name: String): ByteArray = File("../fixtures/$name").readBytes()
 
     private fun interpretFixture(name: String) = interpretShortcut(name, fixture(name))

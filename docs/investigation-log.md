@@ -104,3 +104,18 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 - `.art`: no fixture content invented. Instrumentation tests serve any `*.art` name as empty bytes from the test-only provider; the rejection depends on the extension only. The real `.art` format is unverified (Phase 3).
 - Synthetic `.amazon` (4815162) and `.pcgame` (2342) are in GameNative's described format (Int, no newline) per the spec; not compared against real exports. Dialog wording for the new categories is new and not seen on a physical device. Nothing was installed on the device.
 - An invalid-contents `.art`/unknown-type Shortcut over 4 KiB reports by extension first (unsupported / remote), not too large.
+
+## 2026-11-02: Review fixes on the MVP integration branch
+
+### Verified (`./gradlew check` and `:app:pixel2api33DebugAndroidTest`, both run for real: 30 instrumentation tests, 0 failures)
+
+- Reading stops at the cap: a JVM test feeds a counting 10 MB stream to `readCapped(MAX_LOCAL_SHORTCUT_BYTES + 1)` (now in `:core`, used by `ShortcutReader`) and observes exactly 4097 bytes consumed. This closes the unticked ticket 04 criterion.
+- Rejection to failure-category mapping, intent triage (NoShortcut / WrongAction / NotContentUri, no-data check first) and dialog-message assembly now live in `:core` with JVM tests; the emulator tests still pass.
+
+### Decision recorded: leading zeros
+
+- Contents with leading zeros (for example `007`) are currently accepted as 7. The spec does not say either way. Pinned by a JVM test (`000` is still invalid as zero). Not checked against real exports; revisit if a Storefront ever writes padded IDs.
+
+### Assumed / not verified
+
+- `ShortcutReader` now reports a failure kind (name vs contents) and the exception class name; debug builds log them, release builds log only the failure category. Seen in code, not read from a device log.

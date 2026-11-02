@@ -4,21 +4,35 @@ import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.allourmedia.gamebridge.core.MAX_LOCAL_SHORTCUT_BYTES
-import java.io.InputStream
+import com.allourmedia.gamebridge.core.readCapped
 
 class ShortcutFile(
     val displayName: String,
     val bytes: ByteArray,
 )
 
+/** Which step of reading failed. Both are shown to the player as "couldn't be read". */
+enum class ReadFailureKind {
+    /** The display name could not be queried (provider error, missing grant, no row, no name). */
+    Name,
+
+    /** The name was read but the bytes could not be (provider error or no stream). */
+    Contents,
+}
+
 sealed interface ReadResult {
     data class Read(
         val file: ShortcutFile,
     ) : ReadResult
 
-    /** [displayName] is set when the name could be read but the bytes could not. */
+    /**
+     * [displayName] is set when the name could be read but the bytes could not. [errorClass] is the simple class
+     * name of the exception thrown, if any (never its message, which could contain a URI or path).
+     */
     data class Unreadable(
         val displayName: String?,
+        val kind: ReadFailureKind,
+        val errorClass: String? = null,
     ) : ReadResult
 }
 
@@ -27,20 +41,23 @@ class ShortcutReader(
     private val resolver: ContentResolver,
 ) {
     fun read(uri: Uri): ReadResult {
+        var errorClass: String? = null
         val name =
             try {
                 resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
                     if (it.moveToFirst()) it.getString(0) else null
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                errorClass = e.javaClass.simpleName
                 null
-            } ?: return ReadResult.Unreadable(null)
+            } ?: return ReadResult.Unreadable(null, ReadFailureKind.Name, errorClass)
         val bytes =
             try {
                 resolver.openInputStream(uri)?.use { it.readCapped(MAX_BYTES + 1) }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                errorClass = e.javaClass.simpleName
                 null
-            } ?: return ReadResult.Unreadable(name)
+            } ?: return ReadResult.Unreadable(name, ReadFailureKind.Contents, errorClass)
         return ReadResult.Read(ShortcutFile(name, bytes))
     }
 
@@ -48,16 +65,4 @@ class ShortcutReader(
         /** Local Shortcuts are capped at 4 KiB. One extra byte is read so oversize is detectable. */
         const val MAX_BYTES = MAX_LOCAL_SHORTCUT_BYTES
     }
-}
-
-/** Reads at most [limit] bytes (InputStream.readNBytes needs API 33; minSdk is 30). */
-private fun InputStream.readCapped(limit: Int): ByteArray {
-    val buffer = ByteArray(limit)
-    var total = 0
-    while (total < limit) {
-        val n = read(buffer, total, limit - total)
-        if (n < 0) break
-        total += n
-    }
-    return buffer.copyOf(total)
 }
