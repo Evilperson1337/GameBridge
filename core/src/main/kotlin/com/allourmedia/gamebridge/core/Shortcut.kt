@@ -14,10 +14,10 @@ class Storefront internal constructor(
 
     companion object {
         val GOG = Storefront("GOG", "gog", "GOG", verified = true)
-        val Steam = Storefront("Steam", "steam", "STEAM", verified = false)
-        val Epic = Storefront("Epic", "epic", "EPIC", verified = false)
-        val Amazon = Storefront("Amazon", "amazon", "AMAZON", verified = false)
-        val Custom = Storefront("Custom", "pcgame", "CUSTOM_GAME", verified = false)
+        val Steam = Storefront("Steam", "steam", "STEAM", verified = true)
+        val Epic = Storefront("Epic", "epic", "EPIC", verified = true)
+        val Amazon = Storefront("Amazon", "amazon", "AMAZON", verified = true)
+        val Custom = Storefront("Custom", "pcgame", "CUSTOM_GAME", verified = true)
         val all: List<Storefront> = listOf(GOG, Steam, Epic, Amazon, Custom)
     }
 }
