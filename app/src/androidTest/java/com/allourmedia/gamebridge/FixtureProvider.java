@@ -46,6 +46,16 @@ public class FixtureProvider extends ContentProvider {
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         File copy = new File(getContext().getCacheDir(), name(uri));
+        if (name(uri).toLowerCase().endsWith(".art")) {
+            // No .art fixture exists until Phase 3 confirms the real format; contents are irrelevant to the
+            // rejection, so any .art name is served empty.
+            try (OutputStream out = new java.io.FileOutputStream(copy)) {
+                // empty
+            } catch (IOException e) {
+                throw new FileNotFoundException(e.toString());
+            }
+            return ParcelFileDescriptor.open(copy, ParcelFileDescriptor.MODE_READ_ONLY);
+        }
         try (InputStream in = getContext().getAssets().open(name(uri));
                 OutputStream out = new java.io.FileOutputStream(copy)) {
             byte[] buffer = new byte[1024];

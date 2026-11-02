@@ -88,3 +88,19 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 - Name and location of LaunchBox's configuration XML on the device: not verified; the guide tells the reader to find it first.
 - Error-dialog wording in the README troubleshooting table follows the spec and ticket 03 (built in parallel); final strings may differ and must be reconciled.
 - The Gate G1 and rollback procedures were written, not performed.
+
+## 2026-11-02: Ticket 04, full Shortcut interpretation rules
+
+### Verified (`./gradlew check` and `:app:pixel2api33DebugAndroidTest`, both run for real: 30 instrumentation tests incl. smoke, 0 failures)
+
+- JVM tests at the interpret-a-Shortcut seam cover the five-row Storefront table, every fixture, case-insensitive extensions, `.art`, unknown and missing extensions, BOM, CRLF and blank lines, zero, negative, above 2^31-1, the max Int, non-numeric, signs/hex/decimals/Unicode digits, two numbers, empty, exactly 4096 bytes (invalid, not too large) and 4097 bytes (too large). The "flip a row to verified" test passes a copied verified row through the optional `storefronts` parameter and sees a dispatch request with that row's `game_source`.
+- Only `Shortcut.kt` names Storefronts (grep of `:app` and `:core` main sources). Dispatch reads `request.storefront.gameSource`.
+- Each rejection category has its own dialog, shown on the emulator through the real activity: unsupported type, Storefront not verified (Steam, Epic, Amazon, Custom each naming the Storefront), Remote Shortcut unsupported, invalid contents (zero, out of range), too large. Each asserts no Dispatch was attempted. Upper-case extension and BOM plus blank lines dispatch with the right `app_id`.
+- README troubleshooting table now uses the exact strings from `BridgeFailure.kt` (tickets 03 and 04). This closes the ticket 05 assumption that wording "must be reconciled".
+
+### Assumed / not verified
+
+- Reader stops at the cap: `ShortcutReader` reads at most 4097 bytes by inspection; no test observes how much was read (the ticket criterion stays unticked).
+- `.art`: no fixture content invented. Instrumentation tests serve any `*.art` name as empty bytes from the test-only provider; the rejection depends on the extension only. The real `.art` format is unverified (Phase 3).
+- Synthetic `.amazon` (4815162) and `.pcgame` (2342) are in GameNative's described format (Int, no newline) per the spec; not compared against real exports. Dialog wording for the new categories is new and not seen on a physical device. Nothing was installed on the device.
+- An invalid-contents `.art`/unknown-type Shortcut over 4 KiB reports by extension first (unsupported / remote), not too large.

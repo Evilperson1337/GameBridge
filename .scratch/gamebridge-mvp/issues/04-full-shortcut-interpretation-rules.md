@@ -10,20 +10,21 @@ See the spec's "Storefront table", "Shortcut parsing rules" and "Testing Decisio
 
 **Blocked by:** 03 (Error dialog for intent, read and dispatch failures)
 
-**Status:** ready-for-agent
+**Status:** resolved except one unticked criterion (see below)
 
-- [ ] The Storefront table has all five rows from the spec: GOG (verified), and Steam, Epic, Amazon and Custom (`.pcgame`, `game_source` `CUSTOM_GAME`), all unverified. No Storefront-specific code exists outside the table.
-- [ ] A JVM test shows that flipping a row to verified is enough to produce a dispatch request for that Storefront, with its `game_source` value.
-- [ ] Extensions match the table case-insensitively, plus `.art` → Remote Shortcut. Anything else is unsupported.
-- [ ] Local Shortcut contents are decoded as UTF-8 with an optional BOM stripped and surrounding whitespace, CR/LF and blank lines trimmed. They must be exactly one positive decimal integer within signed 32-bit range. Zero, negative, out-of-range, non-numeric, multi-number and empty contents are rejected as invalid, never truncated.
+- [x] The Storefront table has all five rows from the spec: GOG (verified), and Steam, Epic, Amazon and Custom (`.pcgame`, `game_source` `CUSTOM_GAME`), all unverified. No Storefront-specific code exists outside the table.
+- [x] A JVM test shows that flipping a row to verified is enough to produce a dispatch request for that Storefront, with its `game_source` value.
+- [x] Extensions match the table case-insensitively, plus `.art` → Remote Shortcut. Anything else is unsupported.
+- [x] Local Shortcut contents are decoded as UTF-8 with an optional BOM stripped and surrounding whitespace, CR/LF and blank lines trimmed. They must be exactly one positive decimal integer within signed 32-bit range. Zero, negative, out-of-range, non-numeric, multi-number and empty contents are rejected as invalid, never truncated.
 - [ ] Shortcuts over 4 KiB are rejected as too large, and reading stops at the cap without reading the whole file.
-- [ ] `.steam`, `.epic`, `.amazon` and `.pcgame` with valid contents produce the "Storefront not verified yet" rejection, naming the Storefront. `.art` produces the "Remote Shortcut unsupported" rejection.
-- [ ] Fixtures are added:
+  - Half verified: the too-large rejection is tested (JVM and on the emulator). That the reader stops at 4 KiB + 1 bytes is only by code inspection (`ShortcutReader.readCapped`); no test observes it, so this stays unticked.
+- [x] `.steam`, `.epic`, `.amazon` and `.pcgame` with valid contents produce the "Storefront not verified yet" rejection, naming the Storefront. `.art` produces the "Remote Shortcut unsupported" rejection.
+- [x] Fixtures are added:
   - `Broforce.gog` (1470490225), `Broforce.steam` (274190), `ABZU.epic` (64)
   - one synthetic `.amazon` and one synthetic `.pcgame`, in GameNative's format (an Int with no newline)
   - synthetic: BOM, CRLF, blank lines, zero, negative, above 2³¹−1, non-numeric, two numbers, empty, oversized, unknown extension, upper-case extension
 
   No `.art` fixture content is invented.
-- [ ] JVM tests at the interpret-a-Shortcut seam cover every rule and fixture.
-- [ ] Each rejection category is shown through the error dialog with its own reason, with at least one instrumentation test per category.
-- [ ] `./gradlew check` and the instrumentation suite pass.
+- [x] JVM tests at the interpret-a-Shortcut seam cover every rule and fixture.
+- [x] Each rejection category is shown through the error dialog with its own reason, with at least one instrumentation test per category.
+- [x] `./gradlew check` and the instrumentation suite pass.

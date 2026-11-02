@@ -30,20 +30,21 @@ The debug build is `com.allourmedia.gamebridge.debug` and can sit beside a relea
 
 ## Troubleshooting
 
-GameBridge shows a dialog with the Shortcut's filename (when known) and one reason. The exact wording lives in the app's string resources and may differ slightly from the names below. Close (or Back) returns you to LaunchBox; retry by picking the game again.
+GameBridge shows a dialog titled "GameBridge" with the Shortcut's filename (when known), then one reason, and a single Close button. The reasons below are the exact strings in `BridgeFailure.kt`. Close (or Back) returns you to LaunchBox; retry by picking the game again.
 
-| Reason | What it means and what to do |
+| Dialog reason | What it means and what to do |
 |---|---|
-| Meant to be started from LaunchBox (no Shortcut) | GameBridge was opened without a Shortcut, for example from the app drawer. Start games from LaunchBox. If it happens from LaunchBox, check the command in `docs/launchbox-setup.md` includes `-d {file.uri}`. |
-| Wrong action | The emulator command's `-a` is not `com.allourmedia.gamebridge.action.DISPATCH`. Fix the command. |
-| Not a `content://` URI | LaunchBox passed something other than `content://` (for example a file path). Use `-d {file.uri}`, not `{file.path}`. |
-| The Shortcut couldn't be read | Permission missing or revoked, file gone, or a provider error. Check the game's file still exists in LaunchBox and pick it again. |
-| Not a supported Shortcut | The extension is not a known Storefront extension. Check which files the platform hands to the emulator. |
-| Storefront not verified yet | Steam, Epic, Amazon and Custom Shortcuts are recognised but not dispatched yet. |
-| Remote Shortcuts not supported | `.art` (Artemis) Shortcuts are recognised only. Artemis is a later phase. |
-| Invalid Store ID | The Shortcut content is not one positive whole number in the signed 32-bit range (GameNative writes `0` for some GOG games), or the file is over 4 KiB. |
-| GameNative is not installed | Install the standard GameNative build from its GitHub releases page. |
-| GameNative refused the request | Android refused the Dispatch with a security error. Make sure the standard GameNative build (`app.gamenative`) is installed and up to date. |
+| GameBridge is meant to be started from LaunchBox. Pick a game there. | GameBridge was opened without a Shortcut, for example from the app drawer. Start games from LaunchBox. If it happens from LaunchBox, check the command in `docs/launchbox-setup.md` includes `-d {file.uri}`. |
+| GameBridge didn't recognise this request. Check the command set up in LaunchBox. | The emulator command's `-a` is not `com.allourmedia.gamebridge.action.DISPATCH`. Fix the command. |
+| The Shortcut wasn't shared in a form GameBridge accepts. | LaunchBox passed something other than `content://` (for example a file path). Use `-d {file.uri}`, not `{file.path}`. |
+| The Shortcut couldn't be read. | Permission missing or revoked, file gone, or a provider error. Check the game's file still exists in LaunchBox and pick it again. |
+| Not a supported Shortcut. | The extension is not a known Shortcut extension (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`, `.art`). Check which files the platform hands to the emulator. |
+| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | The Shortcut is valid but that Storefront has not been verified on a device, so it is not dispatched. Only GOG is. |
+| Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. Artemis is a later phase. |
+| This Shortcut's contents aren't valid. | The contents are not exactly one positive whole number in the signed 32-bit range: empty, text, several numbers, zero (GameNative writes `0` for some GOG games), negative or too large a number. |
+| This Shortcut is too large to be a real one. | The file is over 4 KiB. It is not read in full. Check the platform is handing over the Shortcut, not another file. |
+| GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases | Install the standard GameNative build from its GitHub releases page. |
+| GameNative refused the request. | Android refused the Dispatch with a security error. Make sure the standard GameNative build (`app.gamenative`) is installed and up to date. |
 
 ## Limitations
 

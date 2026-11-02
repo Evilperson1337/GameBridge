@@ -3,6 +3,7 @@ package com.allourmedia.gamebridge
 import android.content.ContentResolver
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.allourmedia.gamebridge.core.MAX_LOCAL_SHORTCUT_BYTES
 import java.io.InputStream
 
 class ShortcutFile(
@@ -45,7 +46,7 @@ class ShortcutReader(
 
     companion object {
         /** Local Shortcuts are capped at 4 KiB. One extra byte is read so oversize is detectable. */
-        const val MAX_BYTES = 4096
+        const val MAX_BYTES = MAX_LOCAL_SHORTCUT_BYTES
     }
 }
 

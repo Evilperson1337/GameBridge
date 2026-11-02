@@ -120,8 +120,10 @@ class BridgeActivityTest {
     private fun assertDialog(
         category: FailureCategory,
         fileName: String?,
+        storefront: String? = null,
     ) {
-        val message = if (fileName == null) category.reason else "$fileName\n\n${category.reason}"
+        val reason = BridgeFailure(category, fileName, storefront).reason
+        val message = if (fileName == null) reason else "$fileName\n\n$reason"
         onView(withText(message)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText("Close")).inRoot(isDialog()).check(matches(isDisplayed()))
     }
@@ -132,9 +134,10 @@ class BridgeActivityTest {
         fileName: String? = null,
         grant: String = "grant",
         dispatchAttempts: Int = 0,
+        storefront: String? = null,
     ): Activity {
         val activity = start(intent, grant)
-        assertDialog(category, fileName)
+        assertDialog(category, fileName, storefront)
         assertEquals(dispatchAttempts, dispatches().size)
         return activity
     }
@@ -235,7 +238,7 @@ class BridgeActivityTest {
             "Akalabeth.gog",
             dispatchAttempts = 1,
         )
-        assertTrue(FailureCategory.GameNativeNotInstalled.reason.contains("github.com/utkarshdalal/GameNative/releases"))
+        assertTrue(BridgeFailure(FailureCategory.GameNativeNotInstalled).reason.contains("github.com/utkarshdalal/GameNative/releases"))
     }
 
     @Test
@@ -246,6 +249,72 @@ class BridgeActivityTest {
         assertDialog(FailureCategory.GameNativeRefused, "Akalabeth.gog")
         tapClose()
         awaitFinished(activity)
+    }
+
+    private fun interpretationFailure(
+        fileName: String,
+        category: FailureCategory,
+        storefront: String? = null,
+    ) = failureDialogFor(bridgeIntent(fixtureUri(fileName)), category, fileName, storefront = storefront)
+
+    @Test
+    fun steamShortcutShowsStorefrontNotVerifiedNamingSteam() {
+        interpretationFailure("Broforce.steam", FailureCategory.StorefrontNotVerified, "Steam")
+    }
+
+    @Test
+    fun epicShortcutShowsStorefrontNotVerifiedNamingEpic() {
+        interpretationFailure("ABZU.epic", FailureCategory.StorefrontNotVerified, "Epic")
+    }
+
+    @Test
+    fun amazonShortcutShowsStorefrontNotVerifiedNamingAmazon() {
+        interpretationFailure("Synthetic.amazon", FailureCategory.StorefrontNotVerified, "Amazon")
+    }
+
+    @Test
+    fun customShortcutShowsStorefrontNotVerifiedNamingCustom() {
+        interpretationFailure("Synthetic.pcgame", FailureCategory.StorefrontNotVerified, "Custom")
+    }
+
+    @Test
+    fun remoteShortcutShowsRemoteShortcutsAreUnsupported() {
+        // The provider serves any .art name with empty contents: the real format is not known yet (Phase 3).
+        interpretationFailure("Anything.art", FailureCategory.RemoteUnsupported)
+    }
+
+    @Test
+    fun unknownExtensionShowsNotASupportedShortcut() {
+        interpretationFailure("Synthetic-unknown.txt", FailureCategory.UnsupportedType)
+    }
+
+    @Test
+    fun zeroStoreIdShowsInvalidContents() {
+        interpretationFailure("Synthetic-zero.gog", FailureCategory.InvalidContents)
+    }
+
+    @Test
+    fun outOfRangeStoreIdShowsInvalidContents() {
+        interpretationFailure("Synthetic-above-int-max.gog", FailureCategory.InvalidContents)
+    }
+
+    @Test
+    fun oversizedShortcutShowsTooLarge() {
+        interpretationFailure("Synthetic-oversized.gog", FailureCategory.TooLarge)
+    }
+
+    @Test
+    fun upperCaseExtensionIsDispatched() {
+        stubGameNative()
+        awaitFinished(start(bridgeIntent(fixtureUri("Synthetic-upper.GOG"))))
+        assertEquals(1470490225, dispatches().single().getIntExtra("app_id", -1))
+    }
+
+    @Test
+    fun shortcutWithBomAndBlankLinesIsDispatched() {
+        stubGameNative()
+        awaitFinished(start(bridgeIntent(fixtureUri("Synthetic-bom.gog"))))
+        assertEquals(1470490225, dispatches().single().getIntExtra("app_id", -1))
     }
 
     @Test
