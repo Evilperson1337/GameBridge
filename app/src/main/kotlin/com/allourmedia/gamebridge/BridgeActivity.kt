@@ -79,7 +79,7 @@ open class BridgeActivity : Activity() {
             }
 
             is ShortcutResult.Request -> {
-                dispatch(result.request, file.displayName)
+                dispatch(result.request, file.displayName, uri?.scheme)
             }
         }
     }
@@ -87,9 +87,10 @@ open class BridgeActivity : Activity() {
     private fun dispatch(
         request: DispatchRequest,
         fileName: String,
+        scheme: String?,
     ): BridgeFailure? {
         val outcome = GameNativeDispatcher(dispatchContext()).dispatch(request)
-        debugLog("storefront=${request.storefront} storeId=${request.storeId} dispatch=$outcome")
+        debugLog("storefront=${request.storefront} storeId=${request.storeId} scheme=$scheme dispatch=$outcome")
         val category =
             when (outcome) {
                 DispatchResult.Dispatched -> return null
