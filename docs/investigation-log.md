@@ -283,3 +283,21 @@ With the user's explicit yes, one `am start -a android.intent.action.VIEW -n com
 - That GameBridge can forward the grant to Artemis (`FLAG_GRANT_READ_URI_PERMISSION`). Not tested.
 - That the stream shows the right game. The "resumed existing session" line leaves open whether Artemis started Cuphead or reattached to something else.
 - A decoder `CodecException` and a restart appeared in the log while the stream came up; its effect was not examined.
+
+## 2026-11-02: Remote Shortcut Dispatch to Artemis built (emulator only)
+
+Ticket `.scratch/artemis-dispatch/issues/01-dispatch-art-shortcut-to-artemis.md`. No physical device was touched.
+
+### Verified (JVM tests and the managed emulator, `pixel2api33DebugAndroidTest`)
+
+- `isRemoteShortcut` is true for a display name ending `.art` in any case, and false for other names. `interpretShortcut` no longer special-cases `.art`.
+- `BridgeActivity` reads only the display name of a `.art` Shortcut, then starts `com.limelight.noir/com.limelight.ShortcutTrampoline` with `ACTION_VIEW`, the same `content://` URI as data and `FLAG_GRANT_READ_URI_PERMISSION` (captured with Espresso-Intents; Artemis itself stubbed). No extras, no GameNative Dispatch.
+- A provider that throws on opening the file still gets a Dispatch, so the `.art` bytes are not read.
+- With Artemis absent (the emulator has none, unstubbed) the dialog shows the Artemis-not-installed reason and nothing else is started. A simulated `SecurityException` shows the refused reason.
+- Local Shortcut tests still pass unchanged. Fixture `fixtures/Synthetic.art` uses placeholder values.
+
+### Assumed / not verified
+
+- That real Artemis accepts a `content://` URI with a grant from GameBridge (only a `file://` VIEW from adb is observed). Ticket 03.
+- That a Dispatch starts a stream; a Dispatch is not a Launch.
+- The refused path is simulated; real Artemis refusals are unobserved. Component and package were seen on 20.2.6 only.

@@ -295,10 +295,62 @@ class BridgeActivityTest {
     @Test
     fun customShortcutIsDispatchedAsCustomGame() = assertDispatched("Synthetic.pcgame", 2342, "CUSTOM_GAME")
 
+    private val artemis = ComponentName(ArtemisDispatcher.PACKAGE, ArtemisDispatcher.TRAMPOLINE_CLASS)
+
+    private fun artemisDispatches() = Intents.getIntents().filter { it.component?.packageName == ArtemisDispatcher.PACKAGE }
+
+    /** Stubs Artemis's side: the Dispatch is captured and answered, Artemis itself is not involved. */
+    private fun stubArtemis() {
+        intending(hasComponent(artemis)).respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, null))
+    }
+
     @Test
-    fun remoteShortcutShowsRemoteShortcutsAreUnsupported() {
-        // The provider serves any .art name with empty contents: the real format is not known yet (Phase 3).
-        interpretationFailure("Anything.art", FailureCategory.RemoteUnsupported)
+    fun artShortcutIsDispatchedToArtemisAsAViewOfTheSameUriWithAReadGrant() {
+        stubArtemis()
+        val uri = fixtureUri("Synthetic.art")
+        awaitFinished(start(bridgeIntent(uri)))
+        val dispatched = artemisDispatches().single()
+        assertEquals(Intent.ACTION_VIEW, dispatched.action)
+        assertEquals(artemis, dispatched.component)
+        assertEquals(uri, dispatched.data)
+        assertTrue(dispatched.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0)
+        assertEquals(null, dispatched.extras)
+        assertEquals(0, dispatches().size)
+    }
+
+    @Test
+    fun artShortcutIsDispatchedWithoutOpeningItsContents() {
+        stubArtemis()
+        // The provider throws on openFile for this name, so a Dispatch proves GameBridge never read the file.
+        awaitFinished(start(bridgeIntent(fixtureUri("Unopenable.art"))))
+        assertEquals(1, artemisDispatches().size)
+    }
+
+    @Test
+    fun upperCaseArtExtensionIsDispatchedToArtemis() {
+        stubArtemis()
+        awaitFinished(start(bridgeIntent(fixtureUri("Unopenable.ART"))))
+        assertEquals(1, artemisDispatches().size)
+    }
+
+    @Test
+    fun artShortcutWithArtemisAbsentShowsNotInstalledAndNeverFallsBack() {
+        // Artemis is not installed on the managed emulator, so this is the real absent case, unstubbed.
+        val activity = start(bridgeIntent(fixtureUri("Synthetic.art")))
+        assertDialog(BridgeFailure(FailureCategory.ArtemisNotInstalled, "Synthetic.art"))
+        assertEquals(0, dispatches().size)
+        assertEquals(listOf(artemis), artemisDispatches().map { it.component })
+        tapClose()
+        awaitFinished(activity)
+    }
+
+    @Test
+    fun artemisRefusingShowsItsReason() {
+        val activity = start(bridgeIntent(fixtureUri("Synthetic.art"), RefusingBridgeActivity::class.java))
+        assertDialog(BridgeFailure(FailureCategory.ArtemisRefused, "Synthetic.art"))
+        assertEquals(0, dispatches().size)
+        tapClose()
+        awaitFinished(activity)
     }
 
     @Test

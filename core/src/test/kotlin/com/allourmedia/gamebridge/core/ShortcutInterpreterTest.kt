@@ -126,9 +126,21 @@ class ShortcutInterpreterTest {
     }
 
     @Test
-    fun remoteShortcutsAreRejectedAsUnsupportedWhateverTheirContents() {
-        assertEquals(rejected(Rejection.RemoteUnsupported), interpretShortcut("Game.art", ByteArray(0)))
-        assertEquals(rejected(Rejection.RemoteUnsupported), interpretShortcut("Game.ART", "anything".toByteArray()))
+    fun artExtensionIsARemoteShortcutCaseInsensitively() {
+        assertEquals(true, isRemoteShortcut("Game (GOG).art"))
+        assertEquals(true, isRemoteShortcut("Game.ART"))
+    }
+
+    @Test
+    fun otherNamesAreNotRemoteShortcuts() {
+        for (name in listOf("Game.gog", "Game.art.txt", "art", ".artx", "Game.", "")) {
+            assertEquals(name, false, isRemoteShortcut(name))
+        }
+    }
+
+    @Test
+    fun interpretShortcutNeverTreatsAnArtFileAsALocalShortcut() {
+        assertEquals(rejected(Rejection.UnsupportedType), interpretShortcut("Game.art", "123".toByteArray()))
     }
 
     @Test

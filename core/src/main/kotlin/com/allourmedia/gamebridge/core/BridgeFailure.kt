@@ -23,7 +23,6 @@ enum class FailureCategory(
             "(.gog, .steam, .epic, .amazon, .pcgame).",
     ),
     StorefrontNotVerified("This Storefront isn't verified yet."),
-    RemoteUnsupported("Remote Shortcuts aren't supported yet."),
     InvalidContents("This Shortcut's contents aren't valid."),
     TooLarge(
         "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
@@ -33,6 +32,8 @@ enum class FailureCategory(
         "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
     ),
     GameNativeRefused("GameNative refused the request."),
+    ArtemisNotInstalled("Artemis is not installed. Install Artemis to play Remote Shortcuts (.art)."),
+    ArtemisRefused("Artemis refused the request."),
 }
 
 private const val MAX_NAME = 80
@@ -58,7 +59,6 @@ fun Rejection.toFailure(fileName: String): BridgeFailure =
     when (this) {
         Rejection.UnsupportedType -> BridgeFailure(FailureCategory.UnsupportedType, fileName)
         is Rejection.StorefrontNotVerified -> BridgeFailure(FailureCategory.StorefrontNotVerified, fileName, storefront)
-        Rejection.RemoteUnsupported -> BridgeFailure(FailureCategory.RemoteUnsupported, fileName)
         Rejection.InvalidContents -> BridgeFailure(FailureCategory.InvalidContents, fileName)
         Rejection.TooLarge -> BridgeFailure(FailureCategory.TooLarge, fileName)
     }

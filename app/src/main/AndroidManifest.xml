@@ -4,6 +4,7 @@
     <!-- Package visibility for the Target App only. No permissions are requested. -->
     <queries>
         <package android:name="app.gamenative" />
+        <package android:name="com.limelight.noir" />
     </queries>
 
     <application

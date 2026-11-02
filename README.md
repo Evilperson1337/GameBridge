@@ -30,7 +30,7 @@ A Storefront is the GameNative library a game belongs to. All five are enabled. 
 | Amazon | Enabled, untested | No device observation yet. Test files were made to match GameNative's described format, not real exports. |
 | Custom | Enabled, untested | No device observation yet. |
 
-A row moves to verified only when a device observation of that Storefront (the game starting from a LaunchBox pick) is recorded in [docs/investigation-log.md](docs/investigation-log.md). Remote (Artemis) Shortcuts, `.art`, are not supported yet.
+A row moves to verified only when a device observation of that Storefront (the game starting from a LaunchBox pick) is recorded in [docs/investigation-log.md](docs/investigation-log.md). Remote (Artemis) Shortcuts, `.art`, are enabled but untested on a device: GameBridge hands the file to Artemis unread.
 
 ## Requirements
 
@@ -55,7 +55,8 @@ When something is wrong, GameBridge shows a dialog with the Shortcut's filename 
 | GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, then pick the game again. | The file is gone or LaunchBox did not share it. Check the game's file in LaunchBox. |
 | This isn't a Shortcut type GameBridge supports. Import the Shortcut file exported by GameNative (.gog, .steam, .epic, .amazon, .pcgame). | A game on this platform has a different kind of file. Import the Shortcut file GameNative exported. |
 | Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present, because all five Storefronts are enabled. |
-| Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. |
+| Artemis is not installed. Install Artemis to play Remote Shortcuts (.art). | Install Artemis (`com.limelight.noir`). |
+| Artemis refused the request. | Android refused the hand-off to Artemis. |
 | This Shortcut's contents aren't valid. | The file must hold exactly one positive whole number that fits in a signed 32-bit integer. GameNative writes `0` for some GOG games, which is rejected. |
 | This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, not another file. | The file is over 4 KiB. |
 | GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases | Install the standard GameNative build. |

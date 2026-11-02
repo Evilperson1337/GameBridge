@@ -13,6 +13,10 @@ sealed interface DispatchResult {
     data object GameNativeNotInstalled : DispatchResult
 
     data object GameNativeRefused : DispatchResult
+
+    data object ArtemisNotInstalled : DispatchResult
+
+    data object ArtemisRefused : DispatchResult
 }
 
 /** Dispatches a validated request to GameNative. No fallback to a deep link or another app. */
