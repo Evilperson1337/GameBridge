@@ -16,3 +16,4 @@ captures/
 *.log
 .vscode/
 .fleet/
+docs/research/*.art

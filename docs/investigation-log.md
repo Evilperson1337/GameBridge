@@ -269,7 +269,7 @@ Read from one Artemis-generated file, `Cuphead (GOG).art` (198 bytes, ASCII text
 
 ## 2026-11-02: VIEW of a `.art` file sent to Artemis from adb
 
-With the user's explicit yes, one `am start -a android.intent.action.VIEW -n com.limelight.noir/com.limelight.ShortcutTrampoline -d file:///storage/emulated/0/Games/pc/Cuphead%20(GOG).art` was sent from adb on the Odin. The original file in `Games/pc` was used in place and not modified. It is byte-identical to the sample in `docs/research`.
+With the user's explicit yes, one `am start -a android.intent.action.VIEW -n com.limelight.noir/com.limelight.ShortcutTrampoline -d file:///storage/emulated/0/Games/pc/Cuphead%20(GOG).art` was sent from adb on the Odin. The original file in `Games/pc` was used in place and not modified. It was byte-identical (checked with `cmp`) to the maintainer's local sample in `docs/research`, which is gitignored and not committed because it holds a real host UUID and host name.
 
 ### Verified (observed on the device)
 
