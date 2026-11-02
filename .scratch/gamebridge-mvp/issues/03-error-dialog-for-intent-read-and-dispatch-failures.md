@@ -11,7 +11,7 @@ No retry, no details, no stack traces, and never a fallback to another app or a 
 
 **Blocked by:** 02 (Tracer bullet: a GOG Shortcut is dispatched to GameNative)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] The dialog shows the filename (when known) and a reason mapped from a failure category. Close and Back both finish the activity, and the dialog works with D-pad, A/B buttons and touch.
   - Verified on the emulator: dialog text (filename plus reason, or reason alone) is asserted; Close (injected touch tap), Back, B (BUTTON_B), A (BUTTON_A) and D-pad centre each finish the activity.
@@ -35,3 +35,7 @@ No retry, no details, no stack traces, and never a fallback to another app or a 
 ## Answer
 
 Implemented on `ticket-03`. Unticked: the SecurityException reason (simulated only) and release-build logging (code inspection only). Shortcut interpretation failures (unsupported type, bad contents) still just finish; ticket 04 adds their dialog. Details in `docs/investigation-log.md`.
+
+## Answer
+
+Implemented on `ticket-03` (merged, tip fa29b8b). Two criteria left unticked: the SecurityException case uses a simulated refusal, and release-build logging was checked by code inspection only.
