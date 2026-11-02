@@ -28,3 +28,7 @@ See the spec's "Storefront table", "Shortcut parsing rules" and "Testing Decisio
 - [x] JVM tests at the interpret-a-Shortcut seam cover every rule and fixture.
 - [x] Each rejection category is shown through the error dialog with its own reason, with at least one instrumentation test per category.
 - [x] `./gradlew check` and the instrumentation suite pass.
+
+## Answer
+
+Implemented on `ticket-04` (merged, tip 58454c6). One criterion unticked: no test observes that reading stops at the 4 KiB cap (checked by code reading only).
