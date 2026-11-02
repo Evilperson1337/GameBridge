@@ -20,7 +20,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="content" />
             </intent-filter>
-            <!-- Lets a player find GameBridge in the app drawer; it then explains it is started from LaunchBox. -->
+        </activity>
+
+        <!-- The app-drawer entry: shows the Setup command. Dispatches nothing. -->
+        <activity
+            android:name=".SetupActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

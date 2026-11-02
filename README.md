@@ -34,7 +34,7 @@ GameBridge shows a dialog titled "GameBridge" with the Shortcut's filename (when
 
 | Dialog reason | What it means and what to do |
 |---|---|
-| GameBridge is meant to be started from LaunchBox. Pick a game there. | GameBridge was opened without a Shortcut, for example from the app drawer. Start games from LaunchBox. If it happens from LaunchBox, check the command in `docs/launchbox-setup.md` includes `-d {file.uri}`. |
+| GameBridge is meant to be started from LaunchBox. Pick a game there. | LaunchBox started GameBridge without a Shortcut (the app drawer opens the setup screen instead). Check the command in `docs/launchbox-setup.md` includes `-d {file.uri}`. |
 | GameBridge didn't recognise this request. Check the command set up in LaunchBox. | The emulator command's `-a` is not `com.allourmedia.gamebridge.action.DISPATCH`. Fix the command. |
 | The Shortcut wasn't shared in a form GameBridge accepts. | LaunchBox passed something other than `content://` (for example a file path). Use `-d {file.uri}`, not `{file.path}`. |
 | The Shortcut couldn't be read. | Permission missing or revoked, file gone, or a provider error. Check the game's file still exists in LaunchBox and pick it again. |
