@@ -148,3 +148,15 @@ Report: `docs/gamebridge-g1-launchbox-test-report-20261102.md`.
 - The four rows are enabled but NOT yet verified end to end by the agent. The user is testing them on the Odin; nothing in this log shows a Dispatch from these Storefronts reaching GameNative or a game Ready screen. Only GOG has device evidence. No Launch is claimed for any Storefront.
 - Synthetic `.amazon` and `.pcgame` fixtures have not been compared with real exports (unchanged from ticket 04).
 - Test-harness fix: `BridgeActivityTest.start` could return a previous test's bridge activity (its DESTROYED event reaches the lifecycle callback late) and so skip waiting for the real one; it now matches the activity by class and data. Two tests failed deterministically before this (BOM dispatch, zero Store ID); 30 pass, 0 fail after.
+
+## 2026-11-02: Epic Dispatch observed on the Odin
+
+### Verified (user observation plus read-only `dumpsys activity activities`)
+
+- An Epic Shortcut (`ABZU.epic`) picked in LaunchBox was dispatched through GameBridge and the game started in GameNative (reported by the user).
+- After exiting the game, the user saw a blank screen. `dumpsys` showed GameNative's `MainActivity` still resumed and focused in its own task (#220), with LaunchBox's task directly beneath it. GameBridge was not in the stack.
+
+### Assumed / not verified
+
+- Why GameNative stays on a blank screen after an Epic exit, and whether the GOG exit path differs (the GOG comparison snapshot has not been taken). Whether Back on the blank screen returns to LaunchBox has not been checked.
+- Steam, Amazon and Custom have no device observation yet.
