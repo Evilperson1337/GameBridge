@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Test-only provider: serves fixtures as content:// URIs. Exported because the grant cannot be exercised (see BridgeActivityTest). Lives in the test APK only. -->
+        <provider
+            android:name="com.allourmedia.gamebridge.FixtureProvider"
+            android:authorities="com.allourmedia.gamebridge.test.fixtures"
+            android:exported="true" />
+
+    </application>
+
+</manifest>

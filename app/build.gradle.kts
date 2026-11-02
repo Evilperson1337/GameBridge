@@ -24,6 +24,11 @@ android {
         }
     }
 
+    sourceSets {
+        // Shortcut fixtures shared with the :core JVM tests.
+        getByName("androidTest").assets.directories.add("../fixtures")
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -48,4 +53,6 @@ dependencies {
     androidTestImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.espresso.core)
+    androidTestImplementation(libs.androidx.test.espresso.intents)
 }
