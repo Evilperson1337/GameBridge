@@ -10,7 +10,7 @@ LaunchBox games that are Remote Shortcuts (`.art` files exported by Artemis) can
 
 ## Solution
 
-When LaunchBox hands GameBridge a `.art` Remote Shortcut, GameBridge checks it is a `content://` URI with the `.art` extension, within the existing size cap, and Dispatches it to Artemis as an explicit `ACTION_VIEW` with a read grant on the same URI. GameBridge does not read or parse the file: Artemis owns the format. If Artemis isn't installed or refuses, the failure dialog says so. Local Shortcuts behave exactly as before.
+When LaunchBox hands GameBridge a `.art` Remote Shortcut, GameBridge checks it is a `content://` URI with the `.art` extension and Dispatches it to Artemis as an explicit `ACTION_VIEW` with a read grant on the same URI. GameBridge does not read or parse the file: Artemis owns the format. If Artemis isn't installed or refuses, the failure dialog says so. Local Shortcuts behave exactly as before.
 
 ## User Stories
 
@@ -25,7 +25,7 @@ When LaunchBox hands GameBridge a `.art` Remote Shortcut, GameBridge checks it i
 
 ## Implementation Decisions
 
-- **No parsing.** GameBridge validates the URI only: scheme `content`, extension `.art` (case rules as for other extensions), and the existing read-size cap if the Shortcut is opened at all. It does not open the `.art` file for any other purpose.
+- **No parsing.** GameBridge validates the URI only: scheme `content` and extension `.art` (case rules as for other extensions). It reads only the display name. Because the file is never opened, the read-size cap does not apply (decided in review; Artemis owns the file). It does not open the `.art` file for any other purpose.
 - **Dispatch.** An explicit `ACTION_VIEW` to Artemis's `ShortcutTrampoline` component, with the Shortcut's `content://` URI as data and `FLAG_GRANT_READ_URI_PERMISSION`. Package `com.limelight.noir` (the only observed Artemis package). The component and package are constants in the app module, with a note that the contract was observed on 20.2.6 only.
 - **Package visibility.** Add `com.limelight.noir` to `<queries>`. No permission, network, service or background work.
 - **Failures.** A new `FailureCategory` for Artemis not installed and one for Artemis refusing, using existing failure-dialog structure. `RemoteUnsupported` is removed or repurposed; the README troubleshooting table is updated to the exact strings. There is no Storefront for a `.art` failure.

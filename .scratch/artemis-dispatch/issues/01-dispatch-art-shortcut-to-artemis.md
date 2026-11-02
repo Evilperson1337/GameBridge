@@ -1,6 +1,6 @@
 # 01: Dispatch a .art Shortcut to Artemis
 
-**What to build:** A `.art` Remote Shortcut handed to GameBridge by LaunchBox is validated (content URI, `.art` extension, size cap) and Dispatched to Artemis as an explicit `ACTION_VIEW` on the same URI with a read grant. GameBridge does not parse the file. Local Shortcuts are unchanged. See the spec's "Implementation Decisions" and "Testing Decisions".
+**What to build:** A `.art` Remote Shortcut handed to GameBridge by LaunchBox is validated (content URI and `.art` extension; the file is never opened, so the read-size cap does not apply) and Dispatched to Artemis as an explicit `ACTION_VIEW` on the same URI with a read grant. GameBridge does not parse the file. Local Shortcuts are unchanged. See the spec's "Implementation Decisions" and "Testing Decisions".
 
 **Blocked by:** None (can start immediately)
 
