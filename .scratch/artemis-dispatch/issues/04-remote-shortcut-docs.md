@@ -4,10 +4,10 @@
 
 **Blocked by:** 01 (Dispatch a .art Shortcut to Artemis)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The README names Artemis (`com.limelight.noir`, 20.2.6 observed) as the Target App for `.art` files and states what is and is not verified.
-- [ ] The support table has the Remote Shortcuts row, marked enabled-untested, with the rule for moving it to verified.
-- [ ] The setup guide says the same Setup command works for `.art` files and that GameBridge does not read them.
-- [ ] No real host UUID, host name or app UUID is committed.
-- [ ] All docs use glossary terms (Dispatch, Launch, Remote Shortcut, Target App).
+- [x] The README names Artemis (`com.limelight.noir`, 20.2.6 observed) as the Target App for `.art` files and states what is and is not verified.
+- [x] The support table has the Remote Shortcuts row, marked enabled-untested, with the rule for moving it to verified.
+- [x] The setup guide says the same Setup command works for `.art` files and that GameBridge does not read them.
+- [x] No real host UUID, host name or app UUID is committed.
+- [x] All docs use glossary terms (Dispatch, Launch, Remote Shortcut, Target App).
