@@ -49,6 +49,31 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 - Behaviour with a revoked or missing grant, failures and dialogs (ticket 03).
 - The `testedAbi` warning from ticket 01 still appears.
 
+## 2026-11-02: Ticket 03, error dialog
+
+### Verified (`./gradlew check --rerun-tasks`, and `:app:pixel2api33DebugAndroidTest`: 19 tests, 0 failures, twice in a row)
+
+- A real URI read grant is now exercised. The fixture provider is unexported with `grantUriPermissions`. A test-APK activity (same package and uid as the provider, playing LaunchBox's role) starts the bridge with `FLAG_GRANT_READ_URI_PERMISSION`. Missing-grant and revoked-grant cases fail to read, so the happy path really depends on the grant. This closes the ticket 02 gap.
+- Dialog cases shown with the expected text: no data (MAIN and own action), wrong action, `file:` scheme, missing grant, revoked grant, missing file, provider exception, no display name, GameNative not installed (real, unstubbed Dispatch, `ActivityNotFoundException`).
+- Close (injected tap), Back, `BUTTON_B`, `BUTTON_A` and `DPAD_CENTER` all finish the activity.
+- Release APK: no debuggable flag (aapt2 badging), merged release manifest has one component, `BridgeActivity`, exported, and no permissions. The debug-only test doubles (`StayingBridgeActivity`, `RefusingBridgeActivity`) are exported in the debug manifest only, so the test-APK trampoline can start them.
+
+### Findings
+
+- First A / D-pad press in touch mode only moves focus, so a Close that relies on the default focus would need two presses. The dialog now has a key listener that treats A, D-pad centre and Enter as Close.
+- Espresso taps injected into a just-shown dialog on the cold emulator were sometimes lost (first frame took 1.3 s). Tests wait 1.5 s and for idle before tapping. Not seen as a product bug, but not investigated on a real device.
+- Starting an Espresso-driven file: URI via another package throws FileUriExposedException, so that case uses `startActivitySync`.
+- `KeyEvent.isConfirmKey` is not accessible from Kotlin here; an explicit key set is used.
+- Added a MAIN/LAUNCHER filter so the "no data" case can occur from the app drawer. The validation order in the spec (action first) is bent for this: no data with MAIN, no action or the bridge action gives "started from LaunchBox".
+
+### Assumed / not verified
+
+- SecurityException: simulated by a debug-only activity whose `startActivity` throws. No real GameNative refusal was seen.
+- Release builds log only the failure category: by code inspection (debug logs are gated on FLAG_DEBUGGABLE); not observed on a running release build.
+- Dialog behaviour with a real gamepad and on the physical device: key events were injected on the emulator only. Nothing was installed on the device.
+- The GameNative releases URL (github.com/utkarshdalal/GameNative/releases) is taken from the repo path in the docs; not fetched.
+- Shortcut interpretation failures still finish silently (ticket 04).
+
 ## 2026-11-02: Ticket 05, LaunchBox setup guide, README and rollback (docs only)
 
 ### Verified (by reading the repo; nothing run on a device)

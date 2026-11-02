@@ -2,12 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <!-- Test-only provider: serves fixtures as content:// URIs. Exported because the grant cannot be exercised (see BridgeActivityTest). Lives in the test APK only. -->
+        <!-- Test-only provider: serves fixtures as content:// URIs. Not exported, so the bridge can read a URI only
+             through a grant, exactly as with LaunchBox. Lives in the test APK only. -->
         <provider
             android:name="com.allourmedia.gamebridge.FixtureProvider"
             android:authorities="com.allourmedia.gamebridge.test.fixtures"
-            android:exported="true" />
+            android:exported="false"
+            android:grantUriPermissions="true" />
 
+        <!-- Test-only stand-in for LaunchBox: it owns the provider's package, so it can grant reads. -->
+        <activity
+            android:name="com.allourmedia.gamebridge.GrantTrampolineActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

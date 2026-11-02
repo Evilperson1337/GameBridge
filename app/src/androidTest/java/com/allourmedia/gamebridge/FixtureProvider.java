@@ -36,7 +36,10 @@ public class FixtureProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] args, String order) {
         MatrixCursor cursor = new MatrixCursor(new String[] {OpenableColumns.DISPLAY_NAME});
-        cursor.addRow(new Object[] {uri.getLastPathSegment()});
+        // Failure fixtures: NoName.* has no display name; Error.* makes the provider throw.
+        String name = uri.getLastPathSegment();
+        if (name.startsWith("Error")) throw new IllegalStateException("provider error");
+        if (!name.startsWith("NoName")) cursor.addRow(new Object[] {name});
         return cursor;
     }
 
