@@ -119,3 +119,19 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 ### Assumed / not verified
 
 - `ShortcutReader` now reports a failure kind (name vs contents) and the exception class name; debug builds log them, release builds log only the failure category. Seen in code, not read from a device log.
+
+## 2026-11-02: Gate G1, first attempt (no Dispatch reached GameBridge)
+
+Report: `docs/gamebridge-g1-launchbox-test-report-20261102.md`.
+
+### Verified (read-only `adb` reads on the Odin)
+
+- GameBridge's debug activity resolves for the explicit component (`cmd package resolve-activity`), and the manifest declares the `DISPATCH` action, `content` scheme and `DEFAULT` category.
+- LaunchBox stores a platform-wide Custom Emulator (With Code) setting in `Windows.xml` (`<Platform>`: `DefaultEmulator`, `CustomEmulatorLaunchArguments`). Games can override it per game (`EmulatorOverride`, `CustomEmulator*`).
+- At the time of the attempt the Windows platform's command was still the earlier probe command (target `dev.launchboxprobe`), and that package is not installed. The temporary entry `GBTemp_Akalabeth` has no per-game override, so it used that platform command. This is the observed explanation for LaunchBox's "launching process failed" message.
+- No `GameBridge` logcat output appeared, consistent with no intent reaching `BridgeActivity`.
+
+### Assumed / not verified
+
+- The cause of the Calendar permission screen seen during the attempt is unknown.
+- The GameBridge command in LaunchBox has not yet been saved and run; the Dispatch from LaunchBox is still unverified.
