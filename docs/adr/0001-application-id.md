@@ -1,0 +1,3 @@
+# Application ID is `com.allourmedia.gamebridge`
+
+The application ID is baked into the manifest, the Kotlin packages, and the LaunchBox Custom Emulator (With Code) command on every device, so changing it later means reconfiguring LaunchBox everywhere. We use `com.allourmedia.gamebridge` (display name "GameBridge") because we own the `allourmedia.com` domain, which avoids collisions. The spec's placeholder `dev.gamebridge` uses a domain we don't own. The repo is still called `launchbox-bridge`; the app name and repo name differ on purpose. Debug builds add a `.debug` suffix so they can be installed alongside a release build.
