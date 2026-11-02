@@ -18,6 +18,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -28,6 +29,7 @@ import com.allourmedia.gamebridge.core.BridgeFailure
 import com.allourmedia.gamebridge.core.FailureCategory
 import com.allourmedia.gamebridge.core.Storefront
 import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -126,6 +128,10 @@ class BridgeActivityTest {
     private fun assertDialog(failure: BridgeFailure) {
         onView(withText(failure.message)).inRoot(isDialog()).check(matches(isDisplayed()))
         onView(withText("Close")).inRoot(isDialog()).check(matches(isDisplayed()))
+        // Close is the only button.
+        for (id in listOf(android.R.id.button2, android.R.id.button3)) {
+            onView(withId(id)).inRoot(isDialog()).check(matches(not(isDisplayed())))
+        }
     }
 
     private fun failureDialogFor(

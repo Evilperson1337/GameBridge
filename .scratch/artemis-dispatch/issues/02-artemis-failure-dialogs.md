@@ -4,10 +4,15 @@
 
 **Blocked by:** 01 (Dispatch a .art Shortcut to Artemis)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] JVM tests pin the exact reasons for Artemis not installed and Artemis refused, and every `FailureCategory` is still covered.
-- [ ] An instrumented test shows the not-installed dialog when Artemis is absent, with one Close button.
-- [ ] No reason refers to a repo document, and glossary terms are used.
-- [ ] The README troubleshooting table matches the strings exactly.
-- [ ] `./gradlew check` passes.
+- [x] JVM tests pin the exact reasons for Artemis not installed and Artemis refused, and every `FailureCategory` is still covered.
+  - Checked: `BridgeFailureTest.everyReasonIsPinnedAndTellsThePlayerWhatToChange` pins both Artemis reasons as literals and asserts the map covers `FailureCategory.entries`. `RemoteUnsupported` no longer exists in code (only a historical log line).
+- [x] An instrumented test shows the not-installed dialog when Artemis is absent, with one Close button.
+  - Checked: `artShortcutWithArtemisAbsentShowsNotInstalledAndNeverFallsBack` runs unstubbed on the managed emulator (no Artemis) and passed; `assertDialog` now also asserts the other two dialog buttons are not displayed, so Close is the only button.
+- [x] No reason refers to a repo document, and glossary terms are used.
+  - Checked: `noReasonPointsAtARepoFile` passes; the Artemis reasons use Remote Shortcuts and Artemis only, with no Storefront.
+- [x] The README troubleshooting table matches the strings exactly.
+  - Checked: new JVM test `readmeTroubleshootingTableListsEveryReasonExactly` finds every reason as a table cell in README.md; the README rows were already identical, so no wording changed.
+- [x] `./gradlew check` passes.
+  - Checked: `./gradlew check` and `./gradlew :app:pixel2api33DebugAndroidTest` both passed.

@@ -91,4 +91,19 @@ class BridgeFailureTest {
             assert(!category.reason.contains("docs/") && !category.reason.contains(".md")) { category.name }
         }
     }
+
+    @Test
+    fun readmeTroubleshootingTableListsEveryReasonExactly() {
+        val readme = java.io.File("../README.md").readText()
+        for (category in FailureCategory.entries) {
+            // The README folds the unverified-Storefront reason into one row, with a note after it.
+            val row =
+                if (category == FailureCategory.StorefrontNotVerified) {
+                    "| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) |"
+                } else {
+                    "| ${category.reason} |"
+                }
+            assert(readme.contains(row)) { category.name }
+        }
+    }
 }
