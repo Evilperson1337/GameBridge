@@ -17,6 +17,7 @@
 
 - Criterion 1: `SetupCommandTest` (JVM) compares against literal strings; red first (unresolved reference), then green.
 - Criterion 2 left unticked: screen text, Copy to clipboard (real ClipboardManager) and "GameNative: not installed" pass on the managed emulator (`pixel2api33DebugAndroidTest`, 6 SetupActivityTest tests, 0 failures). The "installed" case is not covered: the emulator has no GameNative and I did not install it.
+- Device check (2026-11-02, Odin): the setup screen showed "GameNative: installed" and the user confirmed Copy worked. This was a manual observation, not an instrumented test, so criterion 2 stays unticked. See `docs/investigation-log.md`.
 - Criterion 3: `SetupActivityTest` parses the displayed `-n`/`-a` and checks `PackageManager.resolveActivity` returns BridgeActivity in this package.
 - Criterion 4: a test asserts the only launcher entry is `SetupActivity`; `BridgeActivityTest` (29 tests, including the no-Shortcut MAIN/own-action cases) passes unchanged. Not exercised: tapping the drawer icon on a real launcher.
 - Criterion 5: manifest diff only moves the LAUNCHER filter to the new activity; no permissions, services or network code; no GameNative link-out.

@@ -201,3 +201,17 @@ Closed on two observations, both recorded above: the Epic Dispatch from LaunchBo
 - The README download link is the relative `../../releases/latest`; not checked on the hosting site (no remote is configured here). No release exists yet.
 - The signed release build and the keystore (tickets 03 and 04) were not seen working by this ticket.
 - The G1 report's link to an investigation document missing from `docs/` was removed. The report also contains a USB ADB serial, which AGENTS.md says not to commit; left for the maintainer to redact.
+
+## 2026-11-02: Setup screen observed on the Odin
+
+The debug build (`com.allourmedia.gamebridge.debug`, from the `integration/distribution-and-setup` branch) was installed on the Odin with `adb install -r`.
+
+### Verified (observed on the device)
+
+- Opening GameBridge shows the setup screen. Its text, read back over adb, is the debug Setup command, a COPY button, "GameNative: installed" and the three checklist lines.
+- The user pressed COPY and reports that it worked (the clipboard content was not read back by the agent).
+
+### Assumed / not verified
+
+- That the pasted text works in LaunchBox's Custom Emulator (With Code) field was not tried in this step.
+- The release build's Setup command was not seen on a device.
