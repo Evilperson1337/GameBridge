@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 (Toolchain and project skeleton)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] `:core` exposes the interpret-a-Shortcut operation (display name and bytes in; dispatch request or rejection out). A valid `.gog` Shortcut produces a GOG dispatch request with its Store ID, tested with JVM tests against the Akalabeth fixture (`1207666073`).
   - Verified: `ShortcutInterpreterTest` (5 JVM tests) passes under `./gradlew check`, including the Akalabeth fixture (1207666073).
@@ -30,3 +30,7 @@
   - Verified: grep for launch/launched in app and core sources finds only the external action name, LaunchBox and ActivityScenario.
 - [x] `./gradlew check` and the instrumentation suite pass.
   - Verified: both run for real and pass (see investigation log).
+
+## Answer
+
+Implemented on `ticket-02` (merged, tip 634704e). One criterion left unticked: the test-only provider is exported rather than serving a real URI read grant, so the instrumentation tests do not prove the grant path. See `docs/investigation-log.md`.
