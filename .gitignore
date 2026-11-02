@@ -7,3 +7,12 @@ local.properties
 *.aab
 .kotlin/
 .DS_Store
+.cxx/
+.externalNativeBuild/
+captures/
+*.hprof
+*.jks
+*.keystore
+*.log
+.vscode/
+.fleet/
