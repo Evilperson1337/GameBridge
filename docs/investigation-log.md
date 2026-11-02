@@ -301,3 +301,23 @@ Ticket `.scratch/artemis-dispatch/issues/01-dispatch-art-shortcut-to-artemis.md`
 - That real Artemis accepts a `content://` URI with a grant from GameBridge (only a `file://` VIEW from adb is observed). Ticket 03.
 - That a Dispatch starts a stream; a Dispatch is not a Launch.
 - The refused path is simulated; real Artemis refusals are unobserved. Component and package were seen on 20.2.6 only.
+
+## 2026-11-02: `.art` Dispatch from LaunchBox to Artemis (debug build, Odin)
+
+Debug build installed with `adb install -r` (standing approval). The user picked the existing Cuphead (GOG) `.art` entry in LaunchBox, on the Windows platform with the debug Setup command already in place. No LaunchBox configuration was changed and the original `.art` file was not touched.
+
+### Verified (observed on the device)
+
+- LaunchBox started `BridgeActivity` with action `com.allourmedia.gamebridge.action.DISPATCH` on a `content://` URI (flags `0x10000001`).
+- GameBridge then started `com.limelight.noir/com.limelight.ShortcutTrampoline` with `android.intent.action.VIEW` on a `content://` URI (flags `0x10000001`, i.e. new task plus read grant) and logged `remote scheme=content dispatch=Dispatched`.
+- Artemis accepted that `content://` URI with the grant: `ShortcutTrampoline` was displayed and `com.limelight.Game` was started by Artemis about a second later.
+- The user reports the stream started (a Launch, observed by a person).
+- The pick was made twice in the capture (14:31:18 and 14:32:00) with the same sequence both times.
+- After the user closed the stream with Artemis's hotkeys, they landed back in LaunchBox, not on the GameBridge setup screen. At the end of the capture the top activity was the Android launcher.
+
+### Assumed / not verified
+
+- That the stream showed the right game (Cuphead). The user said the stream started, not which game.
+- Behaviour with a bad or missing `.art` file; not tested.
+- Other Artemis versions (only 20.2.6 observed), and the release build.
+- Whether the second pick started a new session or resumed the first.
