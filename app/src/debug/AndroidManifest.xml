@@ -2,9 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
+        <!-- Debug-only test doubles. Exported so the test APK's trampoline (a different package) can start them
+             with a real read grant. Never part of a release build. -->
         <activity
             android:name=".StayingBridgeActivity"
-            android:exported="false"
+            android:exported="true"
+            android:theme="@style/Theme.GameBridge.Transparent" />
+        <activity
+            android:name=".RefusingBridgeActivity"
+            android:exported="true"
             android:theme="@style/Theme.GameBridge.Transparent" />
     </application>
 

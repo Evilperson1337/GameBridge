@@ -22,8 +22,8 @@
   - Verified on the emulator: scenario reaches DESTROYED; recreation (via a debug-only subclass that ignores finish) leaves exactly one Dispatch.
 - [x] Debug builds log the Storefront, Store ID, URI scheme and Dispatch result under the `GameBridge` logcat tag.
   - Verified: logcat from the emulator run shows `GameBridge: storefront=GOG storeId=1207666073 scheme=content dispatch=Dispatched`.
-- [ ] A test-only document provider (in the instrumentation test APK only, never in the app) serves fixture Shortcuts as granted `content://` URIs.
-  - Not ticked: the provider is in the test APK only and serves the fixtures, but the read grant is not exercised. It runs in the test APK's process while the test code runs in the app's uid, so the grant call is refused; the provider is exported instead. Needs another approach (for example a grant made from the provider's own process).
+- [x] A test-only document provider (in the instrumentation test APK only, never in the app) serves fixture Shortcuts as granted `content://` URIs.
+  - Verified in ticket 03: the provider is now unexported with `grantUriPermissions`. A test-APK trampoline activity (same package and uid as the provider, standing in for LaunchBox) starts the bridge with `FLAG_GRANT_READ_URI_PERMISSION`. The Akalabeth Dispatch test passes only through that grant, and the missing-grant and revoked-grant tests fail to read, proving the grant is what allows the read.
 - [x] Instrumentation tests on the managed Android 13 emulator use Espresso-Intents to capture and stub the Dispatch and check the action, component and extras (including that `app_id` is an Int). They also cover finishing and the no-duplicate-on-recreation behaviour.
   - Verified: `:app:pixel2api33DebugAndroidTest` ran 4 tests, 0 failures.
 - [x] Code and tests use "Dispatch", never "Launch", for this outcome.

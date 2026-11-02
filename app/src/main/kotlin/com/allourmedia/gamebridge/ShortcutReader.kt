@@ -10,21 +10,38 @@ class ShortcutFile(
     val bytes: ByteArray,
 )
 
-/** Reads a Shortcut through the content resolver. Returns null if it cannot be read. */
+sealed interface ReadResult {
+    data class Read(
+        val file: ShortcutFile,
+    ) : ReadResult
+
+    /** [displayName] is set when the name could be read but the bytes could not. */
+    data class Unreadable(
+        val displayName: String?,
+    ) : ReadResult
+}
+
+/** Reads a Shortcut through the content resolver. Never throws: every provider failure is [ReadResult.Unreadable]. */
 class ShortcutReader(
     private val resolver: ContentResolver,
 ) {
-    fun read(uri: Uri): ShortcutFile? =
-        try {
-            val name =
+    fun read(uri: Uri): ReadResult {
+        val name =
+            try {
                 resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
                     if (it.moveToFirst()) it.getString(0) else null
                 }
-            val bytes = resolver.openInputStream(uri)?.use { it.readCapped(MAX_BYTES + 1) }
-            if (name == null || bytes == null) null else ShortcutFile(name, bytes)
-        } catch (_: Exception) {
-            null
-        }
+            } catch (_: Exception) {
+                null
+            } ?: return ReadResult.Unreadable(null)
+        val bytes =
+            try {
+                resolver.openInputStream(uri)?.use { it.readCapped(MAX_BYTES + 1) }
+            } catch (_: Exception) {
+                null
+            } ?: return ReadResult.Unreadable(name)
+        return ReadResult.Read(ShortcutFile(name, bytes))
+    }
 
     companion object {
         /** Local Shortcuts are capped at 4 KiB. One extra byte is read so oversize is detectable. */
