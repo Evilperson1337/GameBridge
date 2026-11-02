@@ -5,14 +5,30 @@ enum class FailureCategory(
     val reason: String,
 ) {
     NoShortcut("GameBridge is meant to be started from LaunchBox. Pick a game there."),
-    WrongAction("GameBridge didn't recognise this request. Check the command set up in LaunchBox."),
-    NotContentUri("The Shortcut wasn't shared in a form GameBridge accepts."),
-    Unreadable("The Shortcut couldn't be read."),
-    UnsupportedType("Not a supported Shortcut."),
+    WrongAction(
+        "LaunchBox sent GameBridge an unexpected request. In the emulator command, " +
+            "use the action com.allourmedia.gamebridge.action.DISPATCH. " +
+            "Copy the command from GameBridge's setup screen.",
+    ),
+    NotContentUri(
+        "LaunchBox didn't pass the Shortcut as a content URI. " +
+            "The emulator command must end with -d {file.uri}, not {file.path}.",
+    ),
+    Unreadable(
+        "GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, " +
+            "then pick the game again.",
+    ),
+    UnsupportedType(
+        "This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used " +
+            "for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame).",
+    ),
     StorefrontNotVerified("This Storefront isn't verified yet."),
     RemoteUnsupported("Remote Shortcuts aren't supported yet."),
     InvalidContents("This Shortcut's contents aren't valid."),
-    TooLarge("This Shortcut is too large to be a real one."),
+    TooLarge(
+        "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
+            "not another file.",
+    ),
     GameNativeNotInstalled(
         "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
     ),

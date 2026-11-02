@@ -43,7 +43,7 @@ class BridgeFailureTest {
     @Test
     fun messagePutsTheFileNameAboveTheReasonAndTruncatesLongNames() {
         assertEquals(
-            "A.gog\n\nThis Shortcut is too large to be a real one.",
+            "A.gog\n\n" + FailureCategory.TooLarge.reason,
             BridgeFailure(FailureCategory.TooLarge, "A.gog").message,
         )
         val long = "n".repeat(200)
@@ -51,5 +51,44 @@ class BridgeFailureTest {
             "n".repeat(80) + "\n\n" + FailureCategory.TooLarge.reason,
             BridgeFailure(FailureCategory.TooLarge, long).message,
         )
+    }
+
+    @Test
+    fun everyReasonIsPinnedAndTellsThePlayerWhatToChange() {
+        val expected =
+            mapOf(
+                FailureCategory.NoShortcut to "GameBridge is meant to be started from LaunchBox. Pick a game there.",
+                FailureCategory.WrongAction to
+                    "LaunchBox sent GameBridge an unexpected request. In the emulator command, " +
+                    "use the action com.allourmedia.gamebridge.action.DISPATCH. " +
+                    "Copy the command from GameBridge's setup screen.",
+                FailureCategory.NotContentUri to
+                    "LaunchBox didn't pass the Shortcut as a content URI. " +
+                    "The emulator command must end with -d {file.uri}, not {file.path}.",
+                FailureCategory.Unreadable to
+                    "GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, " +
+                    "then pick the game again.",
+                FailureCategory.UnsupportedType to
+                    "This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used " +
+                    "for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame).",
+                FailureCategory.StorefrontNotVerified to "This Storefront isn't verified yet.",
+                FailureCategory.RemoteUnsupported to "Remote Shortcuts aren't supported yet.",
+                FailureCategory.InvalidContents to "This Shortcut's contents aren't valid.",
+                FailureCategory.TooLarge to
+                    "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
+                    "not another file.",
+                FailureCategory.GameNativeNotInstalled to
+                    "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
+                FailureCategory.GameNativeRefused to "GameNative refused the request.",
+            )
+        assertEquals(FailureCategory.entries.toSet(), expected.keys)
+        for ((category, reason) in expected) assertEquals(reason, category.reason)
+    }
+
+    @Test
+    fun noReasonPointsAtARepoFile() {
+        for (category in FailureCategory.entries) {
+            assert(!category.reason.contains("docs/") && !category.reason.contains(".md")) { category.name }
+        }
     }
 }
