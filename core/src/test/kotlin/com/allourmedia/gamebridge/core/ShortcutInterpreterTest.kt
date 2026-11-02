@@ -66,10 +66,10 @@ class ShortcutInterpreterTest {
         assertEquals(
             listOf(
                 listOf("GOG", "gog", "GOG", true),
-                listOf("Steam", "steam", "STEAM", false),
-                listOf("Epic", "epic", "EPIC", false),
-                listOf("Amazon", "amazon", "AMAZON", false),
-                listOf("Custom", "pcgame", "CUSTOM_GAME", false),
+                listOf("Steam", "steam", "STEAM", true),
+                listOf("Epic", "epic", "EPIC", true),
+                listOf("Amazon", "amazon", "AMAZON", true),
+                listOf("Custom", "pcgame", "CUSTOM_GAME", true),
             ),
             rows,
         )
@@ -82,16 +82,38 @@ class ShortcutInterpreterTest {
     }
 
     @Test
-    fun unverifiedStorefrontsAreRejectedNamingTheStorefront() {
-        assertEquals(rejected(Rejection.StorefrontNotVerified(Storefront.Steam)), interpretFixture("Broforce.steam"))
-        assertEquals(rejected(Rejection.StorefrontNotVerified(Storefront.Epic)), interpretFixture("ABZU.epic"))
-        assertEquals(rejected(Rejection.StorefrontNotVerified(Storefront.Amazon)), interpretFixture("Synthetic.amazon"))
-        assertEquals(rejected(Rejection.StorefrontNotVerified(Storefront.Custom)), interpretFixture("Synthetic.pcgame"))
+    fun everyFixtureProducesADispatchRequestWithItsGameSource() {
+        val expected =
+            listOf(
+                Triple("Akalabeth.gog", Storefront.GOG, 1207666073),
+                Triple("Broforce.steam", Storefront.Steam, 274190),
+                Triple("ABZU.epic", Storefront.Epic, 64),
+                Triple("Synthetic.amazon", Storefront.Amazon, 4815162),
+                Triple("Synthetic.pcgame", Storefront.Custom, 2342),
+            )
+        val gameSources = listOf("GOG", "STEAM", "EPIC", "AMAZON", "CUSTOM_GAME")
+        for ((i, e) in expected.withIndex()) {
+            val result = interpretFixture(e.first)
+            assertEquals(e.first, request(e.second, e.third), result)
+            assertEquals(gameSources[i], (result as ShortcutResult.Request).request.storefront.gameSource)
+        }
+    }
+
+    /** The real table has no unverified row now, so the rejection path is exercised with a custom table. */
+    private val unverifiedSteam = Storefront("Steam", "steam", "STEAM", verified = false)
+    private val tableWithUnverifiedSteam = listOf(Storefront.GOG, unverifiedSteam)
+
+    @Test
+    fun unverifiedStorefrontIsRejectedNamingTheStorefront() {
+        assertEquals(
+            rejected(Rejection.StorefrontNotVerified(unverifiedSteam)),
+            interpretShortcut("Broforce.steam", fixture("Broforce.steam"), tableWithUnverifiedSteam),
+        )
     }
 
     @Test
     fun flippingARowToVerifiedIsEnoughToProduceADispatchRequestWithItsGameSource() {
-        val verifiedSteam = Storefront.Steam.copyVerified()
+        val verifiedSteam = unverifiedSteam.copyVerified()
         val result = interpretShortcut("Broforce.steam", fixture("Broforce.steam"), listOf(Storefront.GOG, verifiedSteam))
         assertEquals(request(verifiedSteam, 274190), result)
         assertEquals("STEAM", (result as ShortcutResult.Request).request.storefront.gameSource)
@@ -100,7 +122,7 @@ class ShortcutInterpreterTest {
     @Test
     fun extensionsMatchCaseInsensitively() {
         assertEquals(request(Storefront.GOG, 1470490225), interpretFixture("Synthetic-upper.GOG"))
-        assertEquals(rejected(Rejection.StorefrontNotVerified(Storefront.Steam)), interpretShortcut("X.STEAM", "1".toByteArray()))
+        assertEquals(request(Storefront.Steam, 1), interpretShortcut("X.STEAM", "1".toByteArray()))
     }
 
     @Test
@@ -136,7 +158,7 @@ class ShortcutInterpreterTest {
 
     @Test
     fun invalidContentsOfAnUnverifiedStorefrontAreInvalidNotUnverified() {
-        assertEquals(rejected(Rejection.InvalidContents), interpretShortcut("x.steam", "0".toByteArray()))
+        assertEquals(rejected(Rejection.InvalidContents), interpretShortcut("x.steam", "0".toByteArray(), tableWithUnverifiedSteam))
     }
 
     @Test

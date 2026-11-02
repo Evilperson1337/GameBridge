@@ -39,7 +39,7 @@ GameBridge shows a dialog titled "GameBridge" with the Shortcut's filename (when
 | The Shortcut wasn't shared in a form GameBridge accepts. | LaunchBox passed something other than `content://` (for example a file path). Use `-d {file.uri}`, not `{file.path}`. |
 | The Shortcut couldn't be read. | Permission missing or revoked, file gone, or a provider error. Check the game's file still exists in LaunchBox and pick it again. |
 | Not a supported Shortcut. | The extension is not a known Shortcut extension (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`, `.art`). Check which files the platform hands to the emulator. |
-| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | The Shortcut is valid but that Storefront has not been verified on a device, so it is not dispatched. Only GOG is. |
+| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present: every Storefront row is enabled, so Steam, Epic, Amazon and Custom Shortcuts are dispatched. The dialog appears only if a row is marked unverified in the Storefront table. |
 | Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. Artemis is a later phase. |
 | This Shortcut's contents aren't valid. | The contents are not exactly one positive whole number in the signed 32-bit range: empty, text, several numbers, zero (GameNative writes `0` for some GOG games), negative or too large a number. |
 | This Shortcut is too large to be a real one. | The file is over 4 KiB. It is not read in full. Check the platform is handing over the Shortcut, not another file. |
@@ -48,7 +48,7 @@ GameBridge shows a dialog titled "GameBridge" with the Shortcut's filename (when
 
 ## Limitations
 
-- Only GOG Shortcuts are dispatched. Steam, Epic, Amazon and Custom Shortcuts are recognised but not verified yet; Remote (Artemis) Shortcuts are recognised and reported as unsupported.
+- GOG, Steam, Epic, Amazon and Custom Shortcuts are all dispatched, but only GOG has been checked on a device. The other four rows were enabled for device testing and are not yet verified end to end (see `docs/investigation-log.md`); a Dispatch is not proof the game starts. Remote (Artemis) Shortcuts are recognised and reported as unsupported.
 - Only the standard GameNative build (`app.gamenative`) is targeted, not the "gold" variant (`app.gamenative.gold`).
 - A successful Dispatch is not proof of a Launch. GameBridge cannot observe the game starting; only a person or logcat on the device can confirm it.
 - The full LaunchBox, GameBridge, GameNative path has not yet been run on the device (Gate G1).

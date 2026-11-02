@@ -135,3 +135,16 @@ Report: `docs/gamebridge-g1-launchbox-test-report-20261102.md`.
 
 - The cause of the Calendar permission screen seen during the attempt is unknown.
 - The GameBridge command in LaunchBox has not yet been saved and run; the Dispatch from LaunchBox is still unverified.
+
+## 2026-11-02: Steam, Epic, Amazon and Custom enabled; tests updated
+
+### Verified (`./gradlew check` and `:app:pixel2api33DebugAndroidTest`, both pass: JVM tests, and 30 instrumentation tests with 0 failures)
+
+- The four rows are marked `verified = true` in the Storefront table. JVM tests show each fixture produces a Dispatch request with the right `game_source` (GOG, STEAM, EPIC, AMAZON, CUSTOM_GAME). The `StorefrontNotVerified` rejection is still covered in JVM through a custom table with an unverified row passed to `interpretShortcut`.
+- Emulator tests (Espresso-Intents, GameNative stubbed) check the component, the Int `app_id` and `game_source` for the four Shortcuts. The "Storefront not verified" dialog is unreachable from the real table, so it is covered in JVM only (`BridgeFailureTest` and the interpreter tests).
+
+### Assumed / not verified
+
+- The four rows are enabled but NOT yet verified end to end by the agent. The user is testing them on the Odin; nothing in this log shows a Dispatch from these Storefronts reaching GameNative or a game Ready screen. Only GOG has device evidence. No Launch is claimed for any Storefront.
+- Synthetic `.amazon` and `.pcgame` fixtures have not been compared with real exports (unchanged from ticket 04).
+- Test-harness fix: `BridgeActivityTest.start` could return a previous test's bridge activity (its DESTROYED event reaches the lifecycle callback late) and so skip waiting for the real one; it now matches the activity by class and data. Two tests failed deterministically before this (BOM dispatch, zero Store ID); 30 pass, 0 fail after.

@@ -41,7 +41,7 @@ Scroll to the top of LaunchBox's emulator picker. Custom Emulator (With Code) is
 
 ## Using it
 
-One emulator configuration on the Windows platform covers all your GameNative games. Import the Shortcuts (`.gog` and so on) into LaunchBox as the games' files, then pick a game. If the Dispatch succeeds GameBridge shows nothing and GameNative opens. If not, GameBridge shows a dialog (the reasons are listed in the README troubleshooting table); press Close and you are back in LaunchBox. To retry, pick the game again.
+One emulator configuration on the Windows platform covers all your GameNative games. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) into LaunchBox as the games' files, then pick a game. All five Storefronts are dispatched, but only GOG is verified on a device so far; Steam, Epic, Amazon and Custom are enabled and still being tested. If the Dispatch succeeds GameBridge shows nothing and GameNative opens. If not, GameBridge shows a dialog (the reasons are listed in the README troubleshooting table); press Close and you are back in LaunchBox. To retry, pick the game again.
 
 The built-in GameNative entry fails on these Shortcuts with "ROM file could not be found" (observed on the Odin, per the handoff document); that is why the Custom Emulator is used instead.
 

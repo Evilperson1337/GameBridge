@@ -96,7 +96,10 @@ class BridgeActivityTest {
                 .putExtra(GrantTrampolineActivity.EXTRA_FORWARD, intent)
                 .putExtra(GrantTrampolineActivity.EXTRA_GRANT, grant),
         )
-        return await("a bridge activity to start") { seen.firstOrNull { it is BridgeActivity } }
+        // Match on class and data: a previous test's activity can still report DESTROYED to the callback after setUp.
+        return await("a bridge activity to start") {
+            seen.firstOrNull { it is BridgeActivity && it.javaClass.name == intent.component?.className && it.intent?.data == intent.data }
+        }
     }
 
     private fun <T : Any> await(
@@ -256,25 +259,41 @@ class BridgeActivityTest {
         storefront: Storefront? = null,
     ) = failureDialogFor(bridgeIntent(fixtureUri(fileName)), BridgeFailure(category, fileName, storefront))
 
-    @Test
-    fun steamShortcutShowsStorefrontNotVerifiedNamingSteam() {
-        interpretationFailure("Broforce.steam", FailureCategory.StorefrontNotVerified, Storefront.Steam)
+    /**
+     * Dispatches a Shortcut and checks the component, the Int app_id and the game_source. The "Storefront not verified"
+     * dialog is unreachable from the real Storefront table now (every row is verified), so that path is covered in JVM only.
+     */
+    private fun assertDispatched(
+        fileName: String,
+        appId: Int,
+        gameSource: String,
+    ) {
+        stubGameNative()
+        awaitFinished(start(bridgeIntent(fixtureUri(fileName))))
+        intended(
+            allOf(
+                hasAction(GameNativeDispatcher.ACTION),
+                hasComponent(gameNative),
+                hasExtra("app_id", appId),
+                hasExtra("game_source", gameSource),
+            ),
+        )
+        val dispatched = dispatches().single()
+        assertEquals(Integer::class.java, dispatched.extras!!.getSerializable("app_id")!!.javaClass)
+        assertEquals(setOf("app_id", "game_source"), dispatched.extras!!.keySet())
     }
 
     @Test
-    fun epicShortcutShowsStorefrontNotVerifiedNamingEpic() {
-        interpretationFailure("ABZU.epic", FailureCategory.StorefrontNotVerified, Storefront.Epic)
-    }
+    fun steamShortcutIsDispatchedAsSteam() = assertDispatched("Broforce.steam", 274190, "STEAM")
 
     @Test
-    fun amazonShortcutShowsStorefrontNotVerifiedNamingAmazon() {
-        interpretationFailure("Synthetic.amazon", FailureCategory.StorefrontNotVerified, Storefront.Amazon)
-    }
+    fun epicShortcutIsDispatchedAsEpic() = assertDispatched("ABZU.epic", 64, "EPIC")
 
     @Test
-    fun customShortcutShowsStorefrontNotVerifiedNamingCustom() {
-        interpretationFailure("Synthetic.pcgame", FailureCategory.StorefrontNotVerified, Storefront.Custom)
-    }
+    fun amazonShortcutIsDispatchedAsAmazon() = assertDispatched("Synthetic.amazon", 4815162, "AMAZON")
+
+    @Test
+    fun customShortcutIsDispatchedAsCustomGame() = assertDispatched("Synthetic.pcgame", 2342, "CUSTOM_GAME")
 
     @Test
     fun remoteShortcutShowsRemoteShortcutsAreUnsupported() {
