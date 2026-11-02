@@ -73,3 +73,18 @@ Each entry says what was verified (observed in a real run) and what was assumed.
 - Dialog behaviour with a real gamepad and on the physical device: key events were injected on the emulator only. Nothing was installed on the device.
 - The GameNative releases URL (github.com/utkarshdalal/GameNative/releases) is taken from the repo path in the docs; not fetched.
 - Shortcut interpretation failures still finish silently (ticket 04).
+
+## 2026-11-02: Ticket 05, LaunchBox setup guide, README and rollback (docs only)
+
+### Verified (by reading the repo; nothing run on a device)
+
+- `app/src/main/AndroidManifest.xml`: the exported activity is `.BridgeActivity`, the action is `com.allourmedia.gamebridge.action.DISPATCH`, data scheme `content`. `app/build.gradle.kts`: namespace `com.allourmedia.gamebridge`, applicationId `com.allourmedia.gamebridge`, debug suffix `.debug`.
+- Consequence: the debug build's activity class stays in the `com.allourmedia.gamebridge` package while its application ID is `...gamebridge.debug`, so the setup guide writes the component with a fully qualified class (`<applicationId>/com.allourmedia.gamebridge.BridgeActivity`). This follows from Android resolving a leading-dot class name against the applicationId-derived package; it was not tested through `am start` or LaunchBox.
+
+### Assumed / not verified
+
+- That LaunchBox accepts this command as written, expands `{file.uri}` and grants the read. Only the earlier probe command (`-n dev.launchboxprobe/.ProbeActivity -a ... -d {file.uri}`, from the handoff) was seen working; that is prior evidence, not reproduced here.
+- Where Custom Emulator (With Code) is: "top of the emulator picker" comes from the handoff (LaunchBox 1.23). Other menu paths, field names and any extension setup are not verified and are marked assumed in the guide.
+- Name and location of LaunchBox's configuration XML on the device: not verified; the guide tells the reader to find it first.
+- Error-dialog wording in the README troubleshooting table follows the spec and ticket 03 (built in parallel); final strings may differ and must be reconciled.
+- The Gate G1 and rollback procedures were written, not performed.
