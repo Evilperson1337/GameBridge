@@ -229,3 +229,22 @@ The debug build (`com.allourmedia.gamebridge.debug`, from the `integration/distr
 - That the surviving GameBridge task caused the stale screen is inferred from the task dump and the fix working, not from a controlled comparison.
 - The release build, other Storefronts and an exit from an Epic game were not retried.
 - An earlier pick at 13:17 logged `failure=RemoteUnsupported`; which Shortcut it was is not known.
+
+## 2026-11-02: Artemis entry points on the Odin (read-only)
+
+Read with `adb shell dumpsys package com.limelight.noir` on the Odin. Nothing was installed, started or changed.
+
+### Verified (observed on the device)
+
+- `com.limelight.noir` is installed (versionName 20.2.6, versionCode 57, installed by Obtainium). Earlier logcat showed the user opening its `PcView`, `AppView` and `Game` activities.
+- Its manifest declares `com.limelight.ShortcutTrampoline` with an `android.intent.action.VIEW` filter: categories DEFAULT and BROWSABLE, schemes `content` and `file`, path glob `.*.art`, any MIME type. So the package accepts a VIEW of a `content://` URI ending in `.art`.
+- It also declares `com.limelight.preferences.AddComputerManually` for VIEW on the `art` scheme, and `com.limelight.PcView` as the launcher entry.
+- `ShortcutTrampoline` is reachable from other apps in the sense that the resolver table lists its filter. Whether the activity is `exported`, and what it does with the file, was not read.
+
+### Assumed / not verified
+
+- That `com.limelight.noir` is Artemis (and not a Moonlight fork). The package name and `.art` handling suggest it, but the app's own label was not read.
+- What `ShortcutTrampoline` does with the file, and whether it needs a read-URI grant from the sender.
+- The `.art` file schema beyond the handoff's listed keys (`host_uuid`, `host_name`, `app_uuid`, `app_name`). No `.art` file was found under `/sdcard/LaunchBox` by name.
+- Whether a Dispatch by VIEW starts the stream. A Dispatch is not a Launch.
+- Whether LaunchBox could open `.art` through Artemis without GameBridge.
