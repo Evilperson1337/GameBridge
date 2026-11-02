@@ -22,10 +22,12 @@
             </intent-filter>
         </activity>
 
-        <!-- The app-drawer entry: shows the Setup command. Dispatches nothing. -->
+        <!-- The app-drawer entry: shows the Setup command. Dispatches nothing. noHistory keeps it out of the
+             task a later Dispatch joins, so closing a game returns to LaunchBox. -->
         <activity
             android:name=".SetupActivity"
-            android:exported="true">
+            android:exported="true"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

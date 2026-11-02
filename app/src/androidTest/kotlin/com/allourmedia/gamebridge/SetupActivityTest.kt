@@ -4,6 +4,7 @@ import android.content.ClipboardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
@@ -72,6 +73,16 @@ class SetupActivityTest {
             Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)
         val entries = context.packageManager.queryIntentActivities(drawer, 0).map { it.activityInfo.name }
         assertEquals(listOf("com.allourmedia.gamebridge.SetupActivity"), entries)
+    }
+
+    /**
+     * A Dispatch from LaunchBox joins GameBridge's existing task. If the setup screen were still in it,
+     * the task would survive and closing the game would show the setup screen instead of LaunchBox.
+     */
+    @Test
+    fun leavingTheSetupScreenRemovesItFromTheBackStack() {
+        val info = context.packageManager.getActivityInfo(ComponentName(context, SetupActivity::class.java), 0)
+        assertEquals(ActivityInfo.FLAG_NO_HISTORY, info.flags and ActivityInfo.FLAG_NO_HISTORY)
     }
 
     @Test
