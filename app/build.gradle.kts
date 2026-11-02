@@ -15,12 +15,39 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Signing reads from environment variables only. When any is missing the
+    // release build stays unsigned, so `./gradlew check` works for forks.
+    val signingStoreFile = System.getenv("GAMEBRIDGE_SIGNING_STORE_FILE")
+    val signingStorePassword = System.getenv("GAMEBRIDGE_SIGNING_STORE_PASSWORD")
+    val signingKeyAlias = System.getenv("GAMEBRIDGE_SIGNING_KEY_ALIAS")
+    val signingKeyPassword = System.getenv("GAMEBRIDGE_SIGNING_KEY_PASSWORD")
+    val signingValues =
+        listOf(
+            signingStoreFile,
+            signingStorePassword,
+            signingKeyAlias,
+            signingKeyPassword,
+        )
+    val hasSigning = signingValues.all { !it.isNullOrBlank() }
+
+    signingConfigs {
+        if (hasSigning) {
+            create("release") {
+                storeFile = file(signingStoreFile!!)
+                storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
         }
         release {
             isMinifyEnabled = false
+            if (hasSigning) signingConfig = signingConfigs.getByName("release")
         }
     }
 
