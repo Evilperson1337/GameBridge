@@ -266,3 +266,20 @@ Read from one Artemis-generated file, `Cuphead (GOG).art` (198 bytes, ASCII text
 - That other `.art` files have the same keys and order, or that all four keys are always present.
 - That the title suffix, `(GOG)`, is always the Storefront, and that it matters for GameBridge.
 - That Artemis resolves a game from these UUIDs on a VIEW. No intent has been sent to Artemis yet.
+
+## 2026-11-02: VIEW of a `.art` file sent to Artemis from adb
+
+With the user's explicit yes, one `am start -a android.intent.action.VIEW -n com.limelight.noir/com.limelight.ShortcutTrampoline -d file:///storage/emulated/0/Games/pc/Cuphead%20(GOG).art` was sent from adb on the Odin. The original file in `Games/pc` was used in place and not modified. It is byte-identical to the sample in `docs/research`.
+
+### Verified (observed on the device)
+
+- `ShortcutTrampoline` accepted the VIEW from the adb shell and finished itself; `com.limelight.Game` became the top resumed activity about a second later.
+- Logcat then showed a video stream being configured (HEVC, 1920x1080, 90 fps) and the line "Resumed existing game session". A session for this game may already have been running on the PC, so this does not show a cold start.
+- The user's report of what appeared on screen was not collected in this step.
+
+### Assumed / not verified
+
+- That a `content://` URI with a read grant, as LaunchBox and GameBridge would send, behaves the same as this `file://` URI from the shell user. Not tested.
+- That GameBridge can forward the grant to Artemis (`FLAG_GRANT_READ_URI_PERMISSION`). Not tested.
+- That the stream shows the right game. The "resumed existing session" line leaves open whether Artemis started Cuphead or reattached to something else.
+- A decoder `CodecException` and a restart appeared in the log while the stream came up; its effect was not examined.
