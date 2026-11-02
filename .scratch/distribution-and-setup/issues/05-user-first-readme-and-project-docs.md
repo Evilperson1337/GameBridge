@@ -4,16 +4,16 @@
 
 **Blocked by:** 01 (Setup screen with Setup command), 02 (Failure dialog wording)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The README opens with what it does and the download link, and no longer says Gate G1 or the LaunchBox path has not been run.
-- [ ] The support table marks GOG and Epic verified (with the observation date) and Steam, Amazon and Custom enabled-untested; the rule for moving a row to verified is stated.
-- [ ] Known behaviour includes the blank GameNative screen after exiting an Epic game, described as observed and not diagnosed.
-- [ ] Requirements state the minimum Android version and the LaunchBox and GameNative versions actually tested.
-- [ ] A short note says which Shortcut files to import and that GameNative exports them.
-- [ ] The key-loss warning for the signing key is present.
-- [ ] Developer material is in its own document with the README linking to it in one line.
-- [ ] An MIT `LICENSE` is added with the maintainer as copyright holder.
-- [ ] The investigation log records the new phase and G1 closure, separating verified from assumed.
-- [ ] The broken link in the G1 test report is fixed or removed.
-- [ ] All docs use glossary terms.
+- [x] The README opens with what it does and the download link, and no longer says Gate G1 or the LaunchBox path has not been run.
+- [x] The support table marks GOG and Epic verified (with the observation date) and Steam, Amazon and Custom enabled-untested; the rule for moving a row to verified is stated.
+- [x] Known behaviour includes the blank GameNative screen after exiting an Epic game, described as observed and not diagnosed.
+- [x] Requirements state the minimum Android version and the LaunchBox and GameNative versions actually tested.
+- [x] A short note says which Shortcut files to import and that GameNative exports them.
+- [x] The key-loss warning for the signing key is present.
+- [x] Developer material is in its own document with the README linking to it in one line.
+- [x] An MIT `LICENSE` is added with the maintainer as copyright holder.
+- [x] The investigation log records the new phase and G1 closure, separating verified from assumed.
+- [x] The broken link in the G1 test report is fixed or removed.
+- [x] All docs use glossary terms.

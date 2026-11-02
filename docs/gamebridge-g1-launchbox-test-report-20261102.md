@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Test whether a per-game LaunchBox entry for a GameNative-exported `.gog` shortcut can be configured to invoke GameBridge with the selected shortcut reference. This is a follow-up to the earlier successful LaunchBox diagnostic receiver test documented in [the general LaunchBox → GameNative investigation](launchbox-gamenative-investigation-20261101.md). That earlier test used a separate diagnostic package, `dev.launchboxprobe`; it does not establish that this GameBridge G1 attempt dispatched successfully.
+Test whether a per-game LaunchBox entry for a GameNative-exported `.gog` shortcut can be configured to invoke GameBridge with the selected shortcut reference. This is a follow-up to the earlier successful LaunchBox diagnostic receiver test documented in the general LaunchBox → GameNative investigation of 2026-11-01 (that document is not in this repository). That earlier test used a separate diagnostic package, `dev.launchboxprobe`; it does not establish that this GameBridge G1 attempt dispatched successfully.
 
 ## Test setup and changes
 
@@ -92,4 +92,3 @@ Locate and inspect the per-game **Custom Emulator (With Code)** settings for `GB
 
 - [LaunchBox Android getting started](https://feedback.launchbox-app.com/articles/1026472-getting-started-with-launchbox-for-android)
 - [LaunchBox Custom Emulator (With Code)](https://feedback.launchbox-app.com/en/help/articles/7096169-custom-emulator-with-code)
-- [Earlier LaunchBox → GameNative investigation](launchbox-gamenative-investigation-20261101.md)

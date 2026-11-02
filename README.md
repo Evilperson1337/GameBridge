@@ -1,59 +1,74 @@
 # GameBridge
 
-GameBridge is a small Android app that takes a Shortcut chosen in LaunchBox and dispatches it to the right Target App (GameNative first). LaunchBox calls it through its Custom Emulator (With Code) feature. See `GLOSSARY.md` for terms and `docs/adr/` for decisions.
+GameBridge lets LaunchBox for Android start your GameNative games. Pick a game in LaunchBox and GameBridge hands it to GameNative. It has no menus of its own, asks for no permissions and does nothing in the background.
 
-## What it does
+**Download:** the latest APK is on the [Releases page](../../releases/latest). Releases are pre-releases until every Storefront below has been checked on a device.
 
-LaunchBox's Custom Emulator (With Code) starts GameBridge with a Shortcut as a `content://` URI. GameBridge reads and validates the Shortcut, then dispatches it to GameNative with an explicit intent (action `app.gamenative.LAUNCH_GAME`, `app_id`, `game_source`) and closes. Nothing is shown on a successful Dispatch. On failure, a dialog shows the Shortcut's filename and a reason, with one Close button. GameBridge requests no permissions.
+## Set up
 
-Setup in LaunchBox (exact command, backup and undo): `docs/launchbox-setup.md`.
+1. Install the APK, then open GameBridge once from the app drawer.
+2. The setup screen shows the **Setup command** for the build you installed, with a Copy button. It also says whether GameNative is installed.
+3. In LaunchBox, set the Windows platform's default emulator to Custom Emulator (With Code), paste the Setup command, and clear any per-game emulator override.
 
-## Build
+Every game on the Windows platform then goes through GameBridge, not only the GameNative ones. Write down or screenshot your current emulator settings first. GameBridge never edits LaunchBox, so to undo the setup you remove the Custom Emulator.
 
-Requirements: JDK 21 and the Android SDK (setup steps in `docs/device-testing.md`). Put the SDK path in `local.properties` (gitignored): `sdk.dir=/home/<you>/Android/Sdk`.
+Step-by-step guide, backup and undo: [docs/launchbox-setup.md](docs/launchbox-setup.md).
 
-```sh
-./gradlew check                 # ktlint, Android Lint, JVM tests
-./gradlew :app:assembleDebug    # app/build/outputs/apk/debug/app-debug.apk
-./gradlew :app:pixel2api33DebugAndroidTest   # instrumentation tests on a headless Android 13 emulator
-```
+### Which files to import
 
-Modules: `:core` (pure Kotlin, Shortcut interpretation) and `:app` (Android integration).
+Import the Shortcut files that GameNative exports (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) into LaunchBox as the games' files. GameNative creates them when you export your library. On the device used for testing they sit in `Games/pc`. A Shortcut is a tiny text file holding GameNative's number for the game.
 
-## Deploy
+## Support
 
-```sh
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-```
+A Storefront is the GameNative library a game belongs to. All five are enabled. Only the first two have been seen working on a device.
 
-The debug build is `com.allourmedia.gamebridge.debug` and can sit beside a release build. Device procedure and rollback: `docs/device-testing.md`.
+| Storefront | Status | Evidence |
+|---|---|---|
+| GOG | Verified | 2026-11-01: GameNative started a GOG game (Akalabeth) from the same request GameBridge sends. Not rechecked through LaunchBox since. |
+| Epic | Verified | 2026-11-02: an Epic Shortcut (ABZU) picked in LaunchBox started in GameNative on the test device. |
+| Steam | Enabled, untested | No device observation yet. |
+| Amazon | Enabled, untested | No device observation yet. Test files were made to match GameNative's described format, not real exports. |
+| Custom | Enabled, untested | No device observation yet. |
+
+A row moves to verified only when a device observation of that Storefront (the game starting from a LaunchBox pick) is recorded in [docs/investigation-log.md](docs/investigation-log.md). Remote (Artemis) Shortcuts, `.art`, are not supported yet.
+
+## Requirements
+
+- Android 11 (API 30) or newer. Only Android 13 has been tried.
+- LaunchBox for Android 1.23 and GameNative 1.3.0 (the standard `app.gamenative` build, not the "gold" variant). These are the only versions tested, on an AYN Odin 2 Portal. Other versions may work; that is not known.
+
+## Known behaviour
+
+- A successful hand-off to GameNative (a Dispatch) is not proof the game started (a Launch). GameBridge cannot see the game start.
+- After exiting an Epic game, GameNative was observed showing a blank screen. This was seen once and has not been diagnosed. GameNative was still the front app, and GameBridge was not running.
+- GameBridge never falls back to another app or to a deep link. If it cannot hand over, it says why.
 
 ## Troubleshooting
 
-GameBridge shows a dialog titled "GameBridge" with the Shortcut's filename (when known), then one reason, and a single Close button. The reasons below are the exact strings in `BridgeFailure.kt`. Close (or Back) returns you to LaunchBox; retry by picking the game again.
+When something is wrong, GameBridge shows a dialog with the Shortcut's filename (when known), one reason and a Close button. Close or Back returns you to LaunchBox; pick the game again to retry. The reasons are listed exactly as shown.
 
-| Dialog reason | What it means and what to do |
+| Dialog reason | What to do |
 |---|---|
-| GameBridge is meant to be started from LaunchBox. Pick a game there. | LaunchBox started GameBridge without a Shortcut (the app drawer opens the setup screen instead). Check the command in `docs/launchbox-setup.md` includes `-d {file.uri}`. |
-| GameBridge didn't recognise this request. Check the command set up in LaunchBox. | The emulator command's `-a` is not `com.allourmedia.gamebridge.action.DISPATCH`. Fix the command. |
-| The Shortcut wasn't shared in a form GameBridge accepts. | LaunchBox passed something other than `content://` (for example a file path). Use `-d {file.uri}`, not `{file.path}`. |
-| The Shortcut couldn't be read. | Permission missing or revoked, file gone, or a provider error. Check the game's file still exists in LaunchBox and pick it again. |
-| Not a supported Shortcut. | The extension is not a known Shortcut extension (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`, `.art`). Check which files the platform hands to the emulator. |
-| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present: every Storefront row is enabled, so Steam, Epic, Amazon and Custom Shortcuts are dispatched. The dialog appears only if a row is marked unverified in the Storefront table. |
-| Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. Artemis is a later phase. |
-| This Shortcut's contents aren't valid. | The contents are not exactly one positive whole number in the signed 32-bit range: empty, text, several numbers, zero (GameNative writes `0` for some GOG games), negative or too large a number. |
-| This Shortcut is too large to be a real one. | The file is over 4 KiB. It is not read in full. Check the platform is handing over the Shortcut, not another file. |
-| GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases | Install the standard GameNative build from its GitHub releases page. |
-| GameNative refused the request. | Android refused the Dispatch with a security error. Make sure the standard GameNative build (`app.gamenative`) is installed and up to date. |
+| GameBridge is meant to be started from LaunchBox. Pick a game there. | LaunchBox started GameBridge without a Shortcut. Make sure the Setup command ends with `-d {file.uri}`. |
+| LaunchBox sent GameBridge an unexpected request. In the emulator command, use the action com.allourmedia.gamebridge.action.DISPATCH. Copy the command from GameBridge's setup screen. | The command's `-a` is wrong. Copy the Setup command again from the setup screen. |
+| LaunchBox didn't pass the Shortcut as a content URI. The emulator command must end with -d {file.uri}, not {file.path}. | Replace `{file.path}` with `{file.uri}`. |
+| GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, then pick the game again. | The file is gone or LaunchBox did not share it. Check the game's file in LaunchBox. |
+| This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame). | A game on this platform has a different kind of file. |
+| Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present, because all five Storefronts are enabled. |
+| Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. |
+| This Shortcut's contents aren't valid. | The file must hold exactly one positive whole number that fits in a signed 32-bit integer. GameNative writes `0` for some GOG games, which is rejected. |
+| This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, not another file. | The file is over 4 KiB. |
+| GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases | Install the standard GameNative build. |
+| GameNative refused the request. | Android refused the hand-off. Make sure the standard GameNative build is installed and up to date. |
 
-## Limitations
+## Keep your signing key
 
-- GOG, Steam, Epic, Amazon and Custom Shortcuts are all dispatched, but only GOG has been checked on a device. The other four rows were enabled for device testing and are not yet verified end to end (see `docs/investigation-log.md`); a Dispatch is not proof the game starts. Remote (Artemis) Shortcuts are recognised and reported as unsupported.
-- Only the standard GameNative build (`app.gamenative`) is targeted, not the "gold" variant (`app.gamenative.gold`).
-- A successful Dispatch is not proof of a Launch. GameBridge cannot observe the game starting; only a person or logcat on the device can confirm it.
-- The full LaunchBox, GameBridge, GameNative path has not yet been run on the device (Gate G1).
-- There is no fallback to another Target App or to a deep link.
+Releases are signed by the maintainer's key. If that key is lost, a new key cannot update the installed app: players would have to uninstall GameBridge (and set it up again) before installing the next release. The key is kept offline and never committed.
 
-## Enabling another Storefront
+## For developers
 
-Each Storefront is one row in the Storefront table in `:core`. Enabling one means marking its row verified, adding a fixture Shortcut, and a device check that a real Dispatch reaches the game's Ready screen. No new parsing or dispatch code is needed.
+Build, tests, emulator and device testing: [docs/development.md](docs/development.md). Terms are in [GLOSSARY.md](GLOSSARY.md) and decisions in [docs/adr/](docs/adr/).
+
+## Licence
+
+MIT, see [LICENSE](LICENSE).

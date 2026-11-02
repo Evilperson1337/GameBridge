@@ -176,3 +176,28 @@ Read-only `adb pull` of `/storage/emulated/0/LaunchBox/Data/Platforms/Windows.xm
 
 - The LaunchBox screens and field names used to set this up. The XML shows the result, not the path taken.
 - The user reports removing the per-game `GameNative` overrides in LaunchBox after testing, to use the platform-wide setup. The screens used are not recorded, so the guide's "clear per-game override" step is assumed, not verified.
+
+## 2026-11-02: Distribution and setup phase; Gate G1 closed
+
+Phase "Distribution and setup" (spec: `.scratch/distribution-and-setup/spec.md`). This entry covers the docs ticket (README, `docs/development.md`, `LICENSE`) and closes Gate G1.
+
+### Gate G1: closed
+
+Closed on two observations, both recorded above: the Epic Dispatch from LaunchBox that started the game in GameNative on the Odin, and the `Windows.xml` readback showing the platform-wide Custom Emulator (With Code) setup with the debug Setup command byte for byte. The first G1 attempt failed because of a stale platform command (see the earlier entry); the platform-wide setup is what works.
+
+### Verified (by reading the repo for this ticket; nothing run on a device)
+
+- The README troubleshooting reasons match `FailureCategory` in `BridgeFailure.kt` as of this commit. Steam, Epic, Amazon and Custom are enabled in the Storefront table. `minSdk` is 30 (`app/build.gradle.kts`).
+- Tested versions stated in the README (LaunchBox 1.23, GameNative 1.3.0, Android 13 on an AYN Odin 2 Portal) come from the handoff document and the G1 report.
+- The support table's GOG row rests on the handoff's `am start` of GameNative reaching Akalabeth's Ready screen (2026-11-01); the Epic row on the user's observation above (2026-11-02).
+
+### Assumed / not verified (remaining doubts)
+
+- GOG has not been rechecked through LaunchBox with GameBridge; its "verified" label rests on the direct GameNative request.
+- The blank screen after an Epic exit is described in the README as observed once and undiagnosed. The GOG exit path was not compared.
+- Steam, Amazon and Custom have no device observation. Synthetic `.amazon` and `.pcgame` files are unchecked against real exports.
+- The LaunchBox screens used to set up the platform are not recorded; the guide's steps are written, not walked.
+- Android versions other than 13, and LaunchBox and GameNative versions other than 1.23 and 1.3.0, are untested.
+- The README download link is the relative `../../releases/latest`; not checked on the hosting site (no remote is configured here). No release exists yet.
+- The signed release build and the keystore (tickets 03 and 04) were not seen working by this ticket.
+- The G1 report's link to an investigation document missing from `docs/` was removed. The report also contains a USB ADB serial, which AGENTS.md says not to commit; left for the maintainer to redact.
