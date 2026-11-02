@@ -62,7 +62,10 @@ private const val BYTE_ORDER_MARK = "﻿"
  * True for a Remote Shortcut (`.art`), judged by display name alone. GameBridge never reads or parses a Remote
  * Shortcut: Artemis owns the format, so these never reach [interpretShortcut].
  */
-fun isRemoteShortcut(displayName: String): Boolean = displayName.substringAfterLast('.', "").lowercase() == REMOTE_EXTENSION
+fun isRemoteShortcut(displayName: String): Boolean = shortcutExtension(displayName) == REMOTE_EXTENSION
+
+/** The lowercased text after the last dot of a display name, or empty when there is no dot. */
+fun shortcutExtension(displayName: String): String = displayName.substringAfterLast('.', "").lowercase()
 
 /**
  * Interprets a Local Shortcut from its display name (for the extension) and its raw bytes, which the caller has already
@@ -73,7 +76,7 @@ fun interpretShortcut(
     bytes: ByteArray,
     storefronts: List<Storefront> = Storefront.all,
 ): ShortcutResult {
-    val extension = displayName.substringAfterLast('.', "").lowercase()
+    val extension = shortcutExtension(displayName)
     val storefront =
         storefronts.firstOrNull { it.extension == extension }
             ?: return ShortcutResult.Rejected(Rejection.UnsupportedType)

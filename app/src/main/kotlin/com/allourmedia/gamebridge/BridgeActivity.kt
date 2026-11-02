@@ -107,10 +107,9 @@ open class BridgeActivity : Activity() {
         debugLog("remote scheme=${uri.scheme} dispatch=$outcome")
         val category =
             when (outcome) {
-                DispatchResult.Dispatched -> return null
-                DispatchResult.ArtemisNotInstalled -> FailureCategory.ArtemisNotInstalled
-                DispatchResult.ArtemisRefused -> FailureCategory.ArtemisRefused
-                else -> error("unexpected Artemis outcome $outcome")
+                ArtemisDispatchResult.Dispatched -> return null
+                ArtemisDispatchResult.NotInstalled -> FailureCategory.ArtemisNotInstalled
+                ArtemisDispatchResult.Refused -> FailureCategory.ArtemisRefused
             }
         return fail(BridgeFailure(category, fileName))
     }
@@ -124,10 +123,9 @@ open class BridgeActivity : Activity() {
         debugLog("storefront=${request.storefront} storeId=${request.storeId} scheme=$scheme dispatch=$outcome")
         val category =
             when (outcome) {
-                DispatchResult.Dispatched -> return null
-                DispatchResult.GameNativeNotInstalled -> FailureCategory.GameNativeNotInstalled
-                DispatchResult.GameNativeRefused -> FailureCategory.GameNativeRefused
-                else -> error("unexpected GameNative outcome $outcome")
+                GameNativeDispatchResult.Dispatched -> return null
+                GameNativeDispatchResult.NotInstalled -> FailureCategory.GameNativeNotInstalled
+                GameNativeDispatchResult.Refused -> FailureCategory.GameNativeRefused
             }
         return fail(BridgeFailure(category, fileName))
     }
