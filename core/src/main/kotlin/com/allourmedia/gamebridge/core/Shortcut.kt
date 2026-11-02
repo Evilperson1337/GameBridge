@@ -37,9 +37,6 @@ sealed interface Rejection {
         val storefront: Storefront,
     ) : Rejection
 
-    /** A Remote Shortcut (`.art`). */
-    data object RemoteUnsupported : Rejection
-
     data object InvalidContents : Rejection
 
     data object TooLarge : Rejection
@@ -62,7 +59,13 @@ private const val REMOTE_EXTENSION = "art"
 private const val BYTE_ORDER_MARK = "﻿"
 
 /**
- * Interprets a Shortcut from its display name (for the extension) and its raw bytes, which the caller has already
+ * True for a Remote Shortcut (`.art`), judged by display name alone. GameBridge never reads or parses a Remote
+ * Shortcut: Artemis owns the format, so these never reach [interpretShortcut].
+ */
+fun isRemoteShortcut(displayName: String): Boolean = displayName.substringAfterLast('.', "").lowercase() == REMOTE_EXTENSION
+
+/**
+ * Interprets a Local Shortcut from its display name (for the extension) and its raw bytes, which the caller has already
  * capped at [MAX_LOCAL_SHORTCUT_BYTES] plus one.
  */
 fun interpretShortcut(
@@ -71,7 +74,6 @@ fun interpretShortcut(
     storefronts: List<Storefront> = Storefront.all,
 ): ShortcutResult {
     val extension = displayName.substringAfterLast('.', "").lowercase()
-    if (extension == REMOTE_EXTENSION) return ShortcutResult.Rejected(Rejection.RemoteUnsupported)
     val storefront =
         storefronts.firstOrNull { it.extension == extension }
             ?: return ShortcutResult.Rejected(Rejection.UnsupportedType)

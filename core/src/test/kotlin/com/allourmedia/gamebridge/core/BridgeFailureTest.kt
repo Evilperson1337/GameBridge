@@ -10,7 +10,6 @@ class BridgeFailureTest {
             mapOf(
                 Rejection.UnsupportedType to FailureCategory.UnsupportedType,
                 Rejection.StorefrontNotVerified(Storefront.Steam) to FailureCategory.StorefrontNotVerified,
-                Rejection.RemoteUnsupported to FailureCategory.RemoteUnsupported,
                 Rejection.InvalidContents to FailureCategory.InvalidContents,
                 Rejection.TooLarge to FailureCategory.TooLarge,
             )
@@ -72,7 +71,6 @@ class BridgeFailureTest {
                     "This isn't a Shortcut type GameBridge supports. Import the Shortcut file exported by GameNative " +
                     "(.gog, .steam, .epic, .amazon, .pcgame).",
                 FailureCategory.StorefrontNotVerified to "This Storefront isn't verified yet.",
-                FailureCategory.RemoteUnsupported to "Remote Shortcuts aren't supported yet.",
                 FailureCategory.InvalidContents to "This Shortcut's contents aren't valid.",
                 FailureCategory.TooLarge to
                     "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
@@ -80,6 +78,8 @@ class BridgeFailureTest {
                 FailureCategory.GameNativeNotInstalled to
                     "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
                 FailureCategory.GameNativeRefused to "GameNative refused the request.",
+                FailureCategory.ArtemisNotInstalled to "Artemis is not installed. Install Artemis to play Remote Shortcuts (.art).",
+                FailureCategory.ArtemisRefused to "Artemis refused the request.",
             )
         assertEquals(FailureCategory.entries.toSet(), expected.keys)
         for ((category, reason) in expected) assertEquals(reason, category.reason)

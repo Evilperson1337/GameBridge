@@ -20,6 +20,17 @@ enum class ReadFailureKind {
     Contents,
 }
 
+sealed interface NameResult {
+    data class Named(
+        val displayName: String,
+    ) : NameResult
+
+    /** [errorClass] is the simple class name of the exception thrown, if any (never its message). */
+    data class Unreadable(
+        val errorClass: String?,
+    ) : NameResult
+}
+
 sealed interface ReadResult {
     data class Read(
         val file: ShortcutFile,
@@ -40,17 +51,24 @@ sealed interface ReadResult {
 class ShortcutReader(
     private val resolver: ContentResolver,
 ) {
+    /** Queries the display name only; the Shortcut's contents are not opened. */
+    fun readName(uri: Uri): NameResult =
+        try {
+            resolver
+                .query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+                ?.use { if (it.moveToFirst()) it.getString(0) else null }
+                ?.let { NameResult.Named(it) } ?: NameResult.Unreadable(null)
+        } catch (e: Exception) {
+            NameResult.Unreadable(e.javaClass.simpleName)
+        }
+
     fun read(uri: Uri): ReadResult {
         var errorClass: String? = null
         val name =
-            try {
-                resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
-                    if (it.moveToFirst()) it.getString(0) else null
-                }
-            } catch (e: Exception) {
-                errorClass = e.javaClass.simpleName
-                null
-            } ?: return ReadResult.Unreadable(null, ReadFailureKind.Name, errorClass)
+            when (val named = readName(uri)) {
+                is NameResult.Named -> named.displayName
+                is NameResult.Unreadable -> return ReadResult.Unreadable(null, ReadFailureKind.Name, named.errorClass)
+            }
         val bytes =
             try {
                 resolver.openInputStream(uri)?.use { it.readCapped(MAX_BYTES + 1) }

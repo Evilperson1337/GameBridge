@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -16,6 +17,7 @@ import com.allourmedia.gamebridge.core.IntentTriage
 import com.allourmedia.gamebridge.core.ShortcutResult
 import com.allourmedia.gamebridge.core.Storefront
 import com.allourmedia.gamebridge.core.interpretShortcut
+import com.allourmedia.gamebridge.core.isRemoteShortcut
 import com.allourmedia.gamebridge.core.toFailure
 import com.allourmedia.gamebridge.core.triageIntent
 
@@ -62,6 +64,19 @@ open class BridgeActivity : Activity() {
             is IntentTriage.Failed -> return fail(BridgeFailure(triage.category))
             IntentTriage.Accepted -> Unit
         }
+        val name =
+            when (val named = ShortcutReader(contentResolver).readName(checkNotNull(uri))) {
+                is NameResult.Unreadable -> {
+                    debugLog("unreadable kind=${ReadFailureKind.Name} error=${named.errorClass}")
+                    return fail(BridgeFailure(FailureCategory.Unreadable))
+                }
+
+                is NameResult.Named -> {
+                    named.displayName
+                }
+            }
+        // A Remote Shortcut is handed to Artemis unread: Artemis owns the .art format.
+        if (isRemoteShortcut(name)) return dispatchRemote(uri, name)
         val file =
             when (val read = ShortcutReader(contentResolver).read(checkNotNull(uri))) {
                 is ReadResult.Unreadable -> {
@@ -84,6 +99,22 @@ open class BridgeActivity : Activity() {
         }
     }
 
+    private fun dispatchRemote(
+        uri: Uri,
+        fileName: String,
+    ): BridgeFailure? {
+        val outcome = ArtemisDispatcher(dispatchContext()).dispatch(uri)
+        debugLog("remote scheme=${uri.scheme} dispatch=$outcome")
+        val category =
+            when (outcome) {
+                DispatchResult.Dispatched -> return null
+                DispatchResult.ArtemisNotInstalled -> FailureCategory.ArtemisNotInstalled
+                DispatchResult.ArtemisRefused -> FailureCategory.ArtemisRefused
+                else -> error("unexpected Artemis outcome $outcome")
+            }
+        return fail(BridgeFailure(category, fileName))
+    }
+
     private fun dispatch(
         request: DispatchRequest,
         fileName: String,
@@ -96,6 +127,7 @@ open class BridgeActivity : Activity() {
                 DispatchResult.Dispatched -> return null
                 DispatchResult.GameNativeNotInstalled -> FailureCategory.GameNativeNotInstalled
                 DispatchResult.GameNativeRefused -> FailureCategory.GameNativeRefused
+                else -> error("unexpected GameNative outcome $outcome")
             }
         return fail(BridgeFailure(category, fileName))
     }
