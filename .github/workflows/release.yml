@@ -21,6 +21,14 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
+      - name: Check tag matches versionName
+        run: |
+          NAME="$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts | head -1)"
+          if [ "v$NAME" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match versionName v$NAME in app/build.gradle.kts."
+            exit 1
+          fi
+
       - name: Check signing secrets are present
         env:
           KEYSTORE_BASE64: ${{ secrets.GAMEBRIDGE_KEYSTORE_BASE64 }}

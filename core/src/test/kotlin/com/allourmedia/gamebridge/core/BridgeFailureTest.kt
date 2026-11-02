@@ -57,7 +57,7 @@ class BridgeFailureTest {
     fun everyReasonIsPinnedAndTellsThePlayerWhatToChange() {
         val expected =
             mapOf(
-                FailureCategory.NoShortcut to "GameBridge is meant to be started from LaunchBox. Pick a game there.",
+                FailureCategory.NoShortcut to "LaunchBox didn't pass a Shortcut. The emulator command must end with -d {file.uri}.",
                 FailureCategory.WrongAction to
                     "LaunchBox sent GameBridge an unexpected request. In the emulator command, " +
                     "use the action com.allourmedia.gamebridge.action.DISPATCH. " +
@@ -69,8 +69,8 @@ class BridgeFailureTest {
                     "GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, " +
                     "then pick the game again.",
                 FailureCategory.UnsupportedType to
-                    "This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used " +
-                    "for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame).",
+                    "This isn't a Shortcut type GameBridge supports. Import the Shortcut file exported by GameNative " +
+                    "(.gog, .steam, .epic, .amazon, .pcgame).",
                 FailureCategory.StorefrontNotVerified to "This Storefront isn't verified yet.",
                 FailureCategory.RemoteUnsupported to "Remote Shortcuts aren't supported yet.",
                 FailureCategory.InvalidContents to "This Shortcut's contents aren't valid.",

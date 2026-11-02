@@ -49,11 +49,11 @@ When something is wrong, GameBridge shows a dialog with the Shortcut's filename 
 
 | Dialog reason | What to do |
 |---|---|
-| GameBridge is meant to be started from LaunchBox. Pick a game there. | LaunchBox started GameBridge without a Shortcut. Make sure the Setup command ends with `-d {file.uri}`. |
+| LaunchBox didn't pass a Shortcut. The emulator command must end with -d {file.uri}. | LaunchBox started GameBridge without a Shortcut. Make sure the Setup command ends with `-d {file.uri}`. |
 | LaunchBox sent GameBridge an unexpected request. In the emulator command, use the action com.allourmedia.gamebridge.action.DISPATCH. Copy the command from GameBridge's setup screen. | The command's `-a` is wrong. Copy the Setup command again from the setup screen. |
 | LaunchBox didn't pass the Shortcut as a content URI. The emulator command must end with -d {file.uri}, not {file.path}. | Replace `{file.path}` with `{file.uri}`. |
 | GameBridge couldn't read the Shortcut. Check the game's Shortcut file still exists in LaunchBox, then pick the game again. | The file is gone or LaunchBox did not share it. Check the game's file in LaunchBox. |
-| This isn't a Shortcut GameBridge knows. Check that the platform's default emulator is only used for Shortcut files (.gog, .steam, .epic, .amazon, .pcgame). | A game on this platform has a different kind of file. |
+| This isn't a Shortcut type GameBridge supports. Import the Shortcut file exported by GameNative (.gog, .steam, .epic, .amazon, .pcgame). | A game on this platform has a different kind of file. Import the Shortcut file GameNative exported. |
 | Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present, because all five Storefronts are enabled. |
 | Remote Shortcuts aren't supported yet. | `.art` (Artemis) Shortcuts are recognised only. |
 | This Shortcut's contents aren't valid. | The file must hold exactly one positive whole number that fits in a signed 32-bit integer. GameNative writes `0` for some GOG games, which is rejected. |
