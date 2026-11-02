@@ -215,3 +215,17 @@ The debug build (`com.allourmedia.gamebridge.debug`, from the `integration/distr
 
 - That the pasted text works in LaunchBox's Custom Emulator (With Code) field was not tried in this step.
 - The release build's Setup command was not seen on a device.
+
+## 2026-11-02: Stale setup screen after closing a game
+
+### Verified (observed on the Odin)
+
+- With the setup screen left open, a Dispatch from LaunchBox started `BridgeActivity` with `NEW_TASK` (`flg=0x10000001`). `dumpsys activity` afterwards showed GameBridge's task holding only `SetupActivity`, with LaunchBox in a separate task behind it. Closing the game then showed the setup screen instead of LaunchBox.
+- A GOG Dispatch from LaunchBox with the debug build logged `storefront=GOG ... dispatch=Dispatched` (a Dispatch, not a Launch). The user reports it started and the game closed normally.
+- After `SetupActivity` was made `noHistory`, the user reports closing a game returns to LaunchBox ("appears to be working"). Only the one scenario was tried.
+
+### Assumed / not verified
+
+- That the surviving GameBridge task caused the stale screen is inferred from the task dump and the fix working, not from a controlled comparison.
+- The release build, other Storefronts and an exit from an Epic game were not retried.
+- An earlier pick at 13:17 logged `failure=RemoteUnsupported`; which Shortcut it was is not known.
