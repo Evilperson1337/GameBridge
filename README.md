@@ -20,7 +20,7 @@ Import the Shortcut files that GameNative exports (`.gog`, `.steam`, `.epic`, `.
 
 ## Support
 
-A Storefront is the GameNative library a game belongs to. All five are enabled. Only the first two have been seen working on a device.
+A Storefront is the GameNative library a game belongs to. All five are enabled. Only the first two have been seen working on a device. Remote Shortcuts (`.art`) are a separate row: they go to Artemis, not GameNative.
 
 | Storefront | Status | Evidence |
 |---|---|---|
@@ -29,8 +29,11 @@ A Storefront is the GameNative library a game belongs to. All five are enabled. 
 | Steam | Enabled, untested | No device observation yet. |
 | Amazon | Enabled, untested | No device observation yet. Test files were made to match GameNative's described format, not real exports. |
 | Custom | Enabled, untested | No device observation yet. |
+| Remote Shortcuts (`.art`) | Enabled, untested | Artemis (`com.limelight.noir`, 20.2.6 observed) accepted a `file://` VIEW of a `.art` file sent from adb and opened its game screen (2026-11-02). A Dispatch from LaunchBox through GameBridge has not been observed. |
 
-A row moves to verified only when a device observation of that Storefront (the game starting from a LaunchBox pick) is recorded in [docs/investigation-log.md](docs/investigation-log.md). Remote (Artemis) Shortcuts, `.art`, are enabled but untested on a device: GameBridge hands the file to Artemis unread.
+A row moves to verified only when a device observation of that Storefront (the game starting from a LaunchBox pick) is recorded in [docs/investigation-log.md](docs/investigation-log.md). The Remote Shortcuts row moves to verified only when a game is picked in LaunchBox, GameBridge dispatches the `.art` file to Artemis, and the stream starting for the right game is recorded in the log; it is not enough that the Dispatch succeeds.
+
+**Target App for `.art`:** Artemis (`com.limelight.noir`, seen on 20.2.6 only). GameBridge does not read `.art` files; it passes the `content://` URI to Artemis with a read grant, and Artemis reads the file. Verified only on the emulator with Artemis stubbed. Not verified: that real Artemis accepts the grant from GameBridge, that a Dispatch starts a stream (a Dispatch is not a Launch), and that the package is Artemis rather than another Moonlight fork (the file header names Artemis).
 
 ## Requirements
 
