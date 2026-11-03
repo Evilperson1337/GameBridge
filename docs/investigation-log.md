@@ -412,3 +412,21 @@ The merged debug build was installed on the Odin with `adb install -r` (standing
 - That the APK's signing certificate is the maintainer's key (it signed with the keystore the secrets hold; the certificate fingerprint was not compared with the local keystore).
 - Installing the release APK on the Odin, an update over it keeping the setup, and a Dispatch from LaunchBox through the release build. Not done yet.
 - Signature schemes other than v2 (not needed for the minimum Android version, 11).
+
+## 2026-11-03: Release build installed on the Odin; Dispatch from LaunchBox
+
+With the maintainer's go-ahead the signed release APK from the v0.1.0 pre-release (`com.allourmedia.gamebridge`) was installed beside the debug build with `adb install`. The maintainer changed the Windows platform's Setup command in LaunchBox by hand (copied from the release build's setup screen) and picked a game. The agent changed no LaunchBox configuration.
+
+### Verified (observed on the device)
+
+- The release APK installs and reports versionName 0.1.0, versionCode 1, signed with APK Signature Scheme v2.
+- The release build's setup screen shows the release Setup command (`-n com.allourmedia.gamebridge/com.allourmedia.gamebridge.BridgeActivity -a com.allourmedia.gamebridge.action.DISPATCH -d {file.uri}`) and three Installed tiles.
+- Logcat: LaunchBox started `com.allourmedia.gamebridge/.BridgeActivity` with the DISPATCH action on a `content://` URI, and the release `BridgeActivity` then started GameNative with `app.gamenative.LAUNCH_GAME` (a Dispatch). GameNative's `MainActivity` was displayed about 0.5 s later and was the top activity.
+- The maintainer reports the game appeared to launch (a Launch, reported by a person).
+
+### Assumed / not verified
+
+- Which game and Storefront was picked: the release build writes no Dispatch log line by design, so logcat does not name it.
+- An update installed over this release keeping the setup (only one release exists).
+- The `.art` path through the release build, and the exit behaviour (no stale setup screen) with the release build.
+- That the signing certificate matches the maintainer's local keystore (fingerprint not compared).
