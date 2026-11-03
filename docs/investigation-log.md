@@ -397,3 +397,18 @@ The merged debug build was installed on the Odin with `adb install -r` (standing
 ### Assumed / not verified
 
 - Portrait in light mode, and the not-installed tile on the device.
+
+## 2026-11-03: First tag build, v0.1.0 pre-release
+
+### Verified (observed)
+
+- The first tag build failed in `android-actions/setup-android@v3` ("Failed to find package 'tools'"), before any secret was read, and published nothing. A workflow change (`packages: ""`) fixed it and the tag was recreated on the fixed commit.
+- The second run of the `Release` workflow succeeded: tag/versionName check, secrets check, keystore decode, signed build, `apksigner verify`, staging, publish, and keystore removal all passed.
+- GitHub shows release `v0.1.0` as a pre-release (not a draft) with one asset, `GameBridge-v0.1.0.apk` (2,363,726 bytes), and notes linking to the README support table.
+- Downloaded from the release, the APK verifies with `apksigner` (APK Signature Scheme v2 only; v1, v3 and v4 were not used).
+
+### Assumed / not verified
+
+- That the APK's signing certificate is the maintainer's key (it signed with the keystore the secrets hold; the certificate fingerprint was not compared with the local keystore).
+- Installing the release APK on the Odin, an update over it keeping the setup, and a Dispatch from LaunchBox through the release build. Not done yet.
+- Signature schemes other than v2 (not needed for the minimum Android version, 11).
