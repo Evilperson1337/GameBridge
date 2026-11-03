@@ -14,6 +14,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.Button
@@ -144,6 +145,7 @@ class SetupActivity : Activity() {
                 minHeight = dp(MIN_TARGET_DP)
                 minimumHeight = dp(MIN_TARGET_DP)
                 isFocusableInTouchMode = true
+                accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
                 background = copyBackground()
                 layoutParams =
                     LinearLayout.LayoutParams(MATCH_PARENT, dp(MIN_TARGET_DP)).apply {
@@ -161,18 +163,34 @@ class SetupActivity : Activity() {
         return copyButton
     }
 
-    /** Flat accent fill; focus adds a 2dp ink ring so it is visible on both themes. */
+    /** Flat accent fill; focus adds a 2dp ink ring, pressed darkens the fill, so both show on either theme. */
     private fun copyBackground(): StateListDrawable {
-        fun shape(ring: Boolean) =
-            GradientDrawable().apply {
-                setColor(getColor(R.color.gb_accent))
-                cornerRadius = dp(8).toFloat()
-                if (ring) setStroke(dp(2), getColor(R.color.gb_ink))
-            }
-        return StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_focused), shape(ring = true))
-            addState(intArrayOf(), shape(ring = false))
+        fun shape(
+            ring: Boolean,
+            pressed: Boolean,
+        ) = GradientDrawable().apply {
+            val accent = getColor(R.color.gb_accent)
+            setColor(if (pressed) blend(accent, getColor(R.color.gb_ink)) else accent)
+            cornerRadius = dp(8).toFloat()
+            if (ring) setStroke(dp(2), getColor(R.color.gb_ink))
         }
+        return StateListDrawable().apply {
+            addState(intArrayOf(android.R.attr.state_pressed), shape(ring = false, pressed = true))
+            addState(intArrayOf(android.R.attr.state_focused), shape(ring = true, pressed = false))
+            addState(intArrayOf(), shape(ring = false, pressed = false))
+        }
+    }
+
+    private fun blend(
+        base: Int,
+        over: Int,
+    ): Int {
+        fun mix(shift: Int): Int {
+            val b = (base shr shift) and 0xFF
+            val o = (over shr shift) and 0xFF
+            return (b + ((o - b) * PRESSED_BLEND).toInt()) shl shift
+        }
+        return (0xFF shl 24) or mix(16) or mix(8) or mix(0)
     }
 
     private companion object {
@@ -182,6 +200,7 @@ class SetupActivity : Activity() {
         const val COPY_LABEL = "Copy"
         const val COPIED_LABEL = "Copied"
         const val COPIED_MILLIS = 2_000L
+        const val PRESSED_BLEND = 0.25f
         const val SIZE_BODY = 16f
         const val SIZE_COMMAND = 14f
     }
