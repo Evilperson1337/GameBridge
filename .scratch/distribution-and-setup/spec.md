@@ -1,6 +1,8 @@
 # Spec: Distribution and setup
 
-**Status:** ready-for-agent
+**Status:** ready-for-agent (partly done; see the ticket statuses)
+
+**Note (2026-11-03):** the setup screen described here ("GameNative: installed" and a three-line checklist) was later redesigned: readiness line, three app tiles (GameNative, Artemis, LaunchBox), three steps, Setup command and Copy. Artemis Dispatch has been added since. See `.scratch/artemis-dispatch/` and `docs/investigation-log.md`.
 
 **Source:** a grilling session on 2026-11-02 after the LaunchBox → GameBridge → GameNative path was seen working on the Odin (Epic Dispatch and play; platform-wide setup read back from `Windows.xml`, see `docs/investigation-log.md`). Vocabulary follows `GLOSSARY.md`, including the new **Setup command**.
 

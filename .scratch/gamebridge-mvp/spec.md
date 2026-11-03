@@ -1,6 +1,6 @@
 # Spec: GameBridge MVP (Phase 0 + Phase 1: GOG Dispatch)
 
-**Status:** ready-for-agent
+**Status:** implemented; Gate G1 closed in `docs/investigation-log.md`. Statements below that Artemis is unsupported or later describe this phase only; Artemis Dispatch is specified in `.scratch/artemis-dispatch/spec.md`.
 
 **Source:** `docs/overview/GameBridge_Implementation_Handoff.md` (§10 Phases 0–1), refined by a grilling session on 2026-11-01. Vocabulary follows `GLOSSARY.md`; decisions follow `docs/adr/`; toolchain facts come from `docs/research/android-toolchain-and-gamenative.md`.
 

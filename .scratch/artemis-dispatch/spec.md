@@ -1,12 +1,12 @@
 # Spec: Artemis Dispatch
 
-**Status:** ready-for-agent
+**Status:** implemented (tickets 01 to 07 resolved; see `docs/investigation-log.md` for what is verified)
 
 **Source:** a conversation on 2026-11-02 after the Odin showed Artemis (`com.limelight.noir` 20.2.6) accepting a VIEW of a `.art` file (see `docs/investigation-log.md`, entries "Artemis entry points on the Odin", ".art file format" and "VIEW of a .art file sent to Artemis from adb"). Vocabulary follows `GLOSSARY.md`. This is the first time Artemis support is in scope; the handoff's Phase 3 (discovery, matching, picker) stays out.
 
 ## Problem Statement
 
-LaunchBox games that are Remote Shortcuts (`.art` files exported by Artemis) can't be played through GameBridge. Picking one in LaunchBox reaches GameBridge, which only knows Local Shortcuts and shows a "Remote Shortcuts aren't supported yet" failure.
+LaunchBox games that are Remote Shortcuts (`.art` files exported by Artemis) can't be played through GameBridge. Picking one in LaunchBox reaches GameBridge, which, when this spec was written, only knew Local Shortcuts and showed a "Remote Shortcuts aren't supported yet" failure (historical; since replaced by the Dispatch to Artemis).
 
 ## Solution
 

@@ -1,6 +1,6 @@
 # LaunchBox setup guide
 
-This guide configures LaunchBox for Android to hand a Shortcut to GameBridge, which dispatches it to GameNative (the Target App). Terms are defined in `GLOSSARY.md`.
+This guide configures LaunchBox for Android to hand a Shortcut to GameBridge, which dispatches it to the Target App: GameNative for a Local Shortcut, Artemis for a Remote Shortcut. Terms are defined in `GLOSSARY.md`.
 
 ## How to read this guide
 
@@ -25,7 +25,7 @@ For a verified file-level backup, see "Advanced: file backup" at the end.
 
 ## 2. Get the Setup command
 
-Open GameBridge from the app drawer. Its setup screen shows the exact Setup command for the build you installed, with a Copy button, so you do not need to type it. It also shows whether GameNative, Artemis and LaunchBox are installed and a three-line checklist. The screen only shows and copies; it dispatches nothing.
+Open GameBridge from the app drawer. Its setup screen shows the exact Setup command for the build you installed, with a Copy button, so you do not need to type it. It also shows a readiness line and a tile for each of GameNative, Artemis and LaunchBox (icon, name, installed or not), then three steps. The screen only shows and copies; it dispatches nothing.
 
 If you cannot use the screen, the commands are below. Use the one that matches your build.
 
@@ -52,11 +52,11 @@ Notes:
 1. Set the Windows platform's default emulator to Custom Emulator (With Code). Verified as the end state (`DefaultEmulator`). Assumed: where this is done in LaunchBox. Custom Emulator (With Code) is at the top of the emulator picker in LaunchBox 1.23 per the handoff document; the other screens are not recorded. LaunchBox's own guide: https://feedback.launchbox-app.com/en/help/articles/7096169-custom-emulator-with-code
 2. Paste the Setup command into the field LaunchBox labels "launch arguments". Verified as the end state (`CustomEmulatorLaunchArguments`). Assumed: the field's label and screen.
 3. Clear any per-game emulator override on the Windows games you want to go through GameBridge, for example an old `GameNative` entry, so that the platform setting applies. Assumed: the screens used to clear it were not recorded. Verified: in the working setup the games' `EmulatorOverride` values are empty, but whether they were cleared by hand or by LaunchBox is not known.
-4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Remote Shortcuts (`.art`, made by Artemis) are imported the same way, and the same Setup command works for them. GameBridge does not read a `.art` file; it dispatches it to Artemis (`com.limelight.noir`), which must be installed. Remote Shortcuts are enabled but untested through LaunchBox (see the README support table). Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
+4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Remote Shortcuts (`.art`, made by Artemis) are imported the same way, and the same Setup command works for them. GameBridge does not read a `.art` file; it dispatches it to Artemis (`com.limelight.noir`), which must be installed. A `.art` pick from LaunchBox was seen reaching Artemis and the user reported the stream started (debug build, 2026-11-02); that the right game streamed is not verified (see the README support table). Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
 
 ## 4. Using it
 
-Pick a game. If the Dispatch succeeds GameBridge shows nothing and GameNative opens. If not, GameBridge shows a dialog with one reason and a Close button; press Close and you are back in LaunchBox. To retry, pick the game again. Only GOG and Epic have device evidence so far; Steam, Amazon and Custom are enabled and not yet verified.
+Pick a game. If the Dispatch succeeds GameBridge shows nothing and GameNative (or Artemis, for a `.art` file) opens. If not, GameBridge shows a dialog with one reason and a Close button; press Close and you are back in LaunchBox. To retry, pick the game again. Only GOG and Epic have device evidence so far; Steam, Amazon and Custom are enabled and not yet verified.
 
 The built-in GameNative entry in LaunchBox fails on these Shortcuts with "ROM file ... could not be found" (observed on the Odin, per the handoff document, cause unknown). That is why the Custom Emulator is used instead.
 
@@ -87,7 +87,7 @@ Work through these in order. They list what was seen, not proven causes.
 - Which LaunchBox screens and field names are used for any step above.
 - The release Setup command read back from a device.
 - GOG re-checked through LaunchBox with the final setup, and Steam, Amazon and Custom Storefronts.
-- Remote Shortcuts (`.art`) picked in LaunchBox and dispatched to Artemis.
+- That a Remote Shortcut (`.art`) picked in LaunchBox streams the right game, and the release build doing so.
 
 ## Advanced: file backup
 

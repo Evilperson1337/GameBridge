@@ -2,7 +2,7 @@
 
 **What to build:** Every Shortcut GameBridge receives is either dispatched or rejected with a specific, player-readable reason. The Storefront table gains its remaining rows, so every Local Shortcut GameNative exports (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) is parsed through the same convention, but only GOG is dispatched:
 - Steam, Epic, Amazon and Custom report that support isn't verified yet.
-- `.art` reports that Remote Shortcuts aren't supported yet.
+- `.art` reports that Remote Shortcuts aren't supported yet. (Historical: replaced by the Dispatch to Artemis, `.scratch/artemis-dispatch/`.)
 - Unknown extensions report "Not a supported Shortcut".
 - Malformed, out-of-range and oversized Shortcuts are refused with clear reasons.
 
