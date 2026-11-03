@@ -3,6 +3,8 @@
 <resources>
     <color name="gb_ground">#111111</color>
     <color name="gb_surface">#222222</color>
+    <color name="gb_tone">#333333</color>
+    <color name="gb_edge">#444444</color>
     <color name="gb_ink">#F2F2F2</color>
     <color name="gb_grey">#B4B4B4</color>
     <color name="gb_negative">#FF8A80</color>
