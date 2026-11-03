@@ -445,3 +445,7 @@ The debug build was uninstalled first (the maintainer's agreement and the standi
 - The first pick's file and outcome (it may be the `Cuphead (GOG).art` file; Artemis showed no stream, so a failure there is possible but unconfirmed).
 - That `Desktop.art` showed the PC desktop (the title suggests it); not confirmed.
 - Exit behaviour from the stream with the release build.
+
+### Exit from the Artemis stream, release build (2026-11-03)
+
+Verified (observed on the device): after the maintainer closed the stream with Artemis's hotkeys, the top activity was LaunchBox's `MainActivity`. `dumpsys activity` listed only a LaunchBox task and an Artemis task; there was no GameBridge task, so no setup screen was left behind. Not verified: the same exit after a GameNative game with the release build.
