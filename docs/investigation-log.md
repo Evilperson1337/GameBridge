@@ -430,3 +430,18 @@ With the maintainer's go-ahead the signed release APK from the v0.1.0 pre-releas
 - An update installed over this release keeping the setup (only one release exists).
 - The `.art` path through the release build, and the exit behaviour (no stale setup screen) with the release build.
 - That the signing certificate matches the maintainer's local keystore (fingerprint not compared).
+
+## 2026-11-03: `.art` Dispatch through the release build
+
+The debug build was uninstalled first (the maintainer's agreement and the standing approval for GameBridge's own debug build). Only the release build (`com.allourmedia.gamebridge`) was installed. The maintainer picked `.art` entries in LaunchBox; `Games/pc` holds `Cuphead (GOG).art`, `Cuphead.art` and `Desktop.art`.
+
+### Verified (observed on the device)
+
+- Pick at 13:58:27: LaunchBox started the release `BridgeActivity` (DISPATCH, `content://` URI), which sent a VIEW with the read grant to Artemis's `ShortcutTrampoline`; the trampoline was displayed. Artemis did not start `Game` after it. The maintainer then opened Artemis by hand from the launcher (13:58:38). Which file this pick used, and what Artemis showed, were not recorded.
+- Pick at 14:00:15: the same Dispatch, then Artemis started `com.limelight.Game` within 0.1 s, and `Game` was the top activity afterwards. The maintainer says this was `Desktop.art` and that it launched (a Launch, reported by a person).
+
+### Assumed / not verified
+
+- The first pick's file and outcome (it may be the `Cuphead (GOG).art` file; Artemis showed no stream, so a failure there is possible but unconfirmed).
+- That `Desktop.art` showed the PC desktop (the title suggests it); not confirmed.
+- Exit behaviour from the stream with the release build.
