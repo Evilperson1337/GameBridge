@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Setup screen palette (dark). True neutral ground, no navy. -->
+<resources>
+    <color name="gb_ground">#111111</color>
+    <color name="gb_surface">#222222</color>
+    <color name="gb_ink">#F2F2F2</color>
+    <color name="gb_grey">#B4B4B4</color>
+    <color name="gb_negative">#FF8A80</color>
+    <color name="gb_accent">#8AB4F8</color>
+    <color name="gb_on_accent">#111111</color>
+</resources>

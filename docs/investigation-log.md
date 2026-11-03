@@ -344,3 +344,16 @@ With the maintainer's approval, five temporary files were created on the Odin in
 - These were `file://` URIs from the adb shell. Bad files reached through LaunchBox's `content://` URI and GameBridge were not tried, so GameBridge's own handling of an unreadable name (`readName` failing) is covered only by the instrumented tests.
 - A well-formed file for a real host that is asleep or offline, and a real host with an unknown app UUID, were not tried.
 - The wording of the Artemis dialogs may differ in other versions (only 20.2.6 observed).
+
+## Setup screen redesign (ticket 06)
+
+### Verified
+
+- `:core` JVM tests for `readinessLine` (all installed, one missing, several missing, none installed) pass; `./gradlew check` passes.
+- Instrumented tests on the managed device (pixel2api33) pass: Copy puts exactly the Setup command on the clipboard, its label reads "Copied" and returns to "Copy" within 5 seconds, Copy holds focus when the screen opens, and every focusable or clickable view is at least 48dp tall.
+- Odin (serial <device serial>), debug build, screenshots read: the Odin was in landscape (1920x1080) when captured, in light and in dark (forced with `cmd uimode night yes`, restored to `auto`). Two columns showed (readiness and status left; steps, command block and Copy right); the command broke at spaces and after `/`; Copy shared the block's edges and showed a focus ring. Status bar text was invisible in the light theme until `windowLightStatusBar` was set; now fixed.
+
+### Assumed / not verified
+
+- Portrait (1080x1920) on the Odin was not captured: `settings put system user_rotation` and `cmd window user-rotation lock` did not change the Odin's rotation from ROTATION_90. No emulator was running, so no emulator screenshots exist. The single-column layout is covered only by the code path, not by a screenshot.
+- Colours were chosen by hand against the design rules' 4.5:1 floor; no contrast tool was run.

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Setup screen palette (light). Text pairs reach 4.5:1 on the surface they sit on. -->
+<resources>
+    <color name="gb_ground">#FFFFFF</color>
+    <color name="gb_surface">#F1F2F4</color>
+    <color name="gb_ink">#111111</color>
+    <color name="gb_grey">#5F6368</color>
+    <color name="gb_negative">#B3261E</color>
+    <color name="gb_accent">#1A56B0</color>
+    <color name="gb_on_accent">#FFFFFF</color>
+</resources>

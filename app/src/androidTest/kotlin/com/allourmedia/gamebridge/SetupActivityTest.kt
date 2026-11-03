@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.net.Uri
+import android.view.View
+import android.view.ViewGroup
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -16,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -85,6 +88,77 @@ class SetupActivityTest {
     }
 
     @Test
+    fun copyLabelReadsCopiedAfterwardsThenReturnsToCopy() {
+        launch().use { scenario ->
+            onView(withText("Copy")).perform(click())
+            onView(withText("Copied")).check(matches(isDisplayed()))
+            val deadline = System.currentTimeMillis() + 5_000
+            var label = ""
+            while (System.currentTimeMillis() < deadline) {
+                scenario.onActivity { label = findCopyButton(it)?.text?.toString().orEmpty() }
+                if (label == "Copy") break
+                Thread.sleep(100)
+            }
+            assertEquals("Copy", label)
+        }
+    }
+
+    @Test
+    fun copyHasFocusWhenTheScreenOpens() {
+        launch().use { scenario ->
+            var focused = false
+            scenario.onActivity { focused = findCopyButton(it)?.hasFocus() == true }
+            assertTrue("Copy should hold focus on open", focused)
+        }
+    }
+
+    @Test
+    fun everyInteractiveViewIsAtLeast48dpTall() {
+        launch().use { scenario ->
+            val tooSmall = mutableListOf<String>()
+            scenario.onActivity { activity ->
+                val minPx = 48 * activity.resources.displayMetrics.density
+
+                fun walk(view: View) {
+                    if ((view.isClickable || view.isFocusable) && view !is ViewGroup && view.height < minPx - 1) {
+                        tooSmall += "${view.javaClass.simpleName} ${view.height}px"
+                    }
+                    if (view is ViewGroup) for (i in 0 until view.childCount) walk(view.getChildAt(i))
+                }
+                walk(activity.findViewById<View>(android.R.id.content))
+            }
+            assertTrue("interactive views under 48dp: $tooSmall", tooSmall.isEmpty())
+        }
+    }
+
+    @Test
+    fun showsTheReadinessLineNamingWhatIsMissing() {
+        val missing =
+            listOf(
+                "GameNative" to GameNativeDispatcher.PACKAGE,
+                "Artemis" to ArtemisDispatcher.PACKAGE,
+                "LaunchBox" to LAUNCHBOX_PACKAGE,
+            ).filterNot { isPackageInstalled(context.packageManager, it.second) }.map { it.first }
+        val expected =
+            when (missing.size) {
+                0 -> "GameNative, Artemis and LaunchBox are installed"
+                1 -> "${missing[0]} is not installed"
+                2 -> "${missing[0]} and ${missing[1]} are not installed"
+                else -> "GameNative, Artemis and LaunchBox are not installed"
+            }
+        launch().use { onView(withText(expected)).check(matches(isDisplayed())) }
+    }
+
+    private fun findCopyButton(activity: android.app.Activity): android.widget.Button? {
+        fun walk(view: View): android.widget.Button? {
+            if (view is android.widget.Button) return view
+            if (view is ViewGroup) for (i in 0 until view.childCount) walk(view.getChildAt(i))?.let { return it }
+            return null
+        }
+        return walk(activity.findViewById<View>(android.R.id.content))
+    }
+
+    @Test
     fun theAppDrawerEntryIsTheSetupScreenNotTheBridgeActivity() {
         val drawer =
             Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)
@@ -106,7 +180,7 @@ class SetupActivityTest {
     fun showsTheThreeLineChecklist() {
         launch().use {
             onView(withText("1. Set the Windows platform's default emulator to Custom Emulator (With Code).")).check(matches(isDisplayed()))
-            onView(withText("2. Paste the command above.")).check(matches(isDisplayed()))
+            onView(withText("2. Paste this Setup command:")).check(matches(isDisplayed()))
             onView(withText("3. Clear any per-game emulator override.")).check(matches(isDisplayed()))
         }
     }
