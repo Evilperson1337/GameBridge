@@ -9,10 +9,11 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import com.allourmedia.gamebridge.core.appStatusLine
 import com.allourmedia.gamebridge.core.setupCommand
 
 /**
- * The app-drawer entry. Shows the Setup command for this build, a Copy button, whether GameNative is installed,
+ * The app-drawer entry. Shows the Setup command for this build, a Copy button, whether GameNative, Artemis and LaunchBox are installed,
  * and a checklist. It dispatches nothing and changes nothing.
  */
 class SetupActivity : Activity() {
@@ -50,18 +51,27 @@ class SetupActivity : Activity() {
                 }
             },
         )
-        column.addView(text(if (gameNativeInstalled()) "GameNative: installed" else "GameNative: not installed"))
+        column.addView(text(appStatusLine("GameNative", isPackageInstalled(packageManager, GameNativeDispatcher.PACKAGE))))
+        column.addView(text(appStatusLine("Artemis", isPackageInstalled(packageManager, ArtemisDispatcher.PACKAGE))))
+        column.addView(text(appStatusLine("LaunchBox", isPackageInstalled(packageManager, LAUNCHBOX_PACKAGE))))
         column.addView(text("1. Set the Windows platform's default emulator to Custom Emulator (With Code)."))
         column.addView(text("2. Paste the command above."))
         column.addView(text("3. Clear any per-game emulator override."))
         setContentView(ScrollView(this).apply { addView(column) })
     }
-
-    private fun gameNativeInstalled(): Boolean =
-        try {
-            packageManager.getPackageInfo(GameNativeDispatcher.PACKAGE, 0)
-            true
-        } catch (_: PackageManager.NameNotFoundException) {
-            false
-        }
 }
+
+/** LaunchBox's package. Only its presence is reported; GameBridge never launches it. */
+const val LAUNCHBOX_PACKAGE = "com.unbrokensoftware.launchbox"
+
+/** Whether [packageName] is installed and visible to GameBridge (see the manifest's `<queries>`). */
+fun isPackageInstalled(
+    packageManager: PackageManager,
+    packageName: String,
+): Boolean =
+    try {
+        packageManager.getPackageInfo(packageName, 0)
+        true
+    } catch (_: PackageManager.NameNotFoundException) {
+        false
+    }

@@ -4,10 +4,16 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Instrumented tests show each of the three apps reported as installed or not installed independently, including an installed case for at least one app (use a real installed package such as the test app's own or a stub package that is registered, and say how).
-- [ ] The setup screen text for GameNative is unchanged.
-- [ ] `<queries>` lists LaunchBox; no new permission, network access, service or background work; no link-out or version check.
-- [ ] The README and `docs/launchbox-setup.md` setup-screen description mention the extra lines if they describe the screen.
-- [ ] `./gradlew check` and the instrumentation task pass.
+- [x] Instrumented tests show each of the three apps reported as installed or not installed independently, including an installed case for at least one app (use a real installed package such as the test app's own or a stub package that is registered, and say how).
+- [x] The setup screen text for GameNative is unchanged.
+- [x] `<queries>` lists LaunchBox; no new permission, network access, service or background work; no link-out or version check.
+- [x] The README and `docs/launchbox-setup.md` setup-screen description mention the extra lines if they describe the screen.
+- [x] `./gradlew check` and the instrumentation task pass.
+
+## Verification notes
+
+- Criterion 1: `AppStatusTest` (JVM) covers the text for installed and not installed. `SetupActivityTest.installedCheckSeesARegisteredPackageAndNotAMissingOne` uses the test app's own registered package as the installed case and a nonexistent one as the missing case, through the same `isPackageInstalled` the screen uses. `reportsArtemisAndLaunchBoxEachByTheirOwnInstalledState` checks each line on screen. On the emulator neither Artemis nor LaunchBox is installed, so the on-screen "installed" text for those two is covered only at the helper and text-function level.
+- Criterion 2: the old inline text is now `appStatusLine("GameNative", ...)`; `AppStatusTest` pins both strings, and the existing `reportsGameNativeAbsentWhenItIsNotInstalled` still passes.
+- Criteria 3 to 5: diff reviewed (manifest adds one `<package>`; no new permission or service); README and `docs/launchbox-setup.md` updated; `./gradlew check pixel2api33DebugAndroidTest` passed (SetupActivityTest 9 run, 0 skipped).

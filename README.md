@@ -7,7 +7,7 @@ GameBridge lets LaunchBox for Android start your GameNative games. Pick a game i
 ## Set up
 
 1. Install the APK, then open GameBridge once from the app drawer.
-2. The setup screen shows the **Setup command** for the build you installed, with a Copy button. It also says whether GameNative is installed.
+2. The setup screen shows the **Setup command** for the build you installed, with a Copy button. It also says whether GameNative, Artemis and LaunchBox are installed.
 3. In LaunchBox, set the Windows platform's default emulator to Custom Emulator (With Code), paste the Setup command, and clear any per-game emulator override.
 
 Every game on the Windows platform then goes through GameBridge, not only the GameNative ones. Write down or screenshot your current emulator settings first. GameBridge never edits LaunchBox, so to undo the setup you remove the Custom Emulator.

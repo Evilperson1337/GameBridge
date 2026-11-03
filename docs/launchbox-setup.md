@@ -25,7 +25,7 @@ For a verified file-level backup, see "Advanced: file backup" at the end.
 
 ## 2. Get the Setup command
 
-Open GameBridge from the app drawer. Its setup screen shows the exact Setup command for the build you installed, with a Copy button, so you do not need to type it. It also shows whether GameNative is installed and a three-line checklist. The screen only shows and copies; it dispatches nothing.
+Open GameBridge from the app drawer. Its setup screen shows the exact Setup command for the build you installed, with a Copy button, so you do not need to type it. It also shows whether GameNative, Artemis and LaunchBox are installed and a three-line checklist. The screen only shows and copies; it dispatches nothing.
 
 If you cannot use the screen, the commands are below. Use the one that matches your build.
 
