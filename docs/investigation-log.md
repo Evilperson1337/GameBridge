@@ -449,3 +449,16 @@ The debug build was uninstalled first (the maintainer's agreement and the standi
 ### Exit from the Artemis stream, release build (2026-11-03)
 
 Verified (observed on the device): after the maintainer closed the stream with Artemis's hotkeys, the top activity was LaunchBox's `MainActivity`. `dumpsys activity` listed only a LaunchBox task and an Artemis task; there was no GameBridge task, so no setup screen was left behind. Not verified: the same exit after a GameNative game with the release build.
+
+## 2026-11-03: LaunchBox Update Games on the Windows platform
+
+Result reported by the maintainer after trying it on the Odin (the research note `docs/research/launchbox-auto-import.md` predicted Update Games might rescan the `pc` folder).
+
+### Verified (user-reported)
+
+- Long-pressing the Windows platform and choosing Update Games did not add the new Shortcut. LaunchBox said the user was not logged in to Steam.
+
+### Assumed / not verified
+
+- That Update Games on this platform only checks a Steam library; the message suggests it, nothing states it.
+- Whether it behaves differently on a platform without a Steam link. Not tried. The manual import remains the only confirmed way to add Shortcuts.
