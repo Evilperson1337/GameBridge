@@ -52,7 +52,7 @@ Notes:
 1. Set the Windows platform's default emulator to Custom Emulator (With Code). Verified as the end state (`DefaultEmulator`). Assumed: where this is done in LaunchBox. Custom Emulator (With Code) is at the top of the emulator picker in LaunchBox 1.23 per the handoff document; the other screens are not recorded. LaunchBox's own guide: https://feedback.launchbox-app.com/en/help/articles/7096169-custom-emulator-with-code
 2. Paste the Setup command into the field LaunchBox labels "launch arguments". Verified as the end state (`CustomEmulatorLaunchArguments`). Assumed: the field's label and screen.
 3. Clear any per-game emulator override on the Windows games you want to go through GameBridge, for example an old `GameNative` entry, so that the platform setting applies. Assumed: the screens used to clear it were not recorded. Verified: in the working setup the games' `EmulatorOverride` values are empty, but whether they were cleared by hand or by LaunchBox is not known.
-4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Remote Shortcuts (`.art`, made by Artemis) are imported the same way, and the same Setup command works for them. GameBridge does not read a `.art` file; it dispatches it to Artemis (`com.limelight.noir`), which must be installed. A `.art` pick from LaunchBox was seen reaching Artemis and the user reported the stream started (debug build, 2026-11-02); that the right game streamed is not verified (see the README support table). Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
+4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Remote Shortcuts (`.art`, made by Artemis) are imported the same way, and the same Setup command works for them. GameBridge does not read a `.art` file; it dispatches it to Artemis (`com.limelight.noir`), which must be installed. A `.art` pick from LaunchBox (`Desktop.art`) was seen reaching Artemis and the user reported the stream started, with the release build on 2026-11-03 and earlier with the debug build (see the README support table). One other `.art` pick did not start a stream and was not investigated. Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
 
 ## 4. Using it
 
@@ -87,7 +87,7 @@ Work through these in order. They list what was seen, not proven causes.
 - Which LaunchBox screens and field names are used for any step above.
 - The release Setup command read back from a device.
 - GOG re-checked through LaunchBox with the final setup, and Steam, Amazon and Custom Storefronts.
-- That a Remote Shortcut (`.art`) picked in LaunchBox streams the right game, and the release build doing so.
+- Why one `.art` pick in LaunchBox did not start a stream (2026-11-03), and other Artemis versions.
 
 ## Advanced: file backup
 
