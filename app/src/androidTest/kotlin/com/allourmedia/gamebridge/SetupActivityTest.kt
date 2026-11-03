@@ -68,6 +68,23 @@ class SetupActivityTest {
     }
 
     @Test
+    fun installedCheckSeesARegisteredPackageAndNotAMissingOne() {
+        // The test app's own package is registered, so it stands in for an installed app.
+        assertEquals(true, isPackageInstalled(context.packageManager, context.packageName))
+        assertEquals(false, isPackageInstalled(context.packageManager, "com.allourmedia.gamebridge.nonexistent"))
+    }
+
+    @Test
+    fun reportsArtemisAndLaunchBoxEachByTheirOwnInstalledState() {
+        // The managed emulator has neither app, so only the not-installed text is checked on screen.
+        for ((name, pkg) in listOf("Artemis" to ArtemisDispatcher.PACKAGE, "LaunchBox" to LAUNCHBOX_PACKAGE)) {
+            val installed = isPackageInstalled(context.packageManager, pkg)
+            val expected = if (installed) "$name: installed" else "$name: not installed"
+            launch().use { onView(withText(expected)).check(matches(isDisplayed())) }
+        }
+    }
+
+    @Test
     fun theAppDrawerEntryIsTheSetupScreenNotTheBridgeActivity() {
         val drawer =
             Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)
