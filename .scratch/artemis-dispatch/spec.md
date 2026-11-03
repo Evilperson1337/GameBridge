@@ -30,7 +30,7 @@ When LaunchBox hands GameBridge a `.art` Remote Shortcut, GameBridge checks it i
 - **Package visibility.** Add `com.limelight.noir` to `<queries>`. No permission, network, service or background work.
 - **Failures.** A new `FailureCategory` for Artemis not installed and one for Artemis refusing, using existing failure-dialog structure. `RemoteUnsupported` is removed or repurposed; the README troubleshooting table is updated to the exact strings. There is no Storefront for a `.art` failure.
 - **Target App.** The glossary already names Artemis as the Target App for Remote Shortcuts. No glossary change expected.
-- **Fixtures.** Committed `.art` fixtures use placeholder host and app values, never the maintainer's real UUIDs or host name. `docs/research/Cuphead (GOG).art` stays uncommitted.
+- **Fixtures.** Committed `.art` fixtures use placeholder host and app values, never the maintainer's real UUIDs or host name. Real `.art` samples (for example `Desktop.art`) stay uncommitted; `docs/research/*.art` is gitignored.
 - **Support table.** Remote Shortcuts (`.art`) row: enabled-untested until ticket 03 records a device observation.
 
 ## Testing Decisions
