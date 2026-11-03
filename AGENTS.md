@@ -11,7 +11,7 @@ GameBridge is a small Android app that takes a Shortcut chosen in LaunchBox and 
 - Treat incoming URIs and Shortcut text as untrusted. Accept only `content://` URIs, known extensions, known Storefronts, and Store IDs in the signed 32-bit range. Reject out-of-range IDs instead of truncating them.
 - Never log full Shortcut contents or device paths in release builds.
 - Don't add `MANAGE_EXTERNAL_STORAGE`, network permission, root, an accessibility service, or a background service.
-- Only build what the current phase requires. Don't build Artemis support, discovery, matching or the launcher picker early.
+- Only build what the current phase requires. Artemis Dispatch of a `.art` Shortcut is built; don't build discovery, matching or the launcher picker early.
 - Keep classes small and independently testable. Pure logic belongs in `:core` with JVM tests; Android integration belongs in `:app`.
 
 ## Ask first
