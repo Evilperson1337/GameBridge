@@ -1,6 +1,6 @@
 # AGENTS.md
 
-GameBridge is a small Android app that takes a Shortcut chosen in LaunchBox and dispatches it to the right Target App (GameNative now, Artemis later). The full background is in `docs/overview/GameBridge_Implementation_Handoff.md`. Terms are defined in `GLOSSARY.md`, and decisions are recorded in `docs/adr/`.
+GameBridge is a small Android app that takes a Shortcut chosen in LaunchBox and dispatches it to the right Target App (GameNative for Local Shortcuts, Artemis for Remote Shortcuts). The full background is in `docs/overview/GameBridge_Implementation_Handoff.md`. Terms are defined in `GLOSSARY.md`, and decisions are recorded in `docs/adr/`.
 
 ## Rules
 

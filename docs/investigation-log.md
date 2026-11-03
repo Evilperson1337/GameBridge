@@ -198,9 +198,9 @@ Closed on two observations, both recorded above: the Epic Dispatch from LaunchBo
 - Steam, Amazon and Custom have no device observation. Synthetic `.amazon` and `.pcgame` files are unchecked against real exports.
 - The LaunchBox screens used to set up the platform are not recorded; the guide's steps are written, not walked.
 - Android versions other than 13, and LaunchBox and GameNative versions other than 1.23 and 1.3.0, are untested.
-- The README download link is the relative `../../releases/latest`; not checked on the hosting site (no remote is configured here). No release exists yet.
+- The README download link was a relative `../../releases/latest`; it is now the absolute `https://github.com/Evilperson1337/GameBridge/releases/latest` (2026-11-03). Not checked on the hosting site; no release exists yet.
 - The signed release build and the keystore (tickets 03 and 04) were not seen working by this ticket.
-- The G1 report's link to an investigation document missing from `docs/` was removed. The report also contains a USB ADB serial, which AGENTS.md says not to commit; left for the maintainer to redact.
+- The G1 report's link to an investigation document missing from `docs/` was removed. The report's USB ADB serial and backup folder have since been replaced by placeholders (2026-11-03 docs audit).
 
 ## 2026-11-02: Setup screen observed on the Odin
 

@@ -46,6 +46,8 @@ Waydroid is available in the Arch `extra` repo but is not needed for any ticket.
 
 ## Odin validation procedure (Gate G1)
 
+Gate G1 is closed (see `docs/investigation-log.md`, "Gate G1: closed"); this is the written procedure, kept for re-checks. It was not followed step by step.
+
 Goal: LaunchBox -> GameBridge -> GameNative -> Akalabeth Ready screen, using a temporary copy of the Akalabeth Shortcut and a temporary LaunchBox entry, with nothing original modified. Terms are in `GLOSSARY.md`. A Dispatch is only a hand-off; a person must confirm the Launch (the Ready screen).
 
 Steps marked **ASK** need the user's explicit approval first (AGENTS.md). Steps marked **standing** are covered by the standing approval (install/uninstall of `com.allourmedia.gamebridge.debug`, read logcat).
@@ -58,7 +60,7 @@ Steps marked **ASK** need the user's explicit approval first (AGENTS.md). Steps 
 6. **standing** Start logcat filtered by the tag: `adb logcat -s GameBridge`.
 7. Pick the temporary entry in LaunchBox. Expect no GameBridge UI, GameNative opening, and a debug log line like `storefront=GOG storeId=1207666073 scheme=content dispatch=Dispatched`.
 8. A person confirms Akalabeth reaches its Ready screen. Log lines alone do not prove a Launch. Record the result in `docs/investigation-log.md` (verified vs assumed).
-9. Optional failure check: open GameBridge from the app drawer and confirm the "meant to be started from LaunchBox" dialog.
+9. Optional check: open GameBridge from the app drawer and confirm the setup screen (readiness line, three app tiles, steps, Setup command and Copy). It dispatches nothing.
 10. Run the rollback checklist below.
 
 ## Rollback checklist

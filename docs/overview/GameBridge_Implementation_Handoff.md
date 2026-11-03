@@ -1,5 +1,7 @@
 # GameBridge — Implementation Handoff and Engineering Specification
 
+> **Note (2026-11-03):** this is the original handoff from 2026-11-01 and is kept as history. Its phase plan and "later" statements are out of date: the GOG, Steam, Epic, Amazon and Custom Storefronts and a Dispatch of Remote Shortcuts (`.art`) to Artemis are now built, and Gate G1 is closed. For current status see `README.md`, the specs under `.scratch/`, and `docs/investigation-log.md`.
+
 **Version:** 0.1 | **Date:** 2026-11-01 | **Status:** Ready for Phase 0/1 implementation | **Target:** LaunchBox Android 1.23 → GameNative 1.3.0; Artemis later
 
 ## 1. Executive summary

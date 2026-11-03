@@ -4,7 +4,7 @@
 
 **Blocked by:** 04 (Full Shortcut interpretation rules), 05 (LaunchBox setup guide, README and rollback checklist)
 
-**Status:** ready-for-human
+**Status:** ready-for-human (superseded: Gate G1 was closed on other evidence, see `docs/investigation-log.md`, "Gate G1: closed"; the criteria below were not performed as written)
 
 - [ ] The debug build is installed on the Odin with `adb install -r` (standing approval per AGENTS.md).
 - [ ] With the user's explicit go-ahead, the LaunchBox emulator configuration is backed up (location recorded), and a temporary Akalabeth Shortcut copy and temporary LaunchBox entry are created (paths recorded).
