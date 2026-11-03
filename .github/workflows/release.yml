@@ -19,7 +19,11 @@ jobs:
           distribution: temurin
           java-version: "21"
 
+      # The runner image already has the Android SDK; skip the action's default packages,
+      # one of which (the legacy `tools`) no longer exists in the current sdkmanager.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ""
 
       - name: Check tag matches versionName
         run: |
