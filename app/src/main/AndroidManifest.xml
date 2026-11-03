@@ -29,7 +29,8 @@
         <activity
             android:name=".SetupActivity"
             android:exported="true"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:theme="@style/Theme.GameBridge.Setup">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

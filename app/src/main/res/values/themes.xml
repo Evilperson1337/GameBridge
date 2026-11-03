@@ -8,4 +8,8 @@
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
+    <style name="Theme.GameBridge.Setup" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:windowBackground">@color/gb_ground</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
 </resources>

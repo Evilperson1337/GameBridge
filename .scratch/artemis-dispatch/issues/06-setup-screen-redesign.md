@@ -14,10 +14,10 @@ Behaviour: Copy puts exactly the Setup command on the clipboard as before and it
 
 **Status:** ready-for-agent
 
-- [ ] The readiness line is built by a pure function in `:core` from the three installed flags, with JVM tests for all-installed, one missing, several missing, and none installed, each naming exactly the missing apps.
-- [ ] An instrumented test shows Copy still places exactly the Setup command on the clipboard, and its label reads "Copied" afterwards and returns to "Copy".
-- [ ] An instrumented test shows Copy has focus when the screen opens and every interactive view is at least 48dp.
-- [ ] Existing setup-screen tests for the command text, GameNative present or absent, the checklist, and the manifest cross-check still pass (updated only where the layout moved).
-- [ ] The screen is checked in portrait (1080x1920) first, then landscape, on the managed emulator by saving screenshots to the scratchpad and reading them, in light and dark; any problem seen is fixed. The physical Odin is connected over USB: after the emulator check, install the debug build with `adb install -r` (standing approval), take a screenshot with `adb exec-out screencap -p`, read it, and note what was seen. Use the Odin's serial; another device may be attached.
-- [ ] No new permission, network access, service or background work; no link-out or version check; the screen dispatches nothing.
-- [ ] `./gradlew check` and the instrumentation task pass.
+- [x] The readiness line is built by a pure function in `:core` from the three installed flags, with JVM tests for all-installed, one missing, several missing, and none installed, each naming exactly the missing apps. (Checked: `ReadinessTest`; `./gradlew check` green.)
+- [x] An instrumented test shows Copy still places exactly the Setup command on the clipboard, and its label reads "Copied" afterwards and returns to "Copy". (Checked: both tests pass on pixel2api33.)
+- [x] An instrumented test shows Copy has focus when the screen opens and every interactive view is at least 48dp. (Checked: pass on pixel2api33.)
+- [x] Existing setup-screen tests for the command text, GameNative present or absent, the checklist, and the manifest cross-check still pass (updated only where the layout moved). (Checked: all pass; only step 2 wording changed to "Paste this Setup command:".)
+- [ ] The screen is checked in portrait (1080x1920) first, then landscape, on the managed emulator by saving screenshots to the scratchpad and reading them, in light and dark; any problem seen is fixed. The physical Odin is connected over USB: after the emulator check, install the debug build with `adb install -r` (standing approval), take a screenshot with `adb exec-out screencap -p`, read it, and note what was seen. Use the Odin's serial; another device may be attached. (Not done: no emulator was running; Odin landscape light and dark were screenshotted and read and looked right, but the Odin would not rotate to portrait via adb. See investigation log.)
+- [x] No new permission, network access, service or background work; no link-out or version check; the screen dispatches nothing. (Checked: diff adds only a theme and colours; no permission, service, link-out.)
+- [x] `./gradlew check` and the instrumentation task pass. (Checked: check and pixel2api33DebugAndroidTest pass.)
