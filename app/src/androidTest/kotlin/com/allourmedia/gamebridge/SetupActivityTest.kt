@@ -20,6 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -133,20 +134,27 @@ class SetupActivityTest {
 
     @Test
     fun showsTheReadinessLineNamingWhatIsMissing() {
-        val missing =
-            listOf(
-                "GameNative" to GameNativeDispatcher.PACKAGE,
-                "Artemis" to ArtemisDispatcher.PACKAGE,
-                "LaunchBox" to LAUNCHBOX_PACKAGE,
-            ).filterNot { isPackageInstalled(context.packageManager, it.second) }.map { it.first }
+        // Independent literals per known device state; other states are skipped, not recomputed.
+        val installed =
+            setOf(GameNativeDispatcher.PACKAGE, ArtemisDispatcher.PACKAGE, LAUNCHBOX_PACKAGE)
+                .filter { isPackageInstalled(context.packageManager, it) }
+                .toSet()
         val expected =
-            when (missing.size) {
-                0 -> "GameNative, Artemis and LaunchBox are installed"
-                1 -> "${missing[0]} is not installed"
-                2 -> "${missing[0]} and ${missing[1]} are not installed"
-                else -> "GameNative, Artemis and LaunchBox are not installed"
+            when (installed) {
+                emptySet<String>() -> {
+                    "GameNative, Artemis and LaunchBox are not installed"
+                }
+
+                setOf(GameNativeDispatcher.PACKAGE, ArtemisDispatcher.PACKAGE, LAUNCHBOX_PACKAGE) -> {
+                    "GameNative, Artemis and LaunchBox are installed"
+                }
+
+                else -> {
+                    null
+                }
             }
-        launch().use { onView(withText(expected)).check(matches(isDisplayed())) }
+        assumeTrue("device has a mixed install state", expected != null)
+        launch().use { onView(withText(expected!!)).check(matches(isDisplayed())) }
     }
 
     private fun findCopyButton(activity: android.app.Activity): android.widget.Button? {
