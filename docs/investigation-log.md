@@ -386,3 +386,14 @@ The merged debug build was installed on the Odin with `adb install -r` (standing
 
 - The not-installed tile (placeholder letter, negative colour) on a real device: covered by the emulator and by tests only.
 - Portrait, light mode and the tiles' contrast (two hand-picked colour tokens, no contrast tool run).
+
+## 2026-11-02: Setup screen in portrait on the Odin
+
+### Verified (observed on the device, screenshot read)
+
+- With the Odin held in portrait (1080x1920) and dark mode on: readiness line, three app tiles in one row, the three steps, the Setup command block and Copy, all in one column.
+- The command breaks at spaces and after `/`; nothing breaks mid-token. The bottom third of the screen is empty.
+
+### Assumed / not verified
+
+- Portrait in light mode, and the not-installed tile on the device.
