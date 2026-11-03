@@ -372,3 +372,17 @@ With the maintainer's approval, five temporary files were created on the Odin in
 
 - Portrait in dark was not captured. Tile colours (`gb_tone`, `gb_edge`) were chosen by hand; no contrast tool was run.
 - The reference image named in the task did not exist on disk, so the layout follows the ticket text only.
+
+## 2026-11-02: App tiles seen on the Odin
+
+The merged debug build was installed on the Odin with `adb install -r` (standing approval) and a screenshot was read. The panel is 1080x1920; the screen was in landscape and dark mode (the device's setting was not changed).
+
+### Verified (observed on the device)
+
+- Three rounded tiles, each showing the app's own launcher icon, its name (GameNative, Artemis, LaunchBox) and "Installed". The icons are the real ones read from the installed apps, not bundled artwork.
+- The readiness line "GameNative, Artemis and LaunchBox are installed" sits above the tiles. The command block and Copy button are unchanged on the right.
+
+### Assumed / not verified
+
+- The not-installed tile (placeholder letter, negative colour) on a real device: covered by the emulator and by tests only.
+- Portrait, light mode and the tiles' contrast (two hand-picked colour tokens, no contrast tool run).
