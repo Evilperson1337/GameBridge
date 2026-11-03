@@ -10,9 +10,6 @@ import android.graphics.drawable.StateListDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.ForegroundColorSpan
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -21,7 +18,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import com.allourmedia.gamebridge.core.appStatusLine
 import com.allourmedia.gamebridge.core.readinessLine
 import com.allourmedia.gamebridge.core.setupCommand
 
@@ -52,9 +48,14 @@ class SetupActivity : Activity() {
         val status =
             column().apply {
                 addView(text(readinessLine(gameNative, artemis, launchBox), R.color.gb_ink, bold = true))
-                addView(statusLine("GameNative", gameNative))
-                addView(statusLine("Artemis", artemis))
-                addView(statusLine("LaunchBox", launchBox))
+                addView(
+                    TileFlow(this@SetupActivity, dp(8)).apply {
+                        addView(AppTile(this@SetupActivity, "GameNative", GameNativeDispatcher.PACKAGE))
+                        addView(AppTile(this@SetupActivity, "Artemis", ArtemisDispatcher.PACKAGE))
+                        addView(AppTile(this@SetupActivity, "LaunchBox", LAUNCHBOX_PACKAGE))
+                    },
+                    LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(8) },
+                )
             }
         val steps =
             column().apply {
@@ -100,19 +101,6 @@ class SetupActivity : Activity() {
         setTextColor(getColor(colorId))
         if (bold) setTypeface(typeface, Typeface.BOLD)
         setPadding(0, dp(6), 0, dp(6))
-    }
-
-    /** "Artemis: installed" in grey; only "not installed" is coloured. */
-    private fun statusLine(
-        name: String,
-        installed: Boolean,
-    ): TextView {
-        val line = appStatusLine(name, installed)
-        val spannable = SpannableString(line)
-        val colorId = if (installed) R.color.gb_grey else R.color.gb_negative
-        val start = line.indexOf(':') + 2
-        spannable.setSpan(ForegroundColorSpan(getColor(colorId)), start, line.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        return text(spannable, R.color.gb_ink)
     }
 
     private fun commandBlock() =

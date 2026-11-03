@@ -358,3 +358,17 @@ With the maintainer's approval, five temporary files were created on the Odin in
 - Orientation history: the panel is 1080x1920 (portrait native). It was observed in both orientations: portrait in the maintainer's first screenshot of the old screen, landscape 1920x1080 in the redesign screenshots. The 1920x1080 in the Artemis log (line about the video stream) is the stream resolution, not the screen.
 - The portrait redesign was never seen on screen: it was not captured: `settings put system user_rotation` and `cmd window user-rotation lock` did not change the Odin's rotation from ROTATION_90. No emulator was running, so no emulator screenshots exist. The single-column layout is covered only by the code path, not by a screenshot.
 - Colours were chosen by hand against the design rules' 4.5:1 floor; no contrast tool was run.
+
+## Setup screen app tiles (ticket 07)
+
+### Verified
+
+- `:core` JVM tests pin `appTileStatus` ("Installed" / "Not installed"), `appTileInitial` and the content-description text (`appStatusLine`); `./gradlew check` passes.
+- Instrumented tests on the managed device (pixel2api33, 48 tests, 0 failures): one `AppTile` per app with its name and status text; an installed tile (the test app's own package) shows an icon view with a non-null drawable and no placeholder; a missing package shows the first-letter placeholder and no icon view.
+- Emulator screenshots read (the managed AVD booted by hand, landscape in light and dark, portrait in light): three tiles in one row in landscape, wrapping is implemented by `TileFlow`. Only the not-installed state was seen on screen; an installed tile's real icon was seen only through the test's drawable check, not in a screenshot.
+- The physical Odin was not used.
+
+### Assumed / not verified
+
+- Portrait in dark was not captured. Tile colours (`gb_tone`, `gb_edge`) were chosen by hand; no contrast tool was run.
+- The reference image named in the task did not exist on disk, so the layout follows the ticket text only.

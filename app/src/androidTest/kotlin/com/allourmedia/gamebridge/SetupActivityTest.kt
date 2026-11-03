@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -19,7 +20,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,30 +62,71 @@ class SetupActivityTest {
     }
 
     @Test
-    fun reportsGameNativeAbsentWhenItIsNotInstalled() {
-        // The managed emulator has no GameNative; the installed case is not covered here.
-        val installed = runCatching { context.packageManager.getPackageInfo(GameNativeDispatcher.PACKAGE, 0) }.isSuccess
-        assumeFalse("GameNative is installed on this device", installed)
-        launch().use {
-            onView(withText("GameNative: not installed")).check(matches(isDisplayed()))
+    fun showsOneTileForEachAppWithItsNameAndStatus() {
+        // The expected status per app comes from the device's own install state.
+        val apps =
+            listOf(
+                "GameNative" to GameNativeDispatcher.PACKAGE,
+                "Artemis" to ArtemisDispatcher.PACKAGE,
+                "LaunchBox" to LAUNCHBOX_PACKAGE,
+            )
+        launch().use { scenario ->
+            for ((name, pkg) in apps) {
+                val installed = isPackageInstalled(context.packageManager, pkg)
+                val description = if (installed) "$name: installed" else "$name: not installed"
+                var tiles = 0
+                var tileText = emptyList<String>()
+                scenario.onActivity { activity ->
+                    val tile =
+                        allViews(activity.findViewById<View>(android.R.id.content))
+                            .filterIsInstance<AppTile>()
+                            .filter { it.contentDescription == description }
+                    tiles = tile.size
+                    tileText =
+                        tile.firstOrNull()?.let { t -> allViews(t).filterIsInstance<TextView>().map { it.text.toString() } }.orEmpty()
+                }
+                assertEquals("one tile for $name", 1, tiles)
+                assertTrue("$name tile shows its name: $tileText", name in tileText)
+                assertTrue("$name tile shows its status: $tileText", (if (installed) "Installed" else "Not installed") in tileText)
+            }
         }
     }
+
+    @Test
+    fun installedTileShowsTheAppsRealIconAndNoPlaceholder() {
+        // The test app's own package stands in for an installed app.
+        launch().use { scenario ->
+            var tile: AppTile? = null
+            scenario.onActivity { tile = AppTile(it, "Stub", context.packageName) }
+            val shown = tile!!
+            assertNotNull("icon drawable", shown.iconView?.drawable)
+            assertEquals(null, shown.placeholderView)
+            assertEquals("Stub: installed", shown.contentDescription)
+            assertTrue(allViews(shown).filterIsInstance<TextView>().any { it.text == "Installed" })
+        }
+    }
+
+    @Test
+    fun missingTileShowsThePlaceholderLetterAndNoIcon() {
+        launch().use { scenario ->
+            var tile: AppTile? = null
+            scenario.onActivity { tile = AppTile(it, "Nothing", "com.allourmedia.gamebridge.nonexistent") }
+            val shown = tile!!
+            assertEquals(null, shown.iconView)
+            assertEquals("N", shown.placeholderView?.text?.toString())
+            assertEquals("Nothing: not installed", shown.contentDescription)
+            assertTrue(allViews(shown).filterIsInstance<TextView>().any { it.text == "Not installed" })
+        }
+    }
+
+    private fun allViews(root: View): List<View> =
+        listOf(root) + if (root is ViewGroup) (0 until root.childCount).flatMap { allViews(root.getChildAt(it)) } else emptyList()
 
     @Test
     fun installedCheckSeesARegisteredPackageAndNotAMissingOne() {
         // The test app's own package is registered, so it stands in for an installed app.
         assertEquals(true, isPackageInstalled(context.packageManager, context.packageName))
         assertEquals(false, isPackageInstalled(context.packageManager, "com.allourmedia.gamebridge.nonexistent"))
-    }
-
-    @Test
-    fun reportsArtemisAndLaunchBoxEachByTheirOwnInstalledState() {
-        // The managed emulator has neither app, so only the not-installed text is checked on screen.
-        for ((name, pkg) in listOf("Artemis" to ArtemisDispatcher.PACKAGE, "LaunchBox" to LAUNCHBOX_PACKAGE)) {
-            val installed = isPackageInstalled(context.packageManager, pkg)
-            val expected = if (installed) "$name: installed" else "$name: not installed"
-            launch().use { onView(withText(expected)).check(matches(isDisplayed())) }
-        }
     }
 
     @Test
