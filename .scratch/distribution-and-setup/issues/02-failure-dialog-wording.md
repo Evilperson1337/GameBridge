@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] No failure reason refers to a repo file or a document the player would not have.
 - [x] The existing failure tests are updated to pin the new wording, and every reason is still covered.
-- [ ] The dialog still shows one Close button and Close or Back returns to LaunchBox.
+- [x] The dialog still shows one Close button and Close or Back returns to LaunchBox. `BridgeActivityTest` (emulator) asserts Close is the only button on every failure dialog, that Close finishes the activity, and covers Back; the dispatch task does not stay behind on the Odin (see the investigation log entries on the stale setup screen and the Artemis exit).
 - [x] The README troubleshooting table matches the dialog strings exactly.
 - [x] `./gradlew check` passes.
 

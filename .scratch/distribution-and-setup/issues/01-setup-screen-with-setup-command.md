@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent (not resolved: criterion 2 only partly covered, see notes)
+**Status:** resolved
 
 - [x] JVM tests show the Setup command builder returns the exact debug and release strings given in the LaunchBox setup guide.
-- [ ] An instrumented test shows the screen displays the command for the installed build, Copy places that text on the clipboard, and GameNative present or absent is reported.
+- [x] An instrumented test shows the screen displays the command for the installed build, Copy places that text on the clipboard, and GameNative present or absent is reported. Command text and clipboard: `SetupActivityTest` (emulator). Present or absent: later work (tickets artemis-05 and artemis-07) added emulator tests for installed (a registered stand-in package, real icon) and not-installed tiles; the emulator has no real GameNative. On the Odin, with real GameNative installed, the screen was seen showing it as installed (2026-11-02 and 2026-11-03, see the investigation log).
 - [x] An instrumented test asserts the displayed action and component match what the manifest resolves, so the screen cannot drift from the real app.
 - [x] Opening GameBridge from the app drawer no longer shows the "meant to be started from LaunchBox" dialog; a call from LaunchBox with no Shortcut still does, and its existing test passes.
 - [x] No new permission, network access, service or background work; no link-out or version check for GameNative.
