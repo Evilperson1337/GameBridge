@@ -34,3 +34,7 @@ Each Storefront is one row in the Storefront table in `:core`. Enabling one mean
 - `docs/device-testing.md`: SDK, emulator, physical device, rollback.
 - `docs/investigation-log.md`: what was verified and what was assumed.
 - `docs/research/`: dated research notes.
+
+## Release signing
+
+Releases are signed in GitHub Actions from four repository secrets (`GAMEBRIDGE_KEYSTORE_BASE64`, `GAMEBRIDGE_KEYSTORE_PASSWORD`, `GAMEBRIDGE_KEY_ALIAS`, `GAMEBRIDGE_KEY_PASSWORD`). `scripts/setup-release-signing.sh` walks the maintainer through creating the keystore outside the repo, backing it up offline, and setting those secrets. It never writes a password to disk. Increment `versionCode` for every release.
