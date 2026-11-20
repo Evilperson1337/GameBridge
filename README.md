@@ -20,13 +20,13 @@ Import the Shortcut files that GameNative exports (`.gog`, `.steam`, `.epic`, `.
 
 ## Support
 
-A Storefront is the GameNative library a game belongs to. All five are enabled. Only the first two have been seen working on a device. Remote Shortcuts (`.art`) are a separate row: they go to Artemis, not GameNative. "Verified" below means observed on a device and recorded in the investigation log; anything else is labelled as not verified.
+A Storefront is the GameNative library a game belongs to. All five are enabled. Only GOG, Epic and Steam have been seen working on a device. Remote Shortcuts (`.art`) are a separate row: they go to Artemis, not GameNative. "Verified" below means observed on a device and recorded in the investigation log; anything else is labelled as not verified.
 
 | Storefront | Status | Evidence |
 |---|---|---|
 | GOG | Verified | 2026-11-01: GameNative started a GOG game (Akalabeth) from the same request GameBridge sends. Not rechecked through LaunchBox since. |
 | Epic | Verified | 2026-11-02: an Epic Shortcut (ABZU) picked in LaunchBox started in GameNative on the test device. |
-| Steam | Enabled, untested | No device observation yet. |
+| Steam | Verified | 2026-11-19: with the signed v0.1.0 release build, a Steam Shortcut (Portal) picked in LaunchBox was dispatched and the game started in GameNative on the test device (reported by the maintainer). Only IDs in the signed 32-bit range; see below. |
 | Amazon | Enabled, untested | No device observation yet. Test files were made to match GameNative's described format, not real exports. |
 | Custom | Enabled, untested | No device observation yet. |
 | Remote Shortcuts (`.art`) | Verified | 2026-11-03: with the signed v0.1.0 release build, a `.art` entry (`Desktop.art`) picked in LaunchBox was dispatched by GameBridge to Artemis (`com.limelight.noir`, 20.2.6), Artemis accepted the `content://` grant, the stream started (reported by the user), and closing it returned to LaunchBox. Earlier, 2026-11-02, the same worked with the debug build. Not understood: one other `.art` pick on 2026-11-03 did not start a stream and was not investigated. |

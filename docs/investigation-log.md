@@ -462,3 +462,16 @@ Result reported by the maintainer after trying it on the Odin (the research note
 
 - That Update Games on this platform only checks a Steam library; the message suggests it, nothing states it.
 - Whether it behaves differently on a platform without a Steam link. Not tried. The manual import remains the only confirmed way to add Shortcuts.
+
+## 2026-11-19: Steam Dispatch observed on the Odin with the v0.1.0 release build
+
+### Verified
+
+- The signed v0.1.0 release APK from GitHub was installed on the Odin (AYN Odin 2 Portal), GameNative 1.4.0. `adb logcat` showed a pick in LaunchBox reach `BridgeActivity` and GameBridge send `app.gamenative.LAUNCH_GAME` to `app.gamenative/.MainActivity`.
+- The maintainer reported that Portal (`Portal.steam`, a 3-byte ID) started in GameNative.
+- `Warhammer Survivors.steam` holds a 19-digit ID, outside the signed 32-bit range. GameBridge rejected it with `failure=InvalidContents` and sent nothing, as designed.
+
+### Assumed / not verified
+
+- Which logged pick was Portal and which was Warhammer. The log does not name the Shortcut; the pairing follows from the ID sizes.
+- That Warhammer's file was written by DroidDeck. See `docs/research/gamenative-app-id-range.md`. DroidDeck support is deferred by decision of the maintainer.
