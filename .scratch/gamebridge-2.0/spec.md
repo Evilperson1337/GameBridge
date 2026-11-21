@@ -16,7 +16,7 @@ GameBridge owns the logic. LaunchBox only passes a **Bridge Shortcut** (`.gamebr
 
 - **Scope.** 2.0 is an approved phase, released in evidence-gated slices. AGENTS.md is updated in the same commit.
 - **LaunchBox boundary.** GameBridge never writes to LaunchBox, its database or its configuration. Importing remains manual (`docs/gamebridge-2.0/03-LAUNCHBOX-INTEGRATION.md`).
-- **Entry point.** The existing exported `BridgeActivity` and the existing Setup command are reused; `.gamebridge` is a new branch next to `.art` and the Local Shortcut extensions. No new exported component. Conditional on the device checks in ticket 05 (`docs/gamebridge-2.0/05-LAUNCH-MECHANISM.md`).
+- **Entry point.** The existing exported `BridgeActivity` and the existing Setup command are reused; `.gamebridge` is a new branch next to `.art` and the Local Shortcut extensions. No new exported component. Conditional on the device checks in ticket 02 (`docs/gamebridge-2.0/05-LAUNCH-MECHANISM.md`).
 - **Format.** UTF-8 JSON, at most 4,096 bytes, with a `version` field. Fixed per-target templates only: no raw Intent, component, action or extras in the file. Unknown `target`, `storefront` or fields are rejected; an unknown newer `version` fails explicitly with an update message. Exact schema is ADR 0002.
 - **Validation per Target App.** GameNative: positive signed 32-bit Store ID, out of range is rejected, never truncated. DroidDeck (slice 2): its own recorded range, enabled only after its contract is pinned on a device. Artemis: `host_uuid`, `host_name`, `app_uuid`, `app_name`, length-capped, no control characters.
 - **Scan.** Manual only (button), no background service. It reads each Target App's Shortcut Folder read-only through the Storage Access Framework. Which folder was granted defines the owning Target App. It writes only to the Output Folder, additively; an overwrite or delete needs the player's confirmation. A file name is the source file's stem; on collision across Target Apps a Target App suffix is added. The summary lists added, skipped, and rejected files by name and reason, never by contents. Unverified Target Apps are reported "found, not enabled" and get no file.
@@ -28,8 +28,8 @@ GameBridge owns the logic. LaunchBox only passes a **Bridge Shortcut** (`.gamebr
 
 ## Slices
 
-1. **Slice 1:** format, GameNative and Artemis targets, Scan, `.gamebridge` Dispatch, device validation (tickets 01 to 06).
-2. **Slice 2:** DroidDeck (ticket 07), after slice 1's gate.
+1. **Slice 1:** GameNative Dispatch (01), LaunchBox hand-off check (02), GameNative Scan (03), Artemis feasibility (04), Artemis target (05), device validation (06), docs (07).
+2. **Slice 2:** DroidDeck (08), after slice 1's gate.
 
 ## Known gaps and open questions
 

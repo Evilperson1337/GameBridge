@@ -5,4 +5,4 @@ Scan discovers games by reading the Shortcut files each Target App already expor
 ## Consequences
 
 - Games unknown to the export folders cannot be found. That is accepted: it keeps `MANAGE_EXTERNAL_STORAGE` and root out.
-- Whether SAF can read each app's actual export folder on the Odin is unverified; ticket 05 records it.
+- Whether SAF can read each app's actual export folder on the Odin is unverified; ticket 06 records it.
