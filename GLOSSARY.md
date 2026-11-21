@@ -47,3 +47,18 @@ _Avoid_: launch (for this meaning)
 **Launch**:
 The game actually starting inside the Target App. GameBridge cannot observe it; only a person or device logs can confirm it.
 _Avoid_: dispatch, start (for this meaning)
+
+## Proposed GameBridge 2.0 language
+
+These terms describe the agreed design direction, not capabilities already implemented. The definitions above continue to describe the current app until the 2.0 phase is approved and implemented.
+
+**Shortcut Folder**:
+A folder the player identifies as containing Shortcuts belonging to one Target App.
+
+**Association**:
+A player-confirmed relationship between Shortcuts that represent the same game across one or more Target Apps.
+_Avoid_: automatic match
+
+**Dispatch Option**:
+One associated Shortcut and its Target App that the player may choose for a game. An option does not guarantee that the game is installed, a host is reachable, or a Launch will succeed.
+_Avoid_: available game, guaranteed launch

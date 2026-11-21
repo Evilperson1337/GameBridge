@@ -475,3 +475,35 @@ Result reported by the maintainer after trying it on the Odin (the research note
 
 - Which logged pick was Portal and which was Warhammer. The log does not name the Shortcut; the pairing follows from the ID sizes.
 - That Warhammer's file was written by DroidDeck. See `docs/research/gamenative-app-id-range.md`. DroidDeck support is deferred by decision of the maintainer.
+
+## 2026-11-21: GameBridge 2.0 current-architecture audit
+
+### Verified
+
+- Baseline Git commit `4f0e22cac030b0b76735b143e0f869ea4b31b708`; initial status had a pre-existing dirty `.claude/worktrees/agent-a916a72d3c7cd2e62` gitlink/worktree. It was left untouched.
+- Reviewed repository architecture, Android components, build, tests and existing records; the detailed evidence and source line references are in `docs/gamebridge-2.0/01-CURRENT-ARCHITECTURE.md`.
+- Read GameNative v1.3.0 first-party sources for its launch-intent parser, exported activity, source enum and Shortcut exporter; the audit links the exact sources. This does not verify other versions.
+- Host command `./gradlew --offline :core:test :app:assembleDebug check` succeeded; initial core tests were up-to-date. `./gradlew --offline :core:test --rerun-tasks` succeeded with 45 tests, 0 failures, 0 errors, 0 skipped.
+
+### Assumed / not verified
+
+- No device or emulator was used in this audit; existing device observations are historical, not freshly reproduced. Instrumentation tests and signed release assembly were not run.
+- Artemis source-level contract, other Artemis versions, universal LaunchBox substitution/grant behavior, and Amazon/Custom end-to-end device behavior were not independently verified. The audit distinguishes the limited recorded observations from assumptions and secondary research.
+- Offline build success does not establish clean-machine provisioning or dependency availability. No claim is made that Dispatch proves a game or stream started.
+# Upstream integration source audit (2026-11-21 UTC)
+
+Verified: resolved GameNative HEAD `973d31f1f7fc8270f4c3da501056b95c407a33f1` and DroidDeck HEAD `f29f72d5d919685f9dd8898834a640bb867d1a91` via remote Git, and inspected pinned source and selected history without running upstream code. Findings and primary-source links are in [the integration research](gamebridge-2.0/02-UPSTREAM-INTEGRATIONS.md). DroidDeck's current source includes multi-Storefront handling, unlike the earlier historical notes.
+
+Assumptions and limits: repository default-branch HEADs are treated as the requested current upstream snapshots, not as installed or latest released APKs. No on-device behavior, LaunchBox grant behavior, game Launch, or complete upstream history was verified. No device changes or dependency changes were made.
+
+## 2026-11-21: LaunchBox and Android platform evidence research
+
+### Verified
+
+- Read existing 2.0 architecture/upstream research, glossary, ADR, LaunchBox research, setup guide and historical device report. Fetched and read the official LaunchBox getting-started, Custom Emulator (With Code), and Android 1.21 release pages, plus linked Android platform guidance and Android 13–16 all-apps and target-specific behavior pages. Findings, source links, evidence classifications and applicability limits are in [LaunchBox integration](gamebridge-2.0/03-LAUNCHBOX-INTEGRATION.md) and [Android platform evidence](gamebridge-2.0/ANDROID-PLATFORM-EVIDENCE.md).
+- The LaunchBox custom-command guide describes `{file.uri}` as potentially `file://` or `content://`; it does not establish a universally readable content URI. The 1.21 notes describe a manual platform update, while the previous Windows-platform observation did not add the Shortcut and requested Steam login.
+- Repository build configuration specifies min SDK 30, compile SDK 37 and target SDK 36. No APK inspection, device access, installation, configuration changes, build, or runtime tests were performed in this research.
+
+### Assumed / not verified
+
+- LaunchBox's complete outgoing intent and URI grants across versions/providers, a supported programmatic import endpoint or its absence, cause of the Windows Update Games outcome, and compatibility across Android 13–16 remain unverified. The APK inspection and device matrix are proposed, authorization-gated procedures, not results. Dispatch does not prove Launch.
