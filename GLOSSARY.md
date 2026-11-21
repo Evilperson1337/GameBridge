@@ -50,15 +50,18 @@ _Avoid_: dispatch, start (for this meaning)
 
 ## Proposed GameBridge 2.0 language
 
-These terms describe the agreed design direction, not capabilities already implemented. The definitions above continue to describe the current app until the 2.0 phase is approved and implemented.
+These terms describe the agreed design direction (`.scratch/gamebridge-2.0/spec.md`), not capabilities already implemented. The definitions above continue to describe the current app until 2.0 slices ship. Once they do, **Shortcut** will mean the file a Target App exports, and **Bridge Shortcut** the file GameBridge creates.
+
+**Bridge Shortcut**:
+A `.gamebridge` file created by GameBridge that names a Target App and the IDs it needs. LaunchBox hands it to GameBridge, which Dispatches using a fixed template for that Target App.
+_Avoid_: launcher file, profile, shortcut (unqualified, for this meaning)
 
 **Shortcut Folder**:
-A folder the player identifies as containing Shortcuts belonging to one Target App.
+A folder the player grants GameBridge read-only access to, containing the Shortcuts exported by one Target App. The folder chosen defines which Target App owns the files in it.
 
-**Association**:
-A player-confirmed relationship between Shortcuts that represent the same game across one or more Target Apps.
-_Avoid_: automatic match
+**Output Folder**:
+The folder the player grants GameBridge write access to, where Scan puts Bridge Shortcuts. LaunchBox is pointed at it manually.
 
-**Dispatch Option**:
-One associated Shortcut and its Target App that the player may choose for a game. An option does not guarantee that the game is installed, a host is reachable, or a Launch will succeed.
-_Avoid_: available game, guaranteed launch
+**Scan**:
+A player-started pass that reads the Shortcut Folders and writes a Bridge Shortcut for each game found. It never runs in the background.
+_Avoid_: discovery, sync, auto-import

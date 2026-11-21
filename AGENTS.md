@@ -8,10 +8,10 @@ GameBridge is a small Android app that takes a Shortcut chosen in LaunchBox and 
 - Record what you verified and what you assumed in `docs/investigation-log.md`. Never present an assumption as verified behaviour.
 - A successful `startActivity` is a Dispatch, not a Launch. Never claim a game started based on it. Name results accordingly (for example `DispatchResult`, not `LaunchResult`).
 - Fail explicitly. Don't mask dispatch errors, and never silently fall back to another Target App or to a deep link.
-- Treat incoming URIs and Shortcut text as untrusted. Accept only `content://` URIs, known extensions, known Storefronts, and Store IDs in the signed 32-bit range. Reject out-of-range IDs instead of truncating them.
+- Treat incoming URIs and Shortcut text as untrusted. Accept only `content://` URIs, known extensions, known Storefronts, and IDs valid for the Target App's recorded range (GameNative: signed 32-bit). Reject out-of-range IDs instead of truncating them. A Bridge Shortcut carries data only, never an Intent, component or command (ADR 0002).
 - Never log full Shortcut contents or device paths in release builds.
 - Don't add `MANAGE_EXTERNAL_STORAGE`, network permission, root, an accessibility service, or a background service.
-- Only build what the current phase requires. Artemis Dispatch of a `.art` Shortcut is built; don't build discovery, matching or the launcher picker early.
+- Only build what the current phase requires. Artemis Dispatch of a `.art` Shortcut is built. GameBridge 2.0 (`.scratch/gamebridge-2.0/spec.md`) is approved in evidence-gated slices: Bridge Shortcuts and manual Scan, slice 1 for GameNative and Artemis only. Build a ticket only when its blockers are resolved. DroidDeck waits for slice 2. A launcher picker, Associations across Target Apps, background scanning, and writing to LaunchBox stay out. Scan reads Shortcut Folders read-only and writes only to its Output Folder (ADR 0003).
 - Keep classes small and independently testable. Pure logic belongs in `:core` with JVM tests; Android integration belongs in `:app`.
 
 ## Ask first
