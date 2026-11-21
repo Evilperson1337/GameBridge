@@ -1,0 +1,92 @@
+# Export formats and folders: Artemis, GameNative, DroidDeck
+
+Research snapshot: 2026-11-21 UTC. Source audit only: nothing was run, built or installed, and no device was touched. Read alongside [upstream integrations](02-UPSTREAM-INTEGRATIONS.md), [project rules](../../AGENTS.md) and the [glossary](../../GLOSSARY.md). Dispatch is not Launch. Evidence labels: **Source-verified** means read in the pinned file; **Inferred** means reasoned from source without a run; **Unknown** means not established.
+
+## Provenance
+
+Shallow clones at default-branch HEAD, inspected read-only. The GameNative and DroidDeck HEADs have moved since doc 02 (`973d31f`, `f29f72d`); line links below use the new pins, so do not mix them with doc 02 line numbers. These are moving HEADs, not installed or released versions.
+
+| Project | Repository | Pinned commit | Commit date |
+|---|---|---|---|
+| Artemis (`com.limelight.noir`) | [ClassicOldSong/moonlight-android](https://github.com/ClassicOldSong/moonlight-android) | [`c5cf27f4dc822db0e863c4691e7a70c74bea977a`](https://github.com/ClassicOldSong/moonlight-android/commit/c5cf27f4dc822db0e863c4691e7a70c74bea977a) | 2026-09-09 |
+| GameNative | [utkarshdalal/GameNative](https://github.com/utkarshdalal/GameNative) | [`458fe62169fabc3061d6ce513f5670d4ec337ef6`](https://github.com/utkarshdalal/GameNative/commit/458fe62169fabc3061d6ce513f5670d4ec337ef6) | 2026-11-21 |
+| DroidDeck | [Droid-Deck/DroidDeck](https://github.com/Droid-Deck/DroidDeck) | [`6af598b25e9a6b5ce371b43e534a6e2cc10c64a6`](https://github.com/Droid-Deck/DroidDeck/commit/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6) | 2026-11-21 |
+
+That the Artemis repository is the one behind package `com.limelight.noir` is inferred from the [build file](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/build.gradle#L137) (`applicationIdSuffix ".noir"`) and its Obtainium link naming `com.limelight.noir`; an installed APK was not compared.
+
+## Summary table
+
+| | Artemis `.art` | GameNative `.steam` etc. | DroidDeck `.steam` etc. |
+|---|---|---|---|
+| Content | Text, `[key] value` lines: host UUID/name, app UUID/name | UTF-8 decimal integer only | Decimal ID only (up to unsigned 64-bit) |
+| Filename | `<app name>.art` | `<sanitized title>.<ext>` | `<sanitized title>[ (<id>)].<ext>` |
+| Default folder | None: user picks per export | None: unset until user picks | None: unset until user picks |
+| Folder chooser | Android SAF `ACTION_CREATE_DOCUMENT` | SAF `OpenDocumentTree`, converted to a plain path | App's own file browser, plain path |
+| Written via | `ContentResolver.openOutputStream(uri)` | `java.io.File` | `java.io.File` |
+| Shared storage selectable | Yes (any SAF provider) | Yes, but must resolve to a path | Plain path, so shared storage if permitted |
+
+## Artemis
+
+**`.art` format (source-verified).**
+- Export builds a text body: two `#` comment lines, then `[host_uuid] <uuid>`, `[host_name] <name>`, `[app_uuid] <uuid>` and `[app_name] <name>`. `[app_id]` is written only when the app name is empty, which the same method already rejects, so a real export has no `app_id` line ([export](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/utils/ShortcutHelper.java#L225-L257); [key names](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/utils/ShortcutHelper.java#L34-L38)). Export requires non-empty host UUID and name and app UUID and name.
+- Filename is `<trimmed app name>.art` ([source](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/utils/ShortcutHelper.java#L259)). The name is not sanitized there, so illegal characters are left to the document provider.
+
+**Where it is exported (source-verified).** The user chooses the location every time: `ACTION_CREATE_DOCUMENT`, `application/octet-stream`, `EXTRA_TITLE` set to the filename ([source](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/utils/ShortcutHelper.java#L261-L276)). The result is written through `openOutputStream(uri)` ([write](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/utils/ShortcutHelper.java#L277-L311), [caller](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/AppView.java#L428-L431)). There is no default folder and no remembered export directory in this path. It is SAF-native, so shared storage and SD cards are selectable.
+
+**How ShortcutTrampoline reads it (source-verified).**
+- The [manifest entry](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/AndroidManifest.xml#L110-L128) is exported, `noHistory`, with a `VIEW` filter for schemes `content` and `file`, `mimeType */*` and `pathPattern .*\.art`. The path pattern only matches when the URI path ends in `.art`; whether a `content://` URI from LaunchBox satisfies it is Inferred and Unknown for LaunchBox's URIs.
+- On `ACTION_VIEW` with data, the activity opens the URI with `getContentResolver().openInputStream` and parses lines: blank and `#` lines skipped, other lines must start with `[`, key and value split on the first space, later duplicates win, a malformed line throws ([parser](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/ShortcutTrampoline.java#L311-L351); [key lookup](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/ShortcutTrampoline.java#L370-L381)).
+- Host identity: `host_uuid` must parse as a UUID when present; otherwise `host_name` is looked up in Artemis's saved computers. If both are absent the activity shows an invalid-UUID error ([validation](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/ShortcutTrampoline.java#L241-L275)).
+- App identity precedence: `app_uuid` first, then `app_id` as an integer, then `app_name` matched case-insensitively against the cached app list ([source](https://github.com/ClassicOldSong/moonlight-android/blob/c5cf27f4dc822db0e863c4691e7a70c74bea977a/app/src/main/java/com/limelight/ShortcutTrampoline.java#L433-L501)).
+- The activity then binds the computer manager, may wake the host, and if the host is online and paired starts the stream through `ServerHelper.createStartIntent`. Other states produce an error dialog or a quit-confirmation dialog when a different game is running. This is Dispatch-level evidence; a successful stream is not established.
+
+**Needs.** The host must already be known to Artemis (saved and paired) for UUID or name lookup to succeed; the `.art` file carries identifiers, not connection details. Pairing state is Inferred as a prerequisite from the `ONLINE`/`PAIRED` check.
+
+## GameNative
+
+**Folder (source-verified).** There is no default export folder. The per-Storefront directory preference defaults to an empty string and nothing is written until the user configures it ([preference](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/PrefManager.kt#L1730-L1767), [startup sync skips empty](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/sync/FrontendSyncManager.kt#L95-L104)). Each Storefront (Steam, Epic, GOG, Amazon, Custom) has its own directory setting, so there can be up to five folders. The folder is user-visible and user-selected in a settings dialog written for frontends such as ES-DE ([dialog](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/ui/screen/settings/FrontendSyncDialog.kt#L37-L40)).
+
+**Selection mechanism (source-verified, with a SAF caveat).** The dialog uses the SAF `OpenDocumentTree` picker ([picker](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/ui/components/CustomGameFolderPicker.kt#L182-L198)), but immediately converts the tree URI into a filesystem path (primary volume, SD-card volume or Downloads) and stores only that path string ([conversion](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/ui/components/CustomGameFolderPicker.kt#L73-L103)). Writes use `java.io.File`, not the SAF grant ([writes](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/sync/FrontendSyncManager.kt#L166-L225)). So the folder is chosen through SAF but is a plain shared-storage path. Whether the write succeeds under scoped storage depends on the build: the main manifest declares only `WRITE`/`READ_EXTERNAL_STORAGE` capped at API 29 ([manifest](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/AndroidManifest.xml#L14-L15)), and the `legacy` flavors add `MANAGE_EXTERNAL_STORAGE` ([legacy manifest](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/legacy/AndroidManifest.xml#L5-L7)). Which flavor the installed Odin build is, and whether writes to arbitrary shared folders succeed in the non-legacy flavor, is Unknown. Write failures are logged and swallowed by GameNative.
+
+**Filenames and contents (source-verified).**
+- Name: title with `\ / : * ? " < > |` replaced by `_`, trimmed, `unknown` if empty, plus the extension. Collisions between two titles overwrite silently ([sanitizer](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/sync/FrontendSyncManager.kt#L241-L244)).
+- Extensions: `.steam`, `.epic`, `.gog`, `.amazon`, `.pcgame` for Custom ([mapping](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/sync/FrontendSyncManager.kt#L107-L114)).
+- Content: the integer ID as UTF-8 decimal text, no newline, nothing else. Written on install, deleted on uninstall; a full resync deletes every file with the extension (depth 1) in the folder before rewriting. GOG IDs are narrowed with `toIntOrNull() ?: 0` for the sync, so a non-numeric GOG ID would be exported as `0` ([full sync](https://github.com/utkarshdalal/GameNative/blob/458fe62169fabc3061d6ce513f5670d4ec337ef6/app/src/main/java/app/gamenative/sync/FrontendSyncManager.kt#L190-L225)). GameBridge should reject `0` and out-of-range values rather than guess.
+- Only installed games are exported (Source-verified). IDs are `Int`, so signed 32-bit by construction; Custom games share the Steam DAO.
+
+## DroidDeck
+
+**Folder (source-verified).** No default. The folder preference (`game_files` / `folder`) is null until the user enables sync, and sync does nothing when it is unset ([sync](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameFileSync.kt#L13-L33)). The user picks it with DroidDeck's own in-app file browser (`InAppFilePicker`/`FilePickerActivity`) which returns an absolute path, not a SAF URI ([call site](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/FrontEndActivity.kt#L886-L900), [picker](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/files/InAppFilePicker.kt#L20-L34)). There is one folder for all Storefronts. It is user-visible shared storage if the user selects such a path; it is not SAF-selectable. The manifest declares `MANAGE_EXTERNAL_STORAGE` ([manifest](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/AndroidManifest.xml#L39)), so writes to shared paths are Inferred to work once the user grants all-files access; not run.
+
+**Sync behaviour (source-verified).** A background worker re-syncs the configured folder every 30 seconds while the process runs, and sync fails with an error if the Linux runtime, Steam library or game storage is unavailable ([worker](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameFileSync.kt#L18-L52)). A hidden inventory file `.droiddeck-sync.json` (format `droiddeck-game-files-v1`) records which files DroidDeck owns; only those are removed later ([sync](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameFiles.kt#L14-L25)). Optional icons go to `<folder>/images/<slug>-icon.<ext>`. GameBridge must ignore the inventory and `images/` entries.
+
+**Filenames and contents (source-verified).**
+- Name: sanitized title (same illegal-character set plus control characters, dots and whitespace trimmed, stem capped at 200 UTF-8 bytes), with ` (<id>)` appended when a name collides, then the extension ([filename](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameFiles.kt#L91-L113)).
+- Extensions come from the Storefront id: `.steam` default, `.epic`, `.gog`, `.amazon`, `.xbox`, `.ubisoft`, `.ea`, `.rockstar`, `.battlenet`, `.itch`, `.gamejolt`; `.pcgame` and `.droiddeck` are also read ([extension](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameRequest.kt#L35-L44), [guide](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/docs/frontend-integration.md#L41-L56)). Whether `.pcgame` and `.droiddeck` are ever written (versus only read) was not checked and is Unknown.
+- Content: the game's ID string only, written by `contents()` after requiring a valid ID. Files are capped at 4096 bytes on read.
+
+**ID range (source-verified).** IDs match `[1-9][0-9]{0,19}` and must parse as unsigned 64-bit ([validation](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameLaunchLink.kt#L3-L10)). Exported IDs can exceed signed 32-bit, so GameBridge's signed 32-bit policy will reject them. The file does not record the Storefront inside; only the extension does.
+
+**Launch intent contract (source-verified).**
+- Component: explicit `com.droiddeck.launcher/com.droiddeck.launcher.FrontEndActivity` (exported, never disabled). `.MainActivity` is a launcher alias that can be disabled; do not target it ([guide](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/docs/frontend-integration.md#L5-L18); [manifest](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/AndroidManifest.xml#L143-L179)). Other variant packages (`com.tencent.ig` and others) share the class and action.
+- Action extras: action `com.droiddeck.launcher.LAUNCH_GAME` (also accepts GameNative's `app.gamenative.LAUNCH_GAME`), extra `app_id` as String, Int > 0 or non-zero Long, and optional `game_source` as a String naming a Storefront (absent means Steam; a non-String value is rejected) ([source](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameLaunchIntent.kt#L6-L35)). The guide says to send IDs with `--es` because they may exceed signed 64-bit.
+- View: `ACTION_VIEW` with `droiddeck://game/<id>`, `steam://rungameid/<id>`, a bare ID, or a file or content URI to one of the files above. For a file or content URI the guide says DroidDeck reads through the URI, or through the shared-storage path behind it when the URI grants no access ([guide](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/docs/frontend-integration.md#L32-L39), [guide](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/docs/frontend-integration.md#L76); [SAF mapping](https://github.com/Droid-Deck/DroidDeck/blob/6af598b25e9a6b5ce371b43e534a6e2cc10c64a6/app/src/main/java/com/droiddeck/launcher/frontend/GameFiles.kt#L68-L79)). The path fallback only handles `com.android.externalstorage.documents` URIs. Because the manifest has no filter for file types, the explicit component is required.
+
+## SAF selectability, by project
+
+| Project | Folder chosen via SAF | Folder user-visible shared storage | App-private |
+|---|---|---|---|
+| Artemis | Yes, per file (`CREATE_DOCUMENT`) | Yes, wherever the user saves | Not by default |
+| GameNative | Picker is SAF, result is converted to a path | Yes, as a path | Possible only if the user could pick a private path; not shown |
+| DroidDeck | No, in-app browser, absolute path | Yes, as a path | Possible if the browser shows it; not checked |
+
+For GameBridge this means the three exports differ: Artemis files can land in any SAF provider, while GameNative and DroidDeck write plain paths that a LaunchBox ROM folder can only see if the user points the export at shared storage that LaunchBox scans. LaunchBox scanning of those folders was not verified here (see [doc 03](03-LAUNCHBOX-INTEGRATION.md)).
+
+## Unknowns
+
+- Whether LaunchBox's `{file.uri}` content URI ends in `.art` and satisfies the Artemis `pathPattern`; the actual outgoing intent was not observed.
+- Behaviour of Artemis when the file's host UUID is stale or the host is unpaired: only the code path was read.
+- GameNative's non-legacy flavor behaviour for writing to shared folders without all-files access; which flavor is installed on the Odin.
+- Whether DroidDeck writes `.pcgame` or `.droiddeck`, and its default behaviour before the user enables sync (read: nothing is written).
+- Installed APK versions versus these HEADs; GameNative and DroidDeck HEADs moved during this research day.
+- Cross-app ID namespace overlap: `.steam` and `.epic` from GameNative and DroidDeck can look identical; extension and ID range do not prove which app exported a file.

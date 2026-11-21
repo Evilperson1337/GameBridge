@@ -507,3 +507,28 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 ### Assumed / not verified
 
 - LaunchBox's complete outgoing intent and URI grants across versions/providers, a supported programmatic import endpoint or its absence, cause of the Windows Update Games outcome, and compatibility across Android 13–16 remain unverified. The APK inspection and device matrix are proposed, authorization-gated procedures, not results. Dispatch does not prove Launch.
+
+## 2026-11-21: Export formats and folders research (Artemis, GameNative, DroidDeck)
+
+### Verified
+
+- Read pinned source (no upstream code run): Artemis `c5cf27f4dc822db0e863c4691e7a70c74bea977a`, GameNative `458fe62169fabc3061d6ce513f5670d4ec337ef6`, DroidDeck `6af598b25e9a6b5ce371b43e534a6e2cc10c64a6`. The GameNative and DroidDeck HEADs moved after doc 02, so its line numbers no longer apply. Findings and links are in [export formats and folders](gamebridge-2.0/04-EXPORT-FORMATS-AND-FOLDERS.md).
+- Artemis `.art` is a text file of `[key] value` lines (`host_uuid`, `host_name`, `app_uuid`, `app_name`, optional `app_id`), exported by the user via SAF `CREATE_DOCUMENT`; ShortcutTrampoline matches `VIEW` on `content`/`file` URIs whose path ends `.art`.
+- GameNative and DroidDeck have no default export folder (unset until the user picks one). Both write plain files through `java.io.File`, containing only a decimal ID. GameNative picks the folder via SAF but converts it to a path; DroidDeck uses its own in-app browser.
+- DroidDeck IDs can exceed signed 32-bit (unsigned 64-bit); GameNative IDs are signed ints. DroidDeck's component and extras contract is as stated in its guide and `GameLaunchIntent.kt`.
+
+### Assumed / not verified
+
+- No device, installed APK, LaunchBox URI or write-permission behaviour was tested. Whether LaunchBox passes a `.art`-suffixed URI, whether non-legacy GameNative builds can write to shared folders, and whether DroidDeck writes `.pcgame`/`.droiddeck` are unverified. Dispatch does not prove Launch.
+
+## 2026-11-21: Launch mechanism for `.gamebridge` Shortcuts (research)
+
+### Verified
+
+- Read the LaunchBox Custom Emulator (With Code) guide, the Android getting-started guide, the Android changelog and the 1.22 release notes, and the Android intent-filter, `<data>`, 7.0 file-sharing and 16 behaviour-change pages. Findings and links are in [launch mechanism](gamebridge-2.0/05-LAUNCH-MECHANISM.md).
+- LaunchBox documents only `{file.path}` and `{file.uri}` for Android. The `{file.uri}` example is `file://`. LaunchBox documents an emulator choice per platform with a per-game override, and no per-extension association or "open with default app" route. The `%romfile%` variables page applies to LaunchBox for Windows only.
+- Android 13+ delivers external intents to an exported component of an app targeting 33+ only if they match the filter's action and categories. Android 16 strict explicit-intent matching is opt-in by the receiver (`intentMatchingFlags`). The current `BridgeActivity` filter (DISPATCH, `DEFAULT`, `content`) matches the observed LaunchBox intent.
+
+### Assumed / not verified
+
+- That the platform Scoped Storage Permission is what makes `{file.uri}` a granted `content://` URI. That `.gamebridge` survives in `DISPLAY_NAME` and imports on the Windows platform. Any Android 14–16 or other-version LaunchBox behaviour. No device, APK or LaunchBox configuration was touched. Dispatch does not prove Launch.
