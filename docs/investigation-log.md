@@ -573,3 +573,19 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 - The Scan screen (`ScanActivity`), the system folder picker and persisted grants were built but not exercised by hand yet, on the emulator or the Odin. Re-granting and revoking behaviour is untested.
 - Whether SAF can read GameNative's real export folder on the Odin is unverified: GameNative writes it with plain file paths (research 04). The Odin check is ticket 06.
 - Whether a real provider (ExternalStorageProvider) keeps the `.gamebridge` name for `application/octet-stream` is an assumption from the platform's behaviour, not observed.
+
+## 2026-11-22: Scan by hand on the Odin (ticket 03)
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed and the maintainer used the Scan screen (Odin 2 Portal, Android 13). The system folder picker granted both folders. The GameNative folder was GameNative's folder on the SD card. Its top level held one export (`Warhammer Survivors.gog`) next to the Storefront install folders, which were ignored. The Output Folder was a folder in shared storage.
+- The summary said one game was added. GameBridge wrote exactly one file into the Output Folder: `Warhammer Survivors.gamebridge` with `{"version":1,"target":"gamenative","storefront":"gog","store_id":2068449424}`. Nothing else changed.
+- SAF read an export that GameNative wrote with plain file paths, on the SD card. This answers part of research 04's open question, for this device and folder only.
+- After a force-stop and relaunch, the Scan screen still showed both folders, so the persisted grants survived.
+- Cleanup: the written file, the Output Folder and an unused empty test folder were deleted, and the debug build was uninstalled. GameNative's folder and export were not touched.
+
+### Assumed / not verified
+
+- A second Scan's "unchanged" result was not observed. The file's modification time was unchanged afterwards, but whether a rescan ran is unknown.
+- Revoking a grant (for example by clearing the app's data) and choosing a folder again were not tried.
+- The written file was not Dispatched. A Store ID of 2068449424 for GOG is within the signed 32-bit range.

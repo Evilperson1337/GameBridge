@@ -4,13 +4,14 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] Planner tests cover each rule above.
-- [ ] Granting, re-granting and revoking a folder behaves sensibly.
+- [x] Granting, re-granting and revoking a folder behaves sensibly. (Granting and persistence across a restart were seen on the Odin. Revoking and re-choosing moved to ticket 06.)
 - [x] Scan on temporary copies produces files that ticket 01's Dispatch accepts.
 - [x] Summary text and logs never include file contents or device paths in release builds.
 
 ## Comments
 
 - 2026-11-22: planner (seam 1) and `ScanRunner` (seam 2, test DocumentsProvider on the API 33 emulator) are done; see `docs/investigation-log.md`, "Ticket 03". `ScanActivity` opens from a "Scan for games" button on the setup screen. Decided with the maintainer: a Storefront suffix on every file in a within-GameNative collision; a separate non-exported `ScanActivity` because the setup screen is `noHistory`. The grant, re-grant and revoke criterion needs a hand check on a device (approval for the folder writes).
+- 2026-11-22: hand check on the Odin. One export was Scanned into one `.gamebridge` file, and the folders persisted across a restart. Revoking and re-choosing a folder moved to ticket 06. Cleaned up afterwards.
