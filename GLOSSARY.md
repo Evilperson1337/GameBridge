@@ -62,6 +62,9 @@ A folder the player grants GameBridge read-only access to, containing the Shortc
 **Output Folder**:
 The folder the player grants GameBridge write access to, where Scan puts Bridge Shortcuts. LaunchBox is pointed at it manually.
 
+**Ariane**:
+A fork of Artemis (`com.limelight.ariane`) and a Target App for streamed games in 2.0. It keeps its own paired hosts, so a Bridge Shortcut names Ariane or Artemis explicitly.
+
 **Scan**:
 A player-started pass that reads the Shortcut Folders and writes a Bridge Shortcut for each game found. It never runs in the background.
 _Avoid_: discovery, sync, auto-import

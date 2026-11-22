@@ -24,11 +24,12 @@ GameBridge owns the logic. LaunchBox only passes a **Bridge Shortcut** (`.gamebr
 - **Evidence gate.** A Target App's `verified` flag flips only after an investigation-log entry records the Target App version, the Android version, a logcat-observed Dispatch, and a separately noted Launch. The setup screen shows "verified with <app> <version>".
 - **Legacy path.** Native `.steam`, `.epic`, `.gog`, `.amazon`, `.pcgame` and `.art` Shortcuts keep working through `BridgeActivity` for now. Its removal is a later decision.
 - **Code layout.** `:core`: Bridge Shortcut parser and writer, per-target validators, the scan planner (names and contents in, files to write and rejections out), failure categories; JVM tests, planner written test-first. `:app`: SAF access, file IO, setup UI.
+- **Ariane (added 2026-11-22).** Ariane (`com.limelight.ariane`, a fork of Artemis) is its own Target App, with `target: "ariane"`. It has the same fields and the same Dispatch template as `"artemis"` but its own package, because each client keeps its own paired hosts. Scan gets an optional Ariane Shortcut Folder. A legacy `.art` still goes to Artemis only: there is no switch to Ariane when Artemis is missing. Ariane's `verified` flag stays off until a stream started through GameBridge is recorded.
 - **Changed earlier decision.** The Artemis Dispatch spec says GameBridge does not parse `.art` ("Artemis owns the format"). Scan must read `.art` to build the Bridge Shortcut. Dispatch of a legacy `.art` stays unparsed.
 
 ## Slices
 
-1. **Slice 1:** GameNative Dispatch (01), LaunchBox hand-off check (02), GameNative Scan (03), Artemis feasibility (04), Artemis target (05), device validation (06), docs (07).
+1. **Slice 1:** GameNative Dispatch (01), LaunchBox hand-off check (02), GameNative Scan (03), Artemis feasibility (04), Artemis and Ariane targets (05), device validation (06), docs (07).
 2. **Slice 2:** DroidDeck (08), after slice 1's gate.
 
 ## Known gaps and open questions

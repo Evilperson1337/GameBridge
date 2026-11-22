@@ -10,4 +10,5 @@
 - [ ] Revoking a folder grant and choosing the folder again behave sensibly, and a rescan reports "unchanged".
 - [ ] Installed app versions, GameNative flavor, and Android 14 to 16 behaviour (or "not tested") recorded.
 - [ ] Dispatch (logcat) and Launch (person) recorded separately in `docs/investigation-log.md`.
+- [ ] Ariane: a stream started from a `.gamebridge` file through GameBridge, with its version recorded.
 - [ ] `verified` flags flip only after those entries; the setup screen shows "verified with <app> <version>".
