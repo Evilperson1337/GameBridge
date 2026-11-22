@@ -560,3 +560,16 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 
 - That GameNative's "Game Not Installed" reflects reading Store ID 274190 as Steam. It is consistent with that, but GameNative's own logs were not read.
 - A Launch through a `.gamebridge` file needs an installed game's Store ID; not tried. The URI came from adb, not LaunchBox (ticket 02).
+
+## 2026-11-22: Ticket 03, Scan GameNative into the Output Folder (gamebridge-2.0)
+
+### Verified
+
+- `planScan` in `:core` (test-first, 11 tests in `ScanPlanTest`). Covered: stem naming; a Storefront suffix on every file in a case-insensitive collision; invalid exports rejected by name and reason; non-export files ignored; unverified Storefronts reported "found, not enabled"; identical output files "unchanged"; differing ones held for confirmation; summary text without contents; planned files Dispatch the same game. `:core:test --rerun-tasks`: 73 tests, 0 failures.
+- `ScanRunner` in `:app` against a test-only `DocumentsProvider` (5 tests in `ScanRunnerTest`). Covered: planning from both trees; writes only into the Output Folder, with the source folder unchanged and a sibling folder empty; confirmed replace keeps the existing name and truncates; no clobbering without confirmation; a tree without a grant is reported unreadable. `:app:pixel2api33DebugAndroidTest`: 57 tests, 0 failures (API 33 emulator). `check` and `assembleDebug` succeeded.
+
+### Assumed / not verified
+
+- The Scan screen (`ScanActivity`), the system folder picker and persisted grants were built but not exercised by hand yet, on the emulator or the Odin. Re-granting and revoking behaviour is untested.
+- Whether SAF can read GameNative's real export folder on the Odin is unverified: GameNative writes it with plain file paths (research 04). The Odin check is ticket 06.
+- Whether a real provider (ExternalStorageProvider) keeps the `.gamebridge` name for `application/octet-stream` is an assumption from the platform's behaviour, not observed.
