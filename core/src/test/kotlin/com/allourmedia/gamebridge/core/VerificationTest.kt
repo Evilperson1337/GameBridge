@@ -36,6 +36,23 @@ class VerificationTest {
     }
 
     @Test
+    fun readmeBridgeShortcutTableMatchesTheRecordedVersions() {
+        val rows = readmeRows()
+        assertTrue("GameNative row", rows.any { it.startsWith("| GameNative | $GAMENATIVE_VERIFIED_VERSION |") })
+        for (client in StreamClient.all) {
+            val prefix = "| ${client.name} (`${client.packageName}`) |"
+            val row = rows.singleOrNull { it.startsWith(prefix) }
+            val expected = client.verifiedVersion ?: "Not verified"
+            assertEquals(client.name, "$prefix $expected |", row?.let { it.substring(0, it.indexOf('|', prefix.length) + 1) })
+        }
+    }
+
+    private fun readmeRows(): List<String> {
+        val lines = java.io.File("../README.md").readLines()
+        return lines.filter { it.startsWith("| ") }
+    }
+
+    @Test
     fun anUnverifiedClientIsNeverShownAsVerified() {
         val unverified = StreamClient("Test", "test", "com.example.test", verifiedVersion = null)
         assertFalse(unverified.verified)

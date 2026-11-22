@@ -1,6 +1,6 @@
 # Spec: GameBridge 2.0 (Bridge Shortcuts and Scan)
 
-**Status:** needs-triage (drafted from a grilling session on 2026-11-21; awaiting maintainer approval before any code)
+**Status:** approved. Slice 1 is complete (2026-11-22); slice 2 is current.
 
 **Source:** grilling session with the maintainer, 2026-11-21, grounded in `docs/gamebridge-2.0/` (research 01 to 05). Vocabulary follows `GLOSSARY.md`. Version numbers are working names: slices ship as 0.x; "2.0" is used once the model is proven on all three Target Apps.
 
@@ -29,8 +29,8 @@ GameBridge owns the logic. LaunchBox only passes a **Bridge Shortcut** (`.gamebr
 
 ## Slices
 
-1. **Slice 1:** GameNative Dispatch (01), LaunchBox hand-off check (02), GameNative Scan (03), Artemis feasibility (04), Artemis and Ariane targets (05), device validation (06), docs (07).
-2. **Slice 2:** DroidDeck (08), after slice 1's gate.
+1. **Slice 1 (complete, 2026-11-22):** GameNative Dispatch (01), LaunchBox hand-off check (02), GameNative Scan (03), Artemis feasibility (04), Artemis and Ariane targets (05), device validation (06), docs (07).
+2. **Slice 2 (current):** DroidDeck (08). Slice 1's gate is passed; 08 is built once its own blockers are resolved.
 
 ## Known gaps and open questions
 

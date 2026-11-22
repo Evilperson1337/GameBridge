@@ -19,3 +19,8 @@ kotlin {
 dependencies {
     testImplementation(libs.junit)
 }
+
+// BridgeFailureTest and VerificationTest read the README, so a README edit must rerun them.
+tasks.test {
+    inputs.file(rootProject.file("README.md")).withPropertyName("readme")
+}

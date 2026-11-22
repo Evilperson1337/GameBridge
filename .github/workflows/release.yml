@@ -33,6 +33,10 @@ jobs:
             exit 1
           fi
 
+      # A tag never ships code that fails its tests, ktlint or lint.
+      - name: Check
+        run: ./gradlew --no-daemon check
+
       - name: Check signing secrets are present
         env:
           KEYSTORE_BASE64: ${{ secrets.GAMEBRIDGE_KEYSTORE_BASE64 }}

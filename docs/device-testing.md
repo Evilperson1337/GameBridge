@@ -40,6 +40,10 @@ Results: `app/build/reports/androidTests/managedDevice/debug/`. Requires `/dev/k
 
 Only GameBridge's own debug build (`com.allourmedia.gamebridge.debug`) may be installed with `adb install` / `adb uninstall`. Ask before installing anything else or touching LaunchBox configuration.
 
+- Pick the device with `export ANDROID_SERIAL=<host:port>`, not `adb -s`. The login shell is zsh, where `-s $VAR` and unquoted wildcards in variable assignments behave differently from bash.
+- To hand a Bridge Shortcut to the debug build the way LaunchBox would, use `scripts/dispatch-output.sh`. With no argument, it lists the Output Folder. With an exact file name, it sends that file and prints the Dispatch from logcat. It needs a Scan with an Output Folder in the debug build first. Hand-built SAF URIs are what failed before: a guessed file name came back as `Unreadable`.
+- LaunchBox's own behaviour when it is changed or imports games: see the warnings in `docs/launchbox-setup.md`.
+
 ## Waydroid (optional)
 
 Waydroid is available in the Arch `extra` repo but is not needed for any ticket. The Gradle-managed device is the supported way to run instrumentation tests. Waydroid could be used for manual poking only; it is not set up or verified here.
