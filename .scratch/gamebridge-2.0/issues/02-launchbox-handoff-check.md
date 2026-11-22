@@ -6,7 +6,7 @@
 
 **Status:** resolved
 
-- [x] URI LaunchBox sends with scoped storage set and unset (scheme, read grant), recorded without device paths.
+- [x] URI LaunchBox sends with scoped storage set (scheme, read grant), recorded without device paths. (Unset was not tested; see the log.)
 - [x] The display name GameBridge reads still ends in `.gamebridge`, including upper case.
 - [x] Whether LaunchBox imports `.gamebridge` files on the platform.
 - [x] Dispatch (logcat) and any Launch (person) recorded separately; LaunchBox configuration restored.
