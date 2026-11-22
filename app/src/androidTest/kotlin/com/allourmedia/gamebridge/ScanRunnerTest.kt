@@ -45,7 +45,9 @@ class ScanRunnerTest {
         val context = instrumentation.context
         context.startActivity(
             Intent(context, FolderSeedActivity::class.java)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                // MULTIPLE_TASK: with NEW_TASK alone, a seed task still finishing from the previous test is brought to
+                // the front instead, onCreate never runs, and the folders are never seeded.
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
                 .putExtra(FolderSeedActivity.EXTRA_SEED, bundle)
                 .putExtra(FolderSeedActivity.EXTRA_PACKAGE, instrumentation.targetContext.packageName),
         )
