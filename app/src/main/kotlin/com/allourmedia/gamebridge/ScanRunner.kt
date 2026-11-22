@@ -8,13 +8,17 @@ import com.allourmedia.gamebridge.core.BRIDGE_SHORTCUT_EXTENSION
 import com.allourmedia.gamebridge.core.MAX_LOCAL_SHORTCUT_BYTES
 import com.allourmedia.gamebridge.core.PlannedFile
 import com.allourmedia.gamebridge.core.ScanPlan
+import com.allourmedia.gamebridge.core.ShortcutFolder
 import com.allourmedia.gamebridge.core.SourceShortcut
 import com.allourmedia.gamebridge.core.planScan
 import com.allourmedia.gamebridge.core.readCapped
 import com.allourmedia.gamebridge.core.shortcutExtension
 
-/** The folders a Scan uses. */
-enum class ScanFolder { GameNative, Output }
+/** The folders a Scan uses: the Shortcut Folders it reads, and the Output Folder it writes. */
+enum class ScanFolder { GameNative, Artemis, Ariane, Output }
+
+/** The Shortcut Folders, by the same names. */
+val ShortcutFolder.scanFolder: ScanFolder get() = ScanFolder.valueOf(name)
 
 sealed interface ScanRead {
     data class Planned(
@@ -40,18 +44,21 @@ class ScanRunner(
         val name: String,
     )
 
+    /** Reads each granted Shortcut Folder in [sources] and the Output Folder, and plans the Scan. */
     fun plan(
-        gameNativeTree: Uri,
+        sources: Map<ShortcutFolder, Uri>,
         outputTree: Uri,
     ): ScanRead {
-        val sources =
-            readFiles(gameNativeTree, files(gameNativeTree) ?: return ScanRead.Unreadable(ScanFolder.GameNative))
-                ?: return ScanRead.Unreadable(ScanFolder.GameNative)
+        val found =
+            sources.mapValues { (folder, tree) ->
+                val unreadable = ScanRead.Unreadable(folder.scanFolder)
+                readFiles(tree, files(tree) ?: return unreadable) ?: return unreadable
+            }
         val outputChildren =
             files(outputTree)?.filter { shortcutExtension(it.name) == BRIDGE_SHORTCUT_EXTENSION }
                 ?: return ScanRead.Unreadable(ScanFolder.Output)
         val existing = readFiles(outputTree, outputChildren) ?: return ScanRead.Unreadable(ScanFolder.Output)
-        return ScanRead.Planned(planScan(sources, existing.associate { it.displayName to it.bytes }))
+        return ScanRead.Planned(planScan(found, existing.associate { it.displayName to it.bytes }))
     }
 
     /**

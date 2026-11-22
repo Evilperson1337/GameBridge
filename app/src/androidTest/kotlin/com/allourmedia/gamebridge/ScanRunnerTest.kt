@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.allourmedia.gamebridge.core.PlannedFile
 import com.allourmedia.gamebridge.core.ScanEntry
+import com.allourmedia.gamebridge.core.ShortcutFolder
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,6 +32,7 @@ class ScanRunnerTest {
         source: Map<String, String>,
         output: Map<String, String> = emptyMap(),
         outside: Map<String, String> = emptyMap(),
+        artemis: Map<String, String> = emptyMap(),
     ) {
         val marker = "seed-${System.nanoTime()}.txt"
         val bundle =
@@ -38,6 +40,7 @@ class ScanRunnerTest {
                 putBundle("source", bundleOf(source + (marker to "")))
                 putBundle("output", bundleOf(output))
                 putBundle("outside", bundleOf(outside))
+                putBundle("artemis", bundleOf(artemis))
             }
         val context = instrumentation.context
         context.startActivity(
@@ -73,7 +76,8 @@ class ScanRunnerTest {
 
     private fun sourceFiles() = files(FolderProvider.SOURCE_TREE).filterKeys { !it.startsWith("seed-") }
 
-    private fun plan() = (runner.plan(FolderProvider.SOURCE_TREE, FolderProvider.OUTPUT_TREE) as ScanRead.Planned).plan
+    private fun plan(sources: Map<ShortcutFolder, Uri> = mapOf(ShortcutFolder.GameNative to FolderProvider.SOURCE_TREE)) =
+        (runner.plan(sources, FolderProvider.OUTPUT_TREE) as ScanRead.Planned).plan
 
     @Test
     fun scanPlansFromTheShortcutFolderAndTheOutputFolder() {
@@ -118,8 +122,38 @@ class ScanRunnerTest {
     fun aFolderWithoutAGrantIsReportedUnreadable() {
         seed(source = mapOf("ABZU.epic" to "64"))
         val notGranted = DocumentsContract.buildTreeDocumentUri(FolderProvider.AUTHORITY, "outside-not-granted")
-        assertEquals(ScanRead.Unreadable(ScanFolder.GameNative), runner.plan(notGranted, FolderProvider.OUTPUT_TREE))
-        assertEquals(ScanRead.Unreadable(ScanFolder.Output), runner.plan(FolderProvider.SOURCE_TREE, notGranted))
+        assertEquals(
+            ScanRead.Unreadable(ScanFolder.GameNative),
+            runner.plan(mapOf(ShortcutFolder.GameNative to notGranted), FolderProvider.OUTPUT_TREE),
+        )
+        assertEquals(
+            ScanRead.Unreadable(ScanFolder.Artemis),
+            runner.plan(mapOf(ShortcutFolder.Artemis to notGranted), FolderProvider.OUTPUT_TREE),
+        )
+        assertEquals(
+            ScanRead.Unreadable(ScanFolder.Output),
+            runner.plan(mapOf(ShortcutFolder.GameNative to FolderProvider.SOURCE_TREE), notGranted),
+        )
+    }
+
+    @Test
+    fun scanReadsTheGameNativeAndArtemisFoldersTogether() {
+        val art =
+            "# Artemis app entry\n[host_uuid] 11111111-2222-4333-8444-555555555555\n[host_name] Synthetic Host\n" +
+                "[app_uuid] aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee\n[app_name] Desktop\n"
+        seed(source = mapOf("Portal.steam" to "400"), artemis = mapOf("Desktop.art" to art, "Portal.art" to art))
+        val plan =
+            plan(mapOf(ShortcutFolder.GameNative to FolderProvider.SOURCE_TREE, ShortcutFolder.Artemis to FolderProvider.ARTEMIS_TREE))
+        // Folder listing order is up to the provider, so compare names as a set.
+        assertEquals(
+            setOf("Portal (Steam).gamebridge", "Desktop.gamebridge", "Portal (Artemis).gamebridge"),
+            plan.writes.map { it.name }.toSet(),
+        )
+        assertEquals(
+            """{"version":1,"target":"artemis","host_uuid":"11111111-2222-4333-8444-555555555555","host_name":"Synthetic Host",""" +
+                """"app_uuid":"aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee","app_name":"Desktop"}""",
+            plan.writes.single { it.name == "Desktop.gamebridge" }.content,
+        )
     }
 
     private companion object {

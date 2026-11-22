@@ -5,6 +5,7 @@
     <queries>
         <package android:name="app.gamenative" />
         <package android:name="com.limelight.noir" />
+        <package android:name="com.limelight.ariane" />
         <package android:name="com.unbrokensoftware.launchbox" />
     </queries>
 

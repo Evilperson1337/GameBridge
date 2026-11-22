@@ -21,6 +21,8 @@ import java.io.IOException;
  * and {@code outside} are real directories in this provider's cache, so a test can see every byte the app wrote and
  * where. Document IDs are paths relative to that cache directory.
  *
+ * A fourth folder, {@code artemis}, stands in for an Artemis Shortcut Folder.
+ *
  * <p>Test-only {@code call} methods, reachable only from this test APK's own process ({@link FolderSeedActivity}):
  * {@code reset} (seed {@code source}, {@code output} and {@code outside} from bundles of name to text; a name ending in
  * {@code /} is a folder) and {@code grant} (grant {@code arg}, a package, prefix read access to the source and outside
@@ -33,6 +35,7 @@ public class FolderProvider extends DocumentsProvider {
     public static final Uri SOURCE_TREE = DocumentsContract.buildTreeDocumentUri(AUTHORITY, "source");
     public static final Uri OUTPUT_TREE = DocumentsContract.buildTreeDocumentUri(AUTHORITY, "output");
     public static final Uri OUTSIDE_TREE = DocumentsContract.buildTreeDocumentUri(AUTHORITY, "outside");
+    public static final Uri ARTEMIS_TREE = DocumentsContract.buildTreeDocumentUri(AUTHORITY, "artemis");
 
     private static final String[] ROOT_COLUMNS = {Root.COLUMN_ROOT_ID, Root.COLUMN_DOCUMENT_ID, Root.COLUMN_TITLE, Root.COLUMN_FLAGS};
     private static final String[] DOC_COLUMNS = {
@@ -115,6 +118,7 @@ public class FolderProvider extends DocumentsProvider {
                     int read = Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
                     getContext().grantUriPermission(arg, SOURCE_TREE, read);
                     getContext().grantUriPermission(arg, OUTSIDE_TREE, read);
+                    getContext().grantUriPermission(arg, ARTEMIS_TREE, read);
                     getContext().grantUriPermission(arg, OUTPUT_TREE, read | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     return Bundle.EMPTY;
                 default:
@@ -127,7 +131,7 @@ public class FolderProvider extends DocumentsProvider {
 
     private void reset(Bundle extras) throws IOException {
         delete(base());
-        for (String folder : new String[] {"source", "output", "outside"}) {
+        for (String folder : new String[] {"source", "output", "outside", "artemis"}) {
             File dir = new File(base(), folder);
             if (!dir.mkdirs()) throw new IOException("mkdirs " + folder);
             Bundle files = extras.getBundle(folder);

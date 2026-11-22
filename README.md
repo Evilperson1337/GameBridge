@@ -60,6 +60,9 @@ When something is wrong, GameBridge shows a dialog with the Shortcut's filename 
 | Support for Steam games isn't verified yet. (also Epic, Amazon, Custom) | Not reachable at present, because all five Storefronts are enabled. |
 | Artemis is not installed. Install Artemis to play Remote Shortcuts (.art). | Install Artemis (`com.limelight.noir`) and pick the game again. |
 | Artemis refused the request. | Android refused the hand-off to Artemis. This was simulated in tests, never seen on a device. |
+| Ariane is not installed. Install Ariane to play this game. | A `.gamebridge` file names Ariane (`com.limelight.ariane`). Install it, or rescan with the Artemis folder instead. |
+| Ariane refused the request. | Android refused the hand-off to Ariane. Simulated in tests only. |
+| This Target App isn't verified yet. | The `.gamebridge` file names a client (for example Ariane) whose Dispatch is not verified yet. The dialog names the client. |
 | This Shortcut's contents aren't valid. | The file must hold exactly one positive whole number that fits in a signed 32-bit integer. GameNative writes `0` for some GOG games, which is rejected. |
 | This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, not another file. | The file is over 4 KiB. |
 | This Shortcut was made by a newer GameBridge. Update GameBridge, then pick the game again. | A `.gamebridge` file uses a format version this build doesn't know. |

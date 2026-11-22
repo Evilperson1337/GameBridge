@@ -28,6 +28,7 @@ import androidx.test.runner.lifecycle.Stage
 import com.allourmedia.gamebridge.core.BridgeFailure
 import com.allourmedia.gamebridge.core.FailureCategory
 import com.allourmedia.gamebridge.core.Storefront
+import com.allourmedia.gamebridge.core.StreamClient
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
 import org.junit.After
@@ -381,6 +382,48 @@ class BridgeActivityTest {
         assertEquals(0, dispatches().size)
         tapClose()
         awaitFinished(activity)
+    }
+
+    @Test
+    fun artemisBridgeShortcutIsDispatchedToArtemisAsExtrasWithoutAnyFile() {
+        stubArtemis()
+        awaitFinished(start(bridgeIntent(fixtureUri("Synthetic-artemis.gamebridge"))))
+        intended(
+            allOf(
+                hasAction(Intent.ACTION_VIEW),
+                hasComponent(artemis),
+                hasExtra("UUID", "11111111-2222-4333-8444-555555555555"),
+                hasExtra("Name", "Synthetic Host"),
+                hasExtra("AppUUID", "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"),
+                hasExtra("AppName", "Desktop"),
+            ),
+        )
+        val dispatched = artemisDispatches().single()
+        assertEquals(setOf("UUID", "Name", "AppUUID", "AppName"), dispatched.extras!!.keySet())
+        // No file and no grant: the Bridge Shortcut's URI is never forwarded.
+        assertEquals(null, dispatched.data)
+        assertEquals(0, dispatched.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        assertEquals(0, dispatches().size)
+    }
+
+    @Test
+    fun artemisBridgeShortcutWithArtemisAbsentShowsNotInstalledAndNeverFallsBack() {
+        // Artemis is not installed on the test emulator, so this is a real, unstubbed Dispatch.
+        failureDialogFor(
+            bridgeIntent(fixtureUri("Synthetic-artemis.gamebridge")),
+            BridgeFailure(FailureCategory.ArtemisNotInstalled, "Synthetic-artemis.gamebridge"),
+        )
+        assertEquals(0, Intents.getIntents().count { it.component?.packageName == "com.limelight.ariane" })
+    }
+
+    @Test
+    fun arianeBridgeShortcutShowsNotVerifiedAndStartsNothing() {
+        failureDialogFor(
+            bridgeIntent(fixtureUri("Synthetic-ariane.gamebridge")),
+            BridgeFailure(FailureCategory.TargetNotVerified, "Synthetic-ariane.gamebridge", client = StreamClient.Ariane),
+        )
+        assertEquals(0, artemisDispatches().size)
+        assertEquals(0, Intents.getIntents().count { it.component?.packageName == "com.limelight.ariane" })
     }
 
     @Test

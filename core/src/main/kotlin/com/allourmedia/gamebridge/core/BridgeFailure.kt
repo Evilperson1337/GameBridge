@@ -35,21 +35,33 @@ enum class FailureCategory(
     GameNativeRefused("GameNative refused the request."),
     ArtemisNotInstalled("Artemis is not installed. Install Artemis to play Remote Shortcuts (.art)."),
     ArtemisRefused("Artemis refused the request."),
+    ArianeNotInstalled("Ariane is not installed. Install Ariane to play this game."),
+    ArianeRefused("Ariane refused the request."),
+    TargetNotVerified("This Target App isn't verified yet."),
 }
 
 private const val MAX_NAME = 80
 
-/** A failure plus the Shortcut's filename and, for an unverified Storefront, that Storefront. */
+/** A failure plus the Shortcut's filename and, for an unverified Storefront or client, that Storefront or client. */
 data class BridgeFailure(
     val category: FailureCategory,
     val fileName: String? = null,
     val storefront: Storefront? = null,
+    val client: StreamClient? = null,
 ) {
     val reason: String =
-        if (category == FailureCategory.StorefrontNotVerified && storefront != null) {
-            "Support for ${storefront.name} games isn't verified yet."
-        } else {
-            category.reason
+        when {
+            category == FailureCategory.StorefrontNotVerified && storefront != null -> {
+                "Support for ${storefront.name} games isn't verified yet."
+            }
+
+            category == FailureCategory.TargetNotVerified && client != null -> {
+                "Support for ${client.name} isn't verified yet."
+            }
+
+            else -> {
+                category.reason
+            }
         }
 
     /** The dialog text: the (truncated) filename above the reason, or just the reason. */
@@ -63,6 +75,7 @@ fun Rejection.toFailure(fileName: String): BridgeFailure =
         Rejection.InvalidContents -> BridgeFailure(FailureCategory.InvalidContents, fileName)
         Rejection.TooLarge -> BridgeFailure(FailureCategory.TooLarge, fileName)
         Rejection.NewerVersion -> BridgeFailure(FailureCategory.NewerVersion, fileName)
+        is Rejection.TargetNotVerified -> BridgeFailure(FailureCategory.TargetNotVerified, fileName, client = client)
     }
 
 const val DISPATCH_ACTION = "com.allourmedia.gamebridge.action.DISPATCH"

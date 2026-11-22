@@ -625,3 +625,16 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 - Android 14+: Artemis targets 34, and its filter declares `.art` data. Whether an intent with no data is still delivered there is untested.
 - Not tested: an unpaired or offline host, `AppName`-only lookup, and what the "hiccup" was.
 - A second package, `com.limelight.ariane`, was opened on the device during the test. It was not used by these intents, and its role is unknown.
+
+## 2026-11-22: Ticket 05, Artemis and Ariane through Bridge Shortcut and Scan (code)
+
+### Verified
+
+- Format version 1 gains targets `artemis` and `ariane` with fields `host_uuid`, `host_name`, `app_uuid` and `app_name`. Rules: UUIDs must be 8-4-4-4-12 hex; names must be non-empty, at most 256 characters, with no control characters; unknown or missing fields are rejected. `StreamClient` holds the two clients: Artemis `verified = true` (stream from this template, ticket 04) and Ariane `verified = false`.
+- Scan reads `.art` exports the way Artemis's parser does (comments, blank lines, `[key] value`, later key wins) from optional Artemis and Ariane Shortcut Folders. Each folder Scans only its own Target App's exports. Name collisions get the Storefront or client as a suffix.
+- `StreamDispatcher` sends an explicit VIEW to `<client package>/com.limelight.ShortcutTrampoline` with String extras `UUID`, `Name`, `AppUUID` and `AppName`, NEW_TASK, and no data or grant. A missing client gives that client's not-installed dialog, never the other client. Legacy `.art` Dispatch is unchanged. Package visibility for `com.limelight.ariane` was added.
+- `:core:test --rerun-tasks`: 90 tests, 0 failures. `check` succeeded. `:app:pixel2api33DebugAndroidTest`: 63 tests, 0 failures (API 33 emulator). New tests cover: the Artemis Dispatch extras with no data; Artemis absent; Ariane refused as not verified with nothing started; the Ariane template (`StreamDispatcherTest`); and a Scan of GameNative plus Artemis folders. The first run failed once because a test assumed folder listing order; the test was fixed to compare as a set.
+
+### Assumed / not verified
+
+- No device yet. The Scan screen's Artemis and Ariane folder buttons and a Dispatch from GameBridge (not adb) to Artemis on the Odin are the remaining hand check. Ariane stays unverified until ticket 06.

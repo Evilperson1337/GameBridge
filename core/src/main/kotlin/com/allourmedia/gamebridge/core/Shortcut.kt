@@ -43,11 +43,21 @@ sealed interface Rejection {
 
     /** A Bridge Shortcut written by a newer GameBridge than this one. */
     data object NewerVersion : Rejection
+
+    /** A valid Bridge Shortcut for a streaming client whose Dispatch has not been verified yet. */
+    data class TargetNotVerified(
+        val client: StreamClient,
+    ) : Rejection
 }
 
 sealed interface ShortcutResult {
     data class Request(
         val request: DispatchRequest,
+    ) : ShortcutResult
+
+    /** A Bridge Shortcut for a streamed game (Artemis or Ariane). */
+    data class Remote(
+        val request: RemoteRequest,
     ) : ShortcutResult
 
     data class Rejected(
@@ -78,11 +88,12 @@ fun interpretShortcut(
     displayName: String,
     bytes: ByteArray,
     storefronts: List<Storefront> = Storefront.all,
+    clients: List<StreamClient> = StreamClient.all,
 ): ShortcutResult {
     val extension = shortcutExtension(displayName)
     if (extension == BRIDGE_SHORTCUT_EXTENSION) {
         if (bytes.size > MAX_LOCAL_SHORTCUT_BYTES) return ShortcutResult.Rejected(Rejection.TooLarge)
-        return interpretBridgeShortcut(bytes, storefronts)
+        return interpretBridgeShortcut(bytes, storefronts, clients)
     }
     val storefront =
         storefronts.firstOrNull { it.extension == extension }

@@ -31,37 +31,72 @@ data class ScanPlan(
     val needsConfirmation: List<PlannedFile> = emptyList(),
 )
 
-/** Plans a Scan of the GameNative Shortcut Folder ([gameNative]) into the Output Folder ([existingOutput]). */
+/** The Shortcut Folders a Scan reads. The folder a file was found in decides its Target App (ADR 0003). */
+enum class ShortcutFolder { GameNative, Artemis, Ariane }
+
+/** Plans a Scan of the GameNative Shortcut Folder only. */
 fun planScan(
     gameNative: List<SourceShortcut>,
     existingOutput: Map<String, ByteArray>,
     storefronts: List<Storefront> = Storefront.all,
+): ScanPlan = planScan(mapOf(ShortcutFolder.GameNative to gameNative), existingOutput, storefronts)
+
+/** Plans a Scan of the Shortcut Folders in [sources] into the Output Folder ([existingOutput]). */
+fun planScan(
+    sources: Map<ShortcutFolder, List<SourceShortcut>>,
+    existingOutput: Map<String, ByteArray>,
+    storefronts: List<Storefront> = Storefront.all,
+    clients: List<StreamClient> = StreamClient.all,
 ): ScanPlan {
-    val accepted = mutableListOf<Pair<SourceShortcut, DispatchRequest>>()
+    // Each accepted file: its source, the suffix used on a name collision, and the Bridge Shortcut text.
+    val accepted = mutableListOf<Triple<SourceShortcut, String, String>>()
     val rejected = mutableListOf<ScanEntry>()
     val notEnabled = mutableListOf<ScanEntry>()
     val exportExtensions = storefronts.map { it.extension }.toSet()
-    // Only GameNative's export extensions are Scanned: anything else in the folder is not ours to report on.
-    for (source in gameNative.filter { shortcutExtension(it.displayName) in exportExtensions }) {
-        when (val result = interpretShortcut(source.displayName, source.bytes, storefronts)) {
-            is ShortcutResult.Rejected -> {
-                val entry = ScanEntry(source.displayName, result.reason.toFailure(source.displayName).reason)
-                if (result.reason is Rejection.StorefrontNotVerified) notEnabled += entry else rejected += entry
-            }
+    for (folder in ShortcutFolder.entries) {
+        val client = clients.firstOrNull { it.name == folder.name }
+        for (source in sources[folder].orEmpty()) {
+            // Each folder is Scanned for its own Target App's exports only; anything else is not ours to report on.
+            val extension = shortcutExtension(source.displayName)
+            val result =
+                when {
+                    folder == ShortcutFolder.GameNative && extension in exportExtensions -> {
+                        interpretShortcut(source.displayName, source.bytes, storefronts)
+                    }
 
-            is ShortcutResult.Request -> {
-                accepted += source to result.request
+                    client != null && extension == ART_EXTENSION -> {
+                        interpretArtShortcut(source.bytes, client)
+                    }
+
+                    else -> {
+                        continue
+                    }
+                }
+            when (result) {
+                is ShortcutResult.Rejected -> {
+                    val entry = ScanEntry(source.displayName, result.reason.toFailure(source.displayName).reason)
+                    val unverified = result.reason is Rejection.StorefrontNotVerified || result.reason is Rejection.TargetNotVerified
+                    if (unverified) notEnabled += entry else rejected += entry
+                }
+
+                is ShortcutResult.Request -> {
+                    accepted += Triple(source, result.request.storefront.name, writeBridgeShortcut(result.request))
+                }
+
+                is ShortcutResult.Remote -> {
+                    accepted += Triple(source, result.request.client.name, writeBridgeShortcut(result.request))
+                }
             }
         }
     }
     // Output folders are usually case-insensitive, so "Broforce" and "broforce" collide. Every file in a collision gets
-    // its Storefront as a suffix, so which one keeps the plain name never depends on the order files were listed in.
+    // its Storefront or client as a suffix, so which one keeps the plain name never depends on listing order.
     val stemCounts = accepted.groupingBy { stemOf(it.first).lowercase() }.eachCount()
     val planned =
-        accepted.map { (source, request) ->
+        accepted.map { (source, suffix, content) ->
             val stem = stemOf(source)
-            val name = if (stemCounts.getValue(stem.lowercase()) > 1) "$stem (${request.storefront.name})" else stem
-            PlannedFile("$name.$BRIDGE_SHORTCUT_EXTENSION", writeBridgeShortcut(request), source.displayName)
+            val name = if (stemCounts.getValue(stem.lowercase()) > 1) "$stem ($suffix)" else stem
+            PlannedFile("$name.$BRIDGE_SHORTCUT_EXTENSION", content, source.displayName)
         }
     val existingByName = existingOutput.entries.associateBy { it.key.lowercase() }
     val writes = mutableListOf<PlannedFile>()
@@ -89,7 +124,7 @@ fun scanSummary(
     failedWrites: List<String> = emptyList(),
 ): String {
     val found = plan.writes.size + plan.unchanged.size + plan.rejected.size + plan.notEnabled.size + plan.needsConfirmation.size
-    if (found == 0) return "No GameNative Shortcuts found."
+    if (found == 0) return "No Shortcuts found."
     val added = plan.writes.count { it.name !in failedWrites }
     val lines =
         mutableListOf(

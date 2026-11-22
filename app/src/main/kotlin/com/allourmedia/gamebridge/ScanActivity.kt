@@ -15,17 +15,17 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import com.allourmedia.gamebridge.core.PlannedFile
+import com.allourmedia.gamebridge.core.ShortcutFolder
 import com.allourmedia.gamebridge.core.scanSummary
 
 /**
- * The Scan screen (ADR 0003): the player grants the GameNative Shortcut Folder (read) and the Output Folder
- * (read/write) once, then taps Scan to write a Bridge Shortcut per game. Runs only when the player taps Scan.
+ * The Scan screen (ADR 0003): the player grants one or more Shortcut Folders (GameNative, Artemis, Ariane; read) and
+ * the Output Folder (read/write) once, then taps Scan to write a Bridge Shortcut per game. Runs only when the player taps Scan.
  * Overwriting a file that differs needs a second, explicit tap. Not exported: reached from the setup screen only.
  */
 class ScanActivity : Activity() {
     private val folders by lazy { ScanFolders(this) }
-    private lateinit var gameNativeLabel: TextView
-    private lateinit var outputLabel: TextView
+    private val labels = mutableMapOf<ScanFolder, TextView>()
     private lateinit var scanButton: Button
     private lateinit var replaceButton: Button
     private lateinit var summary: TextView
@@ -35,8 +35,6 @@ class ScanActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        gameNativeLabel = text("")
-        outputLabel = text("")
         summary = text("").apply { setTextIsSelectable(true) }
         scanButton = button("Scan") { scan() }
         replaceButton = button("") { replace() }.apply { visibility = View.GONE }
@@ -46,11 +44,14 @@ class ScanActivity : Activity() {
                 val gutter = dp(16)
                 setPadding(gutter, gutter, gutter, gutter)
                 addView(text("Scan for games", bold = true))
-                addView(text("1. Choose the folder GameNative exports its Shortcuts to."))
-                addView(gameNativeLabel)
-                addView(button("Choose GameNative folder") { choose(ScanFolder.GameNative) })
+                addView(text("1. Choose the folders your apps export Shortcuts to. Each is optional; choose at least one."))
+                for ((folder, what) in SOURCES) {
+                    addView(text(what))
+                    addView(text("").also { labels[folder] = it })
+                    addView(button("Choose ${folder.name} folder") { choose(folder) })
+                }
                 addView(text("2. Choose a folder for GameBridge's Shortcuts, then point LaunchBox at it."))
-                addView(outputLabel)
+                addView(text("").also { labels[ScanFolder.Output] = it })
                 addView(button("Choose Output Folder") { choose(ScanFolder.Output) })
                 addView(text("3. Scan. Files already in the Output Folder are never changed without asking."))
                 addView(scanButton)
@@ -62,12 +63,13 @@ class ScanActivity : Activity() {
     }
 
     private fun refresh() {
-        val gameNative = folders.get(ScanFolder.GameNative)
-        val output = folders.get(ScanFolder.Output)
-        gameNativeLabel.text = label(gameNative)
-        outputLabel.text = label(output)
-        scanButton.isEnabled = gameNative != null && output != null
+        for ((folder, view) in labels) view.text = label(folders.get(folder))
+        scanButton.isEnabled = folders.get(ScanFolder.Output) != null && sources().isNotEmpty()
     }
+
+    /** The Shortcut Folders chosen so far, each with a grant still held. */
+    private fun sources(): Map<ShortcutFolder, Uri> =
+        ShortcutFolder.entries.mapNotNull { folder -> folders.get(folder.scanFolder)?.let { folder to it } }.toMap()
 
     /** The folder as the provider names it (for example `primary:Games/GameNative`), shown on screen only, never logged. */
     private fun label(tree: Uri?) = if (tree == null) "Not chosen" else DocumentsContract.getTreeDocumentId(tree)
@@ -91,13 +93,13 @@ class ScanActivity : Activity() {
     }
 
     private fun scan() {
-        val gameNative = folders.get(ScanFolder.GameNative) ?: return
+        val sources = sources().takeIf { it.isNotEmpty() } ?: return
         val output = folders.get(ScanFolder.Output) ?: return
         busy("Scanning…")
         Thread {
             val runner = ScanRunner(contentResolver)
             val text =
-                when (val read = runner.plan(gameNative, output)) {
+                when (val read = runner.plan(sources, output)) {
                     is ScanRead.Unreadable -> {
                         unreadable(read.folder)
                     }
@@ -131,8 +133,8 @@ class ScanActivity : Activity() {
 
     private fun unreadable(folder: ScanFolder) =
         when (folder) {
-            ScanFolder.GameNative -> "GameBridge can't read the GameNative folder. Choose it again."
             ScanFolder.Output -> "GameBridge can't read the Output Folder. Choose it again."
+            else -> "GameBridge can't read the ${folder.name} folder. Choose it again."
         }
 
     private fun busy(message: String) {
@@ -175,5 +177,13 @@ class ScanActivity : Activity() {
 
     private companion object {
         const val SIZE_BODY = 16f
+
+        /** The Shortcut Folders on screen, in order, with what each holds. */
+        val SOURCES =
+            listOf(
+                ScanFolder.GameNative to "GameNative: its exported Shortcuts (.gog, .steam, .epic, .amazon, .pcgame).",
+                ScanFolder.Artemis to "Artemis: its exported app entries (.art).",
+                ScanFolder.Ariane to "Ariane: its exported app entries (.art).",
+            )
     }
 }

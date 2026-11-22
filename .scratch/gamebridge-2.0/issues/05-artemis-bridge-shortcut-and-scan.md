@@ -6,7 +6,11 @@
 
 **Status:** ready-for-agent
 
-- [ ] `:core` tests for the Artemis validator and `.art` reading; planner tests for rejected files.
-- [ ] Instrumented test for the Artemis Dispatch template; no fallback to another target.
-- [ ] Legacy `.art` Dispatch (unparsed) still works.
-- [ ] Ariane: Dispatch to `com.limelight.ariane`, never to Artemis as a fallback (or the reverse). `verified` stays off until ticket 06.
+- [x] `:core` tests for the Artemis validator and `.art` reading; planner tests for rejected files.
+- [x] Instrumented test for the Artemis Dispatch template; no fallback to another target.
+- [x] Legacy `.art` Dispatch (unparsed) still works.
+- [x] Ariane: Dispatch to `com.limelight.ariane`, never to Artemis as a fallback (or the reverse). `verified` stays off until ticket 06.
+
+## Comments
+
+- 2026-11-22: code done and tested (see `docs/investigation-log.md`, "Ticket 05"). Remaining: a hand check on the Odin of the Scan screen's Artemis folder and a Dispatch from GameBridge to Artemis.

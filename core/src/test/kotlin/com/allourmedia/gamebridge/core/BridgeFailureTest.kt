@@ -13,6 +13,7 @@ class BridgeFailureTest {
                 Rejection.InvalidContents to FailureCategory.InvalidContents,
                 Rejection.TooLarge to FailureCategory.TooLarge,
                 Rejection.NewerVersion to FailureCategory.NewerVersion,
+                Rejection.TargetNotVerified(StreamClient.Ariane) to FailureCategory.TargetNotVerified,
             )
         for ((rejection, category) in expected) assertEquals(category, rejection.toFailure("x.gog").category)
     }
@@ -83,6 +84,9 @@ class BridgeFailureTest {
                 FailureCategory.GameNativeRefused to "GameNative refused the request.",
                 FailureCategory.ArtemisNotInstalled to "Artemis is not installed. Install Artemis to play Remote Shortcuts (.art).",
                 FailureCategory.ArtemisRefused to "Artemis refused the request.",
+                FailureCategory.ArianeNotInstalled to "Ariane is not installed. Install Ariane to play this game.",
+                FailureCategory.ArianeRefused to "Ariane refused the request.",
+                FailureCategory.TargetNotVerified to "This Target App isn't verified yet.",
             )
         assertEquals(FailureCategory.entries.toSet(), expected.keys)
         for ((category, reason) in expected) assertEquals(reason, category.reason)
@@ -108,5 +112,13 @@ class BridgeFailureTest {
                 }
             assert(readme.contains(row)) { category.name }
         }
+    }
+
+    @Test
+    fun unverifiedClientFailureNamesTheClient() {
+        assertEquals(
+            "Desktop.gamebridge\n\nSupport for Ariane isn't verified yet.",
+            Rejection.TargetNotVerified(StreamClient.Ariane).toFailure("Desktop.gamebridge").message,
+        )
     }
 }

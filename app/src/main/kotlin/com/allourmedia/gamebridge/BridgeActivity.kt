@@ -14,15 +14,17 @@ import com.allourmedia.gamebridge.core.DISPATCH_ACTION
 import com.allourmedia.gamebridge.core.DispatchRequest
 import com.allourmedia.gamebridge.core.FailureCategory
 import com.allourmedia.gamebridge.core.IntentTriage
+import com.allourmedia.gamebridge.core.RemoteRequest
 import com.allourmedia.gamebridge.core.ShortcutResult
 import com.allourmedia.gamebridge.core.Storefront
+import com.allourmedia.gamebridge.core.StreamClient
 import com.allourmedia.gamebridge.core.interpretShortcut
 import com.allourmedia.gamebridge.core.isRemoteShortcut
 import com.allourmedia.gamebridge.core.toFailure
 import com.allourmedia.gamebridge.core.triageIntent
 
 /**
- * Receives a Shortcut from the Frontend, dispatches it to GameNative and finishes. On failure it shows an error
+ * Receives a Shortcut from the Frontend, dispatches it to its Target App (GameNative, Artemis or Ariane) and finishes. On failure it shows an error
  * dialog over the transparent activity; Close and Back both finish.
  */
 open class BridgeActivity : Activity() {
@@ -46,13 +48,15 @@ open class BridgeActivity : Activity() {
             outState.putString(KEY_CATEGORY, it.category.name)
             outState.putString(KEY_FILE_NAME, it.fileName)
             outState.putString(KEY_STOREFRONT, it.storefront?.name)
+            outState.putString(KEY_CLIENT, it.client?.name)
         }
     }
 
     private fun restoreFailure(state: Bundle): BridgeFailure? {
         val category = FailureCategory.entries.firstOrNull { it.name == state.getString(KEY_CATEGORY) }
         val storefront = Storefront.all.firstOrNull { it.name == state.getString(KEY_STOREFRONT) }
-        return category?.let { BridgeFailure(it, state.getString(KEY_FILE_NAME), storefront) }
+        val client = StreamClient.all.firstOrNull { it.name == state.getString(KEY_CLIENT) }
+        return category?.let { BridgeFailure(it, state.getString(KEY_FILE_NAME), storefront, client) }
     }
 
     /** The context used to start the Target App. Debug-only subclasses override it to simulate refusals. */
@@ -96,6 +100,10 @@ open class BridgeActivity : Activity() {
             is ShortcutResult.Request -> {
                 dispatch(result.request, file.displayName, uri?.scheme)
             }
+
+            is ShortcutResult.Remote -> {
+                dispatchStream(result.request, file.displayName)
+            }
         }
     }
 
@@ -113,6 +121,28 @@ open class BridgeActivity : Activity() {
             }
         return fail(BridgeFailure(category, fileName))
     }
+
+    private fun dispatchStream(
+        request: RemoteRequest,
+        fileName: String,
+    ): BridgeFailure? {
+        val outcome = StreamDispatcher(dispatchContext()).dispatch(request)
+        // Debug only, and never the host or app identifiers.
+        debugLog("client=${request.client} dispatch=$outcome")
+        val category =
+            when (outcome) {
+                StreamDispatchResult.Dispatched -> return null
+                StreamDispatchResult.NotInstalled -> notInstalled(request.client)
+                StreamDispatchResult.Refused -> refused(request.client)
+            }
+        return fail(BridgeFailure(category, fileName))
+    }
+
+    private fun notInstalled(client: StreamClient) =
+        if (client == StreamClient.Artemis) FailureCategory.ArtemisNotInstalled else FailureCategory.ArianeNotInstalled
+
+    private fun refused(client: StreamClient) =
+        if (client == StreamClient.Artemis) FailureCategory.ArtemisRefused else FailureCategory.ArianeRefused
 
     private fun dispatch(
         request: DispatchRequest,
@@ -166,6 +196,7 @@ open class BridgeActivity : Activity() {
         private const val KEY_CATEGORY = "failure.category"
         private const val KEY_FILE_NAME = "failure.fileName"
         private const val KEY_STOREFRONT = "failure.storefront"
+        private const val KEY_CLIENT = "failure.client"
         private val CONFIRM_KEYS =
             setOf(
                 KeyEvent.KEYCODE_BUTTON_A,
