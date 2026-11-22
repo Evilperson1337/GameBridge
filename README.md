@@ -2,7 +2,7 @@
 
 GameBridge lets LaunchBox for Android start your GameNative games and your Artemis or Ariane streams. Pick a game in LaunchBox and GameBridge hands it to the right app. GameBridge can also Scan the Shortcuts those apps export and write its own Bridge Shortcuts (`.gamebridge`) for LaunchBox to import. It asks for no permissions and does nothing in the background. Scan only reads the folders you choose and only writes to the Output Folder you choose.
 
-> **Bridge Shortcuts and Scan are not in a release yet.** Release 0.1.1 and earlier treat a `.gamebridge` file as an unsupported type. Until the next release, they work only in a build from the `feature/gamebridge-01-dispatch` branch.
+> **Bridge Shortcuts and Scan need GameBridge 0.2.0 or newer.** Release 0.1.1 and earlier treat a `.gamebridge` file as an unsupported type. The 0.2.0 release build itself has not yet been tried on a device; the evidence below is from debug builds of the same code.
 
 **Download:** the latest APK is on the [Releases page](https://github.com/Evilperson1337/GameBridge/releases/latest). Releases are pre-releases until every Storefront below has been checked on a device.
 
