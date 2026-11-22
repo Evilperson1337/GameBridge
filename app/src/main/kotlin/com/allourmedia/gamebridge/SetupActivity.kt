@@ -21,6 +21,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.allourmedia.gamebridge.core.readinessLine
 import com.allourmedia.gamebridge.core.setupCommand
+import com.allourmedia.gamebridge.core.verificationLines
 
 /**
  * The app-drawer entry. Answers one question: what to paste into LaunchBox, and is everything ready. Shows a readiness line,
@@ -57,6 +58,7 @@ class SetupActivity : Activity() {
                     },
                     LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(8) },
                 )
+                for (line in verificationLines()) addView(text(line, R.color.gb_ink))
             }
         val steps =
             column().apply {

@@ -9,19 +9,26 @@ class StreamClient internal constructor(
     /** How the client is named in a Bridge Shortcut's `target`. */
     val bridgeKey: String,
     val packageName: String,
-    val verified: Boolean,
+    /** The client version a stream was recorded with in docs/investigation-log.md, or null when not verified. */
+    val verifiedVersion: String?,
 ) {
+    /** Dispatch to this client is enabled only once a version has been recorded. */
+    val verified: Boolean get() = verifiedVersion != null
+
     override fun toString() = name
 
     /** The same row with Dispatch verified. Exists so tests can show that flipping a row is enough. */
-    internal fun copyVerified() = StreamClient(name, bridgeKey, packageName, verified = true)
+    internal fun copyVerified() = StreamClient(name, bridgeKey, packageName, verifiedVersion = "test")
+
+    /** The same row with Dispatch not verified. Exists so tests keep covering the not-verified path. */
+    internal fun copyUnverified() = StreamClient(name, bridgeKey, packageName, verifiedVersion = null)
 
     companion object {
         /** Verified: a stream opened from this Dispatch template on the Odin (docs/investigation-log.md, ticket 04). */
-        val Artemis = StreamClient("Artemis", "artemis", "com.limelight.noir", verified = true)
+        val Artemis = StreamClient("Artemis", "artemis", "com.limelight.noir", verifiedVersion = "20.2.6")
 
-        /** A fork of Artemis. Not verified until a stream started through GameBridge is recorded (ticket 06). */
-        val Ariane = StreamClient("Ariane", "ariane", "com.limelight.ariane", verified = false)
+        /** A fork of Artemis. Verified: a stream started from a Bridge Shortcut through GameBridge (ticket 06). */
+        val Ariane = StreamClient("Ariane", "ariane", "com.limelight.ariane", verifiedVersion = "1.1.0")
         val all: List<StreamClient> = listOf(Artemis, Ariane)
     }
 }

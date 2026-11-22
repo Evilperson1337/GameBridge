@@ -652,3 +652,24 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 
 - Android 14+ delivery of the data-less VIEW (Artemis targets 34) is still untested. Ariane was not exercised; that is ticket 06.
 - The Ariane folder button and re-granting a folder were not tried.
+
+## 2026-11-22: Ticket 06, slice 1 device validation on the Odin
+
+### Verified
+
+- Device: AYN Odin 2 Portal, Android 13 (API 33). Installed versions: GameNative 1.4.0 (code 24), Artemis 20.2.6 (code 57), Ariane 1.1.0 (code 10100), GameBridge release 0.1.1 (code 2). The GameNative flavor was not recorded beyond the package `app.gamenative`.
+- SAF reads of the real export folders: GameNative (ticket 03), Artemis (ticket 05) and Ariane (this ticket), all on the SD card, through persisted tree grants.
+- Ariane, with the maintainer's approval: the maintainer exported one app from Ariane into a new Ariane Shortcut Folder. A debug build with Ariane enabled Scanned it and wrote one `.gamebridge` file with `target: "ariane"` (host and app fields not recorded).
+  - Dispatch (logcat): the file was handed to the debug `BridgeActivity` from adb as a SAF document `content://` URI under the Output Folder grant. GameBridge (uid 10153) started `com.limelight.ariane/com.limelight.ShortcutTrampoline` with action VIEW and extras, and logged `client=Ariane dispatch=Dispatched`. Ariane then started its own `com.limelight.Game`.
+  - Launch (person): the first two attempts did not stream. Ariane reported that an app was already running on the host. The maintainer restarted the host PC to clear the stale session. On the next Dispatch, the maintainer confirmed that the stream started.
+- `StreamClient` now records `verifiedVersion` (Artemis 20.2.6, Ariane 1.1.0), and `verified` is derived from it. `GAMENATIVE_VERIFIED_VERSION` is 1.4.0. The setup screen showed "Verified with GameNative 1.4.0", "Verified with Artemis 20.2.6" and "Verified with Ariane 1.1.0" on the Odin, as seen by the maintainer.
+- Revoked grants: `pm clear` on the debug build dropped all its persisted grants (`dumpsys activity permissions` listed none). The Scan screen then showed no folders and a disabled Scan button, with no error. After the maintainer re-chose the Ariane and Output Folders, Scan reported 0 added and 1 unchanged.
+- Tests: `check` passed. Core and instrumented tests: 128 tests, 0 failures (API 33 emulator). Not-verified paths are still covered by tests through an explicitly unverified client.
+- Cleanup: the debug build was uninstalled. The Shortcut Folders were only read. The Ariane export and the Output files are the maintainer's.
+
+### Assumed / not verified
+
+- Android 14, 15 and 16: not tested. In particular, delivery of the data-less VIEW to clients that target 34 is untested there.
+- The Ariane hand-off came from adb, not LaunchBox. The release build (0.1.1) predates `.gamebridge` and rejected the file as an unsupported type, as expected. A LaunchBox launch of a `.gamebridge` file needs a release with slice 1.
+- Revocation was tested by clearing app data, not by revoking one grant from system settings.
+- A stale host session gives Ariane's "app already running" message. GameBridge cannot detect this, and this log does not record what clears it short of a host restart.

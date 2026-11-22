@@ -171,7 +171,8 @@ class ScanPlanTest {
 
     @Test
     fun arianeExportIsFoundButNotEnabledUntilArianeIsVerified() {
-        val plan = planScan(mapOf(ShortcutFolder.Ariane to listOf(source("Desktop.art", art()))), emptyMap())
+        val unverified = listOf(StreamClient.Artemis, StreamClient.Ariane.copyUnverified())
+        val plan = planScan(mapOf(ShortcutFolder.Ariane to listOf(source("Desktop.art", art()))), emptyMap(), clients = unverified)
         assertEquals(emptyList<PlannedFile>(), plan.writes)
         assertEquals(listOf(ScanEntry("Desktop.art", "Support for Ariane isn't verified yet.")), plan.notEnabled)
         val verified = planScan(mapOf(ShortcutFolder.Ariane to listOf(source("Desktop.art", art()))), emptyMap(), clients = arianeVerified)

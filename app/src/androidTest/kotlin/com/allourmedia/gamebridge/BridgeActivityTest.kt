@@ -417,13 +417,13 @@ class BridgeActivityTest {
     }
 
     @Test
-    fun arianeBridgeShortcutShowsNotVerifiedAndStartsNothing() {
+    fun arianeBridgeShortcutWithArianeAbsentShowsNotInstalledAndNeverFallsBack() {
+        // Ariane is verified (ticket 06) but not installed on the test emulator, so this is a real, unstubbed Dispatch.
         failureDialogFor(
             bridgeIntent(fixtureUri("Synthetic-ariane.gamebridge")),
-            BridgeFailure(FailureCategory.TargetNotVerified, "Synthetic-ariane.gamebridge", client = StreamClient.Ariane),
+            BridgeFailure(FailureCategory.ArianeNotInstalled, "Synthetic-ariane.gamebridge"),
         )
         assertEquals(0, artemisDispatches().size)
-        assertEquals(0, Intents.getIntents().count { it.component?.packageName == "com.limelight.ariane" })
     }
 
     @Test

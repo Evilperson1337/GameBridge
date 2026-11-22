@@ -40,19 +40,21 @@ class RemoteBridgeShortcutTest {
     }
 
     @Test
-    fun clientsAreArtemisVerifiedAndArianeNotYet() {
-        assertEquals(listOf("Artemis" to true, "Ariane" to false), StreamClient.all.map { it.name to it.verified })
+    fun bothClientsAreVerifiedWithTheirRecordedVersions() {
+        assertEquals(listOf("Artemis" to "20.2.6", "Ariane" to "1.1.0"), StreamClient.all.map { it.name to it.verifiedVersion })
         assertEquals("com.limelight.noir", StreamClient.Artemis.packageName)
         assertEquals("com.limelight.ariane", StreamClient.Ariane.packageName)
     }
 
     @Test
     fun unverifiedClientIsReportedAfterTheContentsAreValid() {
+        val unverified = StreamClient.Ariane.copyUnverified()
+        val clients = listOf(StreamClient.Artemis, unverified)
         assertEquals(
-            ShortcutResult.Rejected(Rejection.TargetNotVerified(StreamClient.Ariane)),
-            interpret(json(target = "ariane")),
+            ShortcutResult.Rejected(Rejection.TargetNotVerified(unverified)),
+            interpret(json(target = "ariane"), clients),
         )
-        assertEquals(invalid, interpret(json(target = "ariane", hostUuid = "nope")))
+        assertEquals(invalid, interpret(json(target = "ariane", hostUuid = "nope"), clients))
     }
 
     @Test
