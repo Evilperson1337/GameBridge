@@ -546,3 +546,17 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 - No physical device was used. Dispatch from adb on the Odin with a temporary `.gamebridge` copy is still to do, and needs the maintainer's approval for the temporary copy.
 - Whether LaunchBox delivers a `.gamebridge` file at all is ticket 02, not established here. A Dispatch is not a Launch.
 - The JSON key names (`version`, `target`, `storefront`, `store_id`) and the lowercase Storefront names are a design choice for version 1, not an upstream contract.
+
+## 2026-11-22: `.gamebridge` Dispatch from adb on the Odin (ticket 01)
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed (standing approval) and one temporary file holding the `Synthetic.gamebridge` fixture (Steam, Store ID 274190) was pushed to a new temporary folder in shared storage. Odin 2 Portal, Android 13, GameNative 1.4.0.
+- `am start` with the DISPATCH action, the debug `BridgeActivity`, `--grant-read-uri-permission` and the file's MediaStore `content://` URI. GameBridge read the file and Dispatched: logcat showed `START ... act=app.gamenative.LAUNCH_GAME ... cmp=app.gamenative/.MainActivity (has extras)` and `GameBridge: storefront=Steam storeId=274190 scheme=content dispatch=Dispatched`.
+- The maintainer saw GameNative show "Game Not Installed". GameNative received the request and did not start a game: this is a Dispatch, **not** a Launch. Broforce is not installed in GameNative on this device.
+- Cleanup: the temporary file, its folder and its MediaStore row were removed; the debug build was uninstalled. The release build was not touched.
+
+### Assumed / not verified
+
+- That GameNative's "Game Not Installed" reflects reading Store ID 274190 as Steam. It is consistent with that, but GameNative's own logs were not read.
+- A Launch through a `.gamebridge` file needs an installed game's Store ID; not tried. The URI came from adb, not LaunchBox (ticket 02).

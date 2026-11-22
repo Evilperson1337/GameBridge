@@ -4,15 +4,16 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] `:core` tests: round trip; rejection of oversize, bad JSON, unknown fields/target/Storefront, newer version, out-of-range and non-positive IDs.
 - [x] Failure messages are pinned as literals in tests.
 - [x] Instrumented test: a `.gamebridge` content URI yields the explicit GameNative intent; missing or refusing GameNative gives the existing dialogs; no fallback.
 - [x] Legacy `.steam`/`.epic`/`.gog`/`.amazon`/`.pcgame`/`.art` tests still pass.
 - [x] Release logging records only the failure category.
-- [ ] Debug build Dispatch from adb on a temporary copy is recorded in `docs/investigation-log.md` as a Dispatch, not a Launch.
+- [x] Debug build Dispatch from adb on a temporary copy is recorded in `docs/investigation-log.md` as a Dispatch, not a Launch.
 
 ## Comments
 
 - 2026-11-22: criteria 1 to 5 met (see `docs/investigation-log.md`, "Ticket 01"). The JSON reader is in-house and strict; no dependency added. Criterion 6 waits for the maintainer's approval to put a temporary `.gamebridge` copy on the Odin.
+- 2026-11-22: criterion 6 met. adb Dispatch on the Odin of a temporary `.gamebridge` copy was recorded; GameNative showed "Game Not Installed" (Dispatch, not Launch). Temporary file removed, debug build uninstalled.
