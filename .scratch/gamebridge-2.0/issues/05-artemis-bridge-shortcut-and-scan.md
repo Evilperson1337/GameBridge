@@ -4,7 +4,7 @@
 
 **Blocked by:** 03, 04
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 - [x] `:core` tests for the Artemis validator and `.art` reading; planner tests for rejected files.
 - [x] Instrumented test for the Artemis Dispatch template; no fallback to another target.
@@ -14,3 +14,4 @@
 ## Comments
 
 - 2026-11-22: code done and tested (see `docs/investigation-log.md`, "Ticket 05"). Remaining: a hand check on the Odin of the Scan screen's Artemis folder and a Dispatch from GameBridge to Artemis.
+- 2026-11-22: hand check on the Odin. Scan turned two Artemis `.art` exports into `.gamebridge` files, and GameBridge Dispatched one to Artemis, where the stream opened (maintainer). Cleaned up. Resolved.

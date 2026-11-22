@@ -638,3 +638,17 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 ### Assumed / not verified
 
 - No device yet. The Scan screen's Artemis and Ariane folder buttons and a Dispatch from GameBridge (not adb) to Artemis on the Odin are the remaining hand check. Ariane stays unverified until ticket 06.
+
+## 2026-11-22: Ticket 05 hand check on the Odin
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed (Odin 2 Portal, Android 13, Artemis 20.2.6). The maintainer chose an Artemis Shortcut Folder on the SD card holding two `.art` exports, the GameNative folder from ticket 03, and a new empty Output Folder.
+- Scan wrote `Cuphead (GOG).gamebridge` and `Yakuza 0 (GOG).gamebridge` with `target: "artemis"` and the export's host and app fields (not recorded). It also wrote one GameNative file. A second tap of Scan reported "unchanged 1" for the existing GameNative file, as designed.
+- `Yakuza 0 (GOG).gamebridge` was handed to the debug `BridgeActivity` from adb as a MediaStore `content://` URI with a read grant. GameBridge (an app, uid 10152, not the shell) started `com.limelight.noir/com.limelight.ShortcutTrampoline` with action VIEW, extras and no data, and logged `client=Artemis dispatch=Dispatched`. The maintainer confirmed that the Yakuza 0 stream opened. This settles ticket 04's open point about an app sender, on Android 13.
+- Cleanup: the test Output Folder, its files and their MediaStore rows were removed, and the debug build was uninstalled. The Shortcut Folders were only read.
+
+### Assumed / not verified
+
+- Android 14+ delivery of the data-less VIEW (Artemis targets 34) is still untested. Ariane was not exercised; that is ticket 06.
+- The Ariane folder button and re-granting a folder were not tried.
