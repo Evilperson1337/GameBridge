@@ -40,11 +40,24 @@ sealed interface Rejection {
     data object InvalidContents : Rejection
 
     data object TooLarge : Rejection
+
+    /** A Bridge Shortcut written by a newer GameBridge than this one. */
+    data object NewerVersion : Rejection
+
+    /** A valid Bridge Shortcut for a streaming client whose Dispatch has not been verified yet. */
+    data class TargetNotVerified(
+        val client: StreamClient,
+    ) : Rejection
 }
 
 sealed interface ShortcutResult {
     data class Request(
         val request: DispatchRequest,
+    ) : ShortcutResult
+
+    /** A Bridge Shortcut for a streamed game (Artemis or Ariane). */
+    data class Remote(
+        val request: RemoteRequest,
     ) : ShortcutResult
 
     data class Rejected(
@@ -56,7 +69,7 @@ sealed interface ShortcutResult {
 const val MAX_LOCAL_SHORTCUT_BYTES = 4096
 
 private const val REMOTE_EXTENSION = "art"
-private const val BYTE_ORDER_MARK = "﻿"
+internal const val BYTE_ORDER_MARK = "﻿"
 
 /**
  * True for a Remote Shortcut (`.art`), judged by display name alone. GameBridge never reads or parses a Remote
@@ -68,15 +81,20 @@ fun isRemoteShortcut(displayName: String): Boolean = shortcutExtension(displayNa
 fun shortcutExtension(displayName: String): String = displayName.substringAfterLast('.', "").lowercase()
 
 /**
- * Interprets a Local Shortcut from its display name (for the extension) and its raw bytes, which the caller has already
- * capped at [MAX_LOCAL_SHORTCUT_BYTES] plus one.
+ * Interprets a Local Shortcut or a Bridge Shortcut from its display name (for the extension) and its raw bytes, which
+ * the caller has already capped at [MAX_LOCAL_SHORTCUT_BYTES] plus one.
  */
 fun interpretShortcut(
     displayName: String,
     bytes: ByteArray,
     storefronts: List<Storefront> = Storefront.all,
+    clients: List<StreamClient> = StreamClient.all,
 ): ShortcutResult {
     val extension = shortcutExtension(displayName)
+    if (extension == BRIDGE_SHORTCUT_EXTENSION) {
+        if (bytes.size > MAX_LOCAL_SHORTCUT_BYTES) return ShortcutResult.Rejected(Rejection.TooLarge)
+        return interpretBridgeShortcut(bytes, storefronts, clients)
+    }
     val storefront =
         storefronts.firstOrNull { it.extension == extension }
             ?: return ShortcutResult.Rejected(Rejection.UnsupportedType)

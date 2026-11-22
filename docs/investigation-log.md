@@ -475,3 +475,201 @@ Result reported by the maintainer after trying it on the Odin (the research note
 
 - Which logged pick was Portal and which was Warhammer. The log does not name the Shortcut; the pairing follows from the ID sizes.
 - That Warhammer's file was written by DroidDeck. See `docs/research/gamenative-app-id-range.md`. DroidDeck support is deferred by decision of the maintainer.
+
+## 2026-11-21: GameBridge 2.0 current-architecture audit
+
+### Verified
+
+- Baseline Git commit `4f0e22cac030b0b76735b143e0f869ea4b31b708`; initial status had a pre-existing dirty `.claude/worktrees/agent-a916a72d3c7cd2e62` gitlink/worktree. It was left untouched.
+- Reviewed repository architecture, Android components, build, tests and existing records; the detailed evidence and source line references are in `docs/gamebridge-2.0/01-CURRENT-ARCHITECTURE.md`.
+- Read GameNative v1.3.0 first-party sources for its launch-intent parser, exported activity, source enum and Shortcut exporter; the audit links the exact sources. This does not verify other versions.
+- Host command `./gradlew --offline :core:test :app:assembleDebug check` succeeded; initial core tests were up-to-date. `./gradlew --offline :core:test --rerun-tasks` succeeded with 45 tests, 0 failures, 0 errors, 0 skipped.
+
+### Assumed / not verified
+
+- No device or emulator was used in this audit; existing device observations are historical, not freshly reproduced. Instrumentation tests and signed release assembly were not run.
+- Artemis source-level contract, other Artemis versions, universal LaunchBox substitution/grant behavior, and Amazon/Custom end-to-end device behavior were not independently verified. The audit distinguishes the limited recorded observations from assumptions and secondary research.
+- Offline build success does not establish clean-machine provisioning or dependency availability. No claim is made that Dispatch proves a game or stream started.
+# Upstream integration source audit (2026-11-21 UTC)
+
+Verified: resolved GameNative HEAD `973d31f1f7fc8270f4c3da501056b95c407a33f1` and DroidDeck HEAD `f29f72d5d919685f9dd8898834a640bb867d1a91` via remote Git, and inspected pinned source and selected history without running upstream code. Findings and primary-source links are in [the integration research](gamebridge-2.0/02-UPSTREAM-INTEGRATIONS.md). DroidDeck's current source includes multi-Storefront handling, unlike the earlier historical notes.
+
+Assumptions and limits: repository default-branch HEADs are treated as the requested current upstream snapshots, not as installed or latest released APKs. No on-device behavior, LaunchBox grant behavior, game Launch, or complete upstream history was verified. No device changes or dependency changes were made.
+
+## 2026-11-21: LaunchBox and Android platform evidence research
+
+### Verified
+
+- Read existing 2.0 architecture/upstream research, glossary, ADR, LaunchBox research, setup guide and historical device report. Fetched and read the official LaunchBox getting-started, Custom Emulator (With Code), and Android 1.21 release pages, plus linked Android platform guidance and Android 13–16 all-apps and target-specific behavior pages. Findings, source links, evidence classifications and applicability limits are in [LaunchBox integration](gamebridge-2.0/03-LAUNCHBOX-INTEGRATION.md) and [Android platform evidence](gamebridge-2.0/ANDROID-PLATFORM-EVIDENCE.md).
+- The LaunchBox custom-command guide describes `{file.uri}` as potentially `file://` or `content://`; it does not establish a universally readable content URI. The 1.21 notes describe a manual platform update, while the previous Windows-platform observation did not add the Shortcut and requested Steam login.
+- Repository build configuration specifies min SDK 30, compile SDK 37 and target SDK 36. No APK inspection, device access, installation, configuration changes, build, or runtime tests were performed in this research.
+
+### Assumed / not verified
+
+- LaunchBox's complete outgoing intent and URI grants across versions/providers, a supported programmatic import endpoint or its absence, cause of the Windows Update Games outcome, and compatibility across Android 13–16 remain unverified. The APK inspection and device matrix are proposed, authorization-gated procedures, not results. Dispatch does not prove Launch.
+
+## 2026-11-21: Export formats and folders research (Artemis, GameNative, DroidDeck)
+
+### Verified
+
+- Read pinned source (no upstream code run): Artemis `c5cf27f4dc822db0e863c4691e7a70c74bea977a`, GameNative `458fe62169fabc3061d6ce513f5670d4ec337ef6`, DroidDeck `6af598b25e9a6b5ce371b43e534a6e2cc10c64a6`. The GameNative and DroidDeck HEADs moved after doc 02, so its line numbers no longer apply. Findings and links are in [export formats and folders](gamebridge-2.0/04-EXPORT-FORMATS-AND-FOLDERS.md).
+- Artemis `.art` is a text file of `[key] value` lines (`host_uuid`, `host_name`, `app_uuid`, `app_name`, optional `app_id`), exported by the user via SAF `CREATE_DOCUMENT`; ShortcutTrampoline matches `VIEW` on `content`/`file` URIs whose path ends `.art`.
+- GameNative and DroidDeck have no default export folder (unset until the user picks one). Both write plain files through `java.io.File`, containing only a decimal ID. GameNative picks the folder via SAF but converts it to a path; DroidDeck uses its own in-app browser.
+- DroidDeck IDs can exceed signed 32-bit (unsigned 64-bit); GameNative IDs are signed ints. DroidDeck's component and extras contract is as stated in its guide and `GameLaunchIntent.kt`.
+
+### Assumed / not verified
+
+- No device, installed APK, LaunchBox URI or write-permission behaviour was tested. Whether LaunchBox passes a `.art`-suffixed URI, whether non-legacy GameNative builds can write to shared folders, and whether DroidDeck writes `.pcgame`/`.droiddeck` are unverified. Dispatch does not prove Launch.
+
+## 2026-11-21: Launch mechanism for `.gamebridge` Shortcuts (research)
+
+### Verified
+
+- Read the LaunchBox Custom Emulator (With Code) guide, the Android getting-started guide, the Android changelog and the 1.22 release notes, and the Android intent-filter, `<data>`, 7.0 file-sharing and 16 behaviour-change pages. Findings and links are in [launch mechanism](gamebridge-2.0/05-LAUNCH-MECHANISM.md).
+- LaunchBox documents only `{file.path}` and `{file.uri}` for Android. The `{file.uri}` example is `file://`. LaunchBox documents an emulator choice per platform with a per-game override, and no per-extension association or "open with default app" route. The `%romfile%` variables page applies to LaunchBox for Windows only.
+- Android 13+ delivers external intents to an exported component of an app targeting 33+ only if they match the filter's action and categories. Android 16 strict explicit-intent matching is opt-in by the receiver (`intentMatchingFlags`). The current `BridgeActivity` filter (DISPATCH, `DEFAULT`, `content`) matches the observed LaunchBox intent.
+
+### Assumed / not verified
+
+- That the platform Scoped Storage Permission is what makes `{file.uri}` a granted `content://` URI. That `.gamebridge` survives in `DISPLAY_NAME` and imports on the Windows platform. Any Android 14–16 or other-version LaunchBox behaviour. No device, APK or LaunchBox configuration was touched. Dispatch does not prove Launch.
+
+## 2026-11-22: Ticket 01, GameNative `.gamebridge` Dispatch (gamebridge-2.0)
+
+### Verified
+
+- `:core` reads the version 1 Bridge Shortcut format (ADR 0002) through the existing `interpretShortcut` entry, so `BridgeActivity` needed no change. `./gradlew --offline :core:test --rerun-tasks`: 63 tests, 0 failures (18 new in `BridgeShortcutTest`).
+- `./gradlew --offline check :app:assembleDebug :app:pixel2api33DebugAndroidTest` succeeded: 52 instrumented tests, 0 failures, on the Gradle-managed Pixel 2 API 33 emulator. The new tests show a `.gamebridge` content URI Dispatched to GameNative with the same Int `app_id` and `game_source` extras as a `.steam` Shortcut, no URI or grant forwarded, and the newer-version, unknown-field and out-of-range dialogs with no Dispatch.
+- The JSON reader is a strict in-house reader for one flat object of strings and integers. No new dependency was added.
+
+### Assumed / not verified
+
+- No physical device was used. Dispatch from adb on the Odin with a temporary `.gamebridge` copy is still to do, and needs the maintainer's approval for the temporary copy.
+- Whether LaunchBox delivers a `.gamebridge` file at all is ticket 02, not established here. A Dispatch is not a Launch.
+- The JSON key names (`version`, `target`, `storefront`, `store_id`) and the lowercase Storefront names are a design choice for version 1, not an upstream contract.
+
+## 2026-11-22: `.gamebridge` Dispatch from adb on the Odin (ticket 01)
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed (standing approval) and one temporary file holding the `Synthetic.gamebridge` fixture (Steam, Store ID 274190) was pushed to a new temporary folder in shared storage. Odin 2 Portal, Android 13, GameNative 1.4.0.
+- `am start` with the DISPATCH action, the debug `BridgeActivity`, `--grant-read-uri-permission` and the file's MediaStore `content://` URI. GameBridge read the file and Dispatched: logcat showed `START ... act=app.gamenative.LAUNCH_GAME ... cmp=app.gamenative/.MainActivity (has extras)` and `GameBridge: storefront=Steam storeId=274190 scheme=content dispatch=Dispatched`.
+- The maintainer saw GameNative show "Game Not Installed". GameNative received the request and did not start a game: this is a Dispatch, **not** a Launch. Broforce is not installed in GameNative on this device.
+- Cleanup: the temporary file, its folder and its MediaStore row were removed; the debug build was uninstalled. The release build was not touched.
+
+### Assumed / not verified
+
+- That GameNative's "Game Not Installed" reflects reading Store ID 274190 as Steam. It is consistent with that, but GameNative's own logs were not read.
+- A Launch through a `.gamebridge` file needs an installed game's Store ID; not tried. The URI came from adb, not LaunchBox (ticket 02).
+
+## 2026-11-22: Ticket 03, Scan GameNative into the Output Folder (gamebridge-2.0)
+
+### Verified
+
+- `planScan` in `:core` (test-first, 11 tests in `ScanPlanTest`). Covered: stem naming; a Storefront suffix on every file in a case-insensitive collision; invalid exports rejected by name and reason; non-export files ignored; unverified Storefronts reported "found, not enabled"; identical output files "unchanged"; differing ones held for confirmation; summary text without contents; planned files Dispatch the same game. `:core:test --rerun-tasks`: 73 tests, 0 failures.
+- `ScanRunner` in `:app` against a test-only `DocumentsProvider` (5 tests in `ScanRunnerTest`). Covered: planning from both trees; writes only into the Output Folder, with the source folder unchanged and a sibling folder empty; confirmed replace keeps the existing name and truncates; no clobbering without confirmation; a tree without a grant is reported unreadable. `:app:pixel2api33DebugAndroidTest`: 57 tests, 0 failures (API 33 emulator). `check` and `assembleDebug` succeeded.
+
+### Assumed / not verified
+
+- The Scan screen (`ScanActivity`), the system folder picker and persisted grants were built but not exercised by hand yet, on the emulator or the Odin. Re-granting and revoking behaviour is untested.
+- Whether SAF can read GameNative's real export folder on the Odin is unverified: GameNative writes it with plain file paths (research 04). The Odin check is ticket 06.
+- Whether a real provider (ExternalStorageProvider) keeps the `.gamebridge` name for `application/octet-stream` is an assumption from the platform's behaviour, not observed.
+
+## 2026-11-22: Scan by hand on the Odin (ticket 03)
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed and the maintainer used the Scan screen (Odin 2 Portal, Android 13). The system folder picker granted both folders. The GameNative folder was GameNative's folder on the SD card. Its top level held one export (`Warhammer Survivors.gog`) next to the Storefront install folders, which were ignored. The Output Folder was a folder in shared storage.
+- The summary said one game was added. GameBridge wrote exactly one file into the Output Folder: `Warhammer Survivors.gamebridge` with `{"version":1,"target":"gamenative","storefront":"gog","store_id":2068449424}`. Nothing else changed.
+- SAF read an export that GameNative wrote with plain file paths, on the SD card. This answers part of research 04's open question, for this device and folder only.
+- After a force-stop and relaunch, the Scan screen still showed both folders, so the persisted grants survived.
+- Cleanup: the written file, the Output Folder and an unused empty test folder were deleted, and the debug build was uninstalled. GameNative's folder and export were not touched.
+
+### Assumed / not verified
+
+- A second Scan's "unchanged" result was not observed. The file's modification time was unchanged afterwards, but whether a rescan ran is unknown.
+- Revoking a grant (for example by clearing the app's data) and choosing a folder again were not tried.
+- The written file was not Dispatched. A Store ID of 2068449424 for GOG is within the signed 32-bit range.
+
+## 2026-11-22: LaunchBox hand-off of a `.gamebridge` file (ticket 02)
+
+Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Windows platform: Custom Emulator (With Code) with a Scoped Storage folder set. All changes were approved by the maintainer. `Windows.xml` was backed up with a checksum before any change, outside the repo.
+
+### Verified
+
+- **Import:** LaunchBox accepted a temporary `.gamebridge` file in the platform's Scoped Storage folder as a Windows game.
+- **Hand-off:** with Scoped Storage set, LaunchBox started GameBridge with the DISPATCH action, a `content://com.android.externalstorage.documents/…` URI and flags `0x10000001` (NEW_TASK and GRANT_READ_URI_PERMISSION). This happened on three picks, the same as for native Shortcuts.
+- **Debug build:** with the platform command pointing at the debug build, GameBridge read the file and Dispatched. Logcat showed `START act=app.gamenative.LAUNCH_GAME … cmp=app.gamenative/.MainActivity` and `GameBridge: storefront=GOG storeId=2068449424 scheme=content dispatch=Dispatched`. The maintainer reported that the game launched. The display name LaunchBox's URI gives ends in `.gamebridge`: any other name would have been rejected, not Dispatched.
+- **Release build (0.1.1):** it received the same file and showed `UnsupportedType`, as expected for a build without `.gamebridge` support.
+- **Per-game override:** LaunchBox 1.23 used the platform's Custom Emulator (With Code) command, not a per-game override's command of the same emulator type. The override was saved in `Windows.xml` but did not take effect, on two picks.
+- **Side effect of importing:** the import re-created all five existing Windows games. Each got a new `ID`, `DateAdded` and `DateModified`. Two lost downloaded screenshot and background image references, and one had its `PlayCount` and `LastPlayedDate` changed. Titles, application paths and emulator settings were unchanged. The maintainer chose to keep this state instead of restoring the backup.
+- **LaunchBox rewrites its own file:** a corrected `Windows.xml` pushed while LaunchBox was force-stopped was overwritten when LaunchBox next ran, which put the debug command back. Changing the platform command in LaunchBox's own UI is what restored the release command. Final state: release command on the platform, five games, no temporary game. Two later picks went to the release build with no failure.
+- **Cleanup:** the temporary `.gamebridge` file was already gone from `Games/pc` before I went to delete it. The debug build was uninstalled.
+
+### Assumed / not verified
+
+- Not tested: Scoped Storage unset (what `{file.uri}` becomes), an upper-case `.GAMEBRIDGE` name, and Android 14–16.
+- Why the per-game override was ignored; why the import re-created the existing games (Update Games may rescan the whole folder); whether LaunchBox deleted the temporary file when its game was deleted. The cause of a "critical permissions" message the maintainer briefly saw is unknown. It resolved without any permission change by me.
+- That LaunchBox keeps its library in a cache or in memory and writes it back. This is inferred from the overwrite, not from its code.
+
+## 2026-11-22: Artemis launch without a `.art` file (ticket 04)
+
+### Verified
+
+- **Source** (Artemis `ClassicOldSong/moonlight-android` at `c5cf27f`, read-only): `ShortcutTrampoline` takes host and app from intent extras whenever `.art` data doesn't supply them. Host: String extras `UUID` and `Name`. App: `AppUUID`, `AppId` (a String) and `AppName`, plus Boolean `HDR`. Artemis's own pinned shortcuts use this path (`ServerHelper.createAppShortcutIntent`): an explicit intent with action VIEW, these extras, and no data. Artemis 20.2.6 targets SDK 34.
+- **Device** (Odin, Android 13, Artemis `com.limelight.noir` 20.2.6, maintainer's approval): an explicit `am start` from adb with action VIEW, no data, and the host and app UUIDs and names taken from an existing `.art` export (values not recorded). Artemis displayed `ShortcutTrampoline`, and the maintainer reported that the stream opened "with a hiccup". No file was involved.
+- **Stale host:** the same intent with a made-up host UUID and no host name made Artemis show its own dialog, "Connection Error" / "PC not found", with HELP and OK.
+
+### Assumed / not verified
+
+- The intents came from the shell (uid 2000), not from GameBridge. An app sending them is assumed to be treated the same, because Android 13 matches external intents on action and category, and VIEW plus DEFAULT matches Artemis's filter. This has not been observed from an app.
+- Android 14+: Artemis targets 34, and its filter declares `.art` data. Whether an intent with no data is still delivered there is untested.
+- Not tested: an unpaired or offline host, `AppName`-only lookup, and what the "hiccup" was.
+- A second package, `com.limelight.ariane`, was opened on the device during the test. It was not used by these intents, and its role is unknown.
+
+## 2026-11-22: Ticket 05, Artemis and Ariane through Bridge Shortcut and Scan (code)
+
+### Verified
+
+- Format version 1 gains targets `artemis` and `ariane` with fields `host_uuid`, `host_name`, `app_uuid` and `app_name`. Rules: UUIDs must be 8-4-4-4-12 hex; names must be non-empty, at most 256 characters, with no control characters; unknown or missing fields are rejected. `StreamClient` holds the two clients: Artemis `verified = true` (stream from this template, ticket 04) and Ariane `verified = false`.
+- Scan reads `.art` exports the way Artemis's parser does (comments, blank lines, `[key] value`, later key wins) from optional Artemis and Ariane Shortcut Folders. Each folder Scans only its own Target App's exports. Name collisions get the Storefront or client as a suffix.
+- `StreamDispatcher` sends an explicit VIEW to `<client package>/com.limelight.ShortcutTrampoline` with String extras `UUID`, `Name`, `AppUUID` and `AppName`, NEW_TASK, and no data or grant. A missing client gives that client's not-installed dialog, never the other client. Legacy `.art` Dispatch is unchanged. Package visibility for `com.limelight.ariane` was added.
+- `:core:test --rerun-tasks`: 90 tests, 0 failures. `check` succeeded. `:app:pixel2api33DebugAndroidTest`: 63 tests, 0 failures (API 33 emulator). New tests cover: the Artemis Dispatch extras with no data; Artemis absent; Ariane refused as not verified with nothing started; the Ariane template (`StreamDispatcherTest`); and a Scan of GameNative plus Artemis folders. The first run failed once because a test assumed folder listing order; the test was fixed to compare as a set.
+
+### Assumed / not verified
+
+- No device yet. The Scan screen's Artemis and Ariane folder buttons and a Dispatch from GameBridge (not adb) to Artemis on the Odin are the remaining hand check. Ariane stays unverified until ticket 06.
+
+## 2026-11-22: Ticket 05 hand check on the Odin
+
+### Verified
+
+- With the maintainer's approval, the debug build was installed (Odin 2 Portal, Android 13, Artemis 20.2.6). The maintainer chose an Artemis Shortcut Folder on the SD card holding two `.art` exports, the GameNative folder from ticket 03, and a new empty Output Folder.
+- Scan wrote `Cuphead (GOG).gamebridge` and `Yakuza 0 (GOG).gamebridge` with `target: "artemis"` and the export's host and app fields (not recorded). It also wrote one GameNative file. A second tap of Scan reported "unchanged 1" for the existing GameNative file, as designed.
+- `Yakuza 0 (GOG).gamebridge` was handed to the debug `BridgeActivity` from adb as a MediaStore `content://` URI with a read grant. GameBridge (an app, uid 10152, not the shell) started `com.limelight.noir/com.limelight.ShortcutTrampoline` with action VIEW, extras and no data, and logged `client=Artemis dispatch=Dispatched`. The maintainer confirmed that the Yakuza 0 stream opened. This settles ticket 04's open point about an app sender, on Android 13.
+- Cleanup: the test Output Folder, its files and their MediaStore rows were removed, and the debug build was uninstalled. The Shortcut Folders were only read.
+
+### Assumed / not verified
+
+- Android 14+ delivery of the data-less VIEW (Artemis targets 34) is still untested. Ariane was not exercised; that is ticket 06.
+- The Ariane folder button and re-granting a folder were not tried.
+
+## 2026-11-22: Ticket 06, slice 1 device validation on the Odin
+
+### Verified
+
+- Device: AYN Odin 2 Portal, Android 13 (API 33). Installed versions: GameNative 1.4.0 (code 24), Artemis 20.2.6 (code 57), Ariane 1.1.0 (code 10100), GameBridge release 0.1.1 (code 2). The GameNative flavor was not recorded beyond the package `app.gamenative`.
+- SAF reads of the real export folders: GameNative (ticket 03), Artemis (ticket 05) and Ariane (this ticket), all on the SD card, through persisted tree grants.
+- Ariane, with the maintainer's approval: the maintainer exported one app from Ariane into a new Ariane Shortcut Folder. A debug build with Ariane enabled Scanned it and wrote one `.gamebridge` file with `target: "ariane"` (host and app fields not recorded).
+  - Dispatch (logcat): the file was handed to the debug `BridgeActivity` from adb as a SAF document `content://` URI under the Output Folder grant. GameBridge (uid 10153) started `com.limelight.ariane/com.limelight.ShortcutTrampoline` with action VIEW and extras, and logged `client=Ariane dispatch=Dispatched`. Ariane then started its own `com.limelight.Game`.
+  - Launch (person): the first two attempts did not stream. Ariane reported that an app was already running on the host. The maintainer restarted the host PC to clear the stale session. On the next Dispatch, the maintainer confirmed that the stream started.
+- `StreamClient` now records `verifiedVersion` (Artemis 20.2.6, Ariane 1.1.0), and `verified` is derived from it. `GAMENATIVE_VERIFIED_VERSION` is 1.4.0. The setup screen showed "Verified with GameNative 1.4.0", "Verified with Artemis 20.2.6" and "Verified with Ariane 1.1.0" on the Odin, as seen by the maintainer.
+- Revoked grants: `pm clear` on the debug build dropped all its persisted grants (`dumpsys activity permissions` listed none). The Scan screen then showed no folders and a disabled Scan button, with no error. After the maintainer re-chose the Ariane and Output Folders, Scan reported 0 added and 1 unchanged.
+- Tests: `check` passed. Core and instrumented tests: 128 tests, 0 failures (API 33 emulator). Not-verified paths are still covered by tests through an explicitly unverified client.
+- Cleanup: the debug build was uninstalled. The Shortcut Folders were only read. The Ariane export and the Output files are the maintainer's.
+
+### Assumed / not verified
+
+- Android 14, 15 and 16: not tested. In particular, delivery of the data-less VIEW to clients that target 34 is untested there.
+- The Ariane hand-off came from adb, not LaunchBox. The release build (0.1.1) predates `.gamebridge` and rejected the file as an unsupported type, as expected. A LaunchBox launch of a `.gamebridge` file needs a release with slice 1.
+- Revocation was tested by clearing app data, not by revoking one grant from system settings.
+- A stale host session gives Ariane's "app already running" message. GameBridge cannot detect this, and this log does not record what clears it short of a host restart.

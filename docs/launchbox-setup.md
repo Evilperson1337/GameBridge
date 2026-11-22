@@ -13,7 +13,13 @@ What the readback verified: on the Windows platform, `DefaultEmulator` is `Custo
 
 ## Warning: this affects every game on the Windows platform
 
-The supported setup replaces the Windows platform's default emulator. After it, every Windows game that does not have its own emulator override goes through GameBridge, not only your GameNative games. Games on other Windows emulators or launchers will stop working until you undo the change or give them a per-game override (per-game overrides are not verified, see "Not verified").
+The supported setup replaces the Windows platform's default emulator. After it, every Windows game that does not have its own emulator override goes through GameBridge, not only your GameNative games. Games on other Windows emulators or launchers will stop working until you undo the change.
+
+## Warning: what LaunchBox 1.23 did on the Odin (2026-11-22)
+
+- **The platform command is the one used.** A Custom Emulator (With Code) command set on one game was ignored. LaunchBox ran the Windows platform's command for that game. A per-game override is therefore not a way to keep some games on another setup.
+- **Importing can re-create your existing Windows games.** Importing `.gamebridge` files into the Windows platform re-created all five Windows games already there. Each got a new ID and new dates, two lost their screenshot and background image links, and one had its play count and last-played date changed. The cause is unknown; it may be that LaunchBox rescans the whole folder. Back up before importing, as in step 1. Consider importing into a test platform first.
+- **Change LaunchBox settings in its own UI.** A `Windows.xml` pushed with adb while LaunchBox was installed was overwritten by LaunchBox. Use LaunchBox's screens to change or restore settings. Keep the file backup only to compare against or for a last resort.
 
 ## 1. Back up your current settings
 
@@ -53,10 +59,11 @@ Notes:
 2. Paste the Setup command into the field LaunchBox labels "launch arguments". Verified as the end state (`CustomEmulatorLaunchArguments`). Assumed: the field's label and screen.
 3. Clear any per-game emulator override on the Windows games you want to go through GameBridge, for example an old `GameNative` entry, so that the platform setting applies. Assumed: the screens used to clear it were not recorded. Verified: in the working setup the games' `EmulatorOverride` values are empty, but whether they were cleared by hand or by LaunchBox is not known.
 4. Import the Shortcuts (`.gog`, `.steam`, `.epic`, `.amazon`, `.pcgame`) as the games' files. Remote Shortcuts (`.art`, made by Artemis) are imported the same way, and the same Setup command works for them. GameBridge does not read a `.art` file; it dispatches it to Artemis (`com.limelight.noir`), which must be installed. A `.art` pick from LaunchBox (`Desktop.art`) was seen reaching Artemis and the user reported the stream started, with the release build on 2026-11-03 and earlier with the debug build (see the README support table). One other `.art` pick did not start a stream and was not investigated. Verified: imported games have `ApplicationPath` set to the Shortcut file (seen for `.epic`, `.gog` and `.amazon`). Assumed: the import screens.
+5. Or import Bridge Shortcuts (`.gamebridge`) from the Output Folder that Scan writes to, using the same Setup command. Verified on 2026-11-22: LaunchBox 1.23 imported `.gamebridge` files and passed one to a debug build as a `content://` URI, and the GOG game started in GameNative (reported by the maintainer). Bridge Shortcuts need a GameBridge build newer than release 0.1.1. Ariane streams are only possible through Bridge Shortcuts.
 
 ## 4. Using it
 
-Pick a game. If the Dispatch succeeds GameBridge shows nothing and GameNative (or Artemis, for a `.art` file) opens. If not, GameBridge shows a dialog with one reason and a Close button; press Close and you are back in LaunchBox. To retry, pick the game again. Only GOG and Epic have device evidence so far; Steam, Amazon and Custom are enabled and not yet verified.
+Pick a game. If the Dispatch succeeds, GameBridge shows nothing and the Target App opens: GameNative, Artemis (for an `.art` file), or whichever app a `.gamebridge` file names. If not, GameBridge shows a dialog with one reason and a Close button; press Close and you are back in LaunchBox. To retry, pick the game again. Only GOG and Epic have device evidence so far; Steam, Amazon and Custom are enabled and not yet verified.
 
 The built-in GameNative entry in LaunchBox fails on these Shortcuts with "ROM file ... could not be found" (observed on the Odin, per the handoff document, cause unknown). That is why the Custom Emulator is used instead.
 
@@ -82,8 +89,9 @@ Work through these in order. They list what was seen, not proven causes.
 
 ## Not verified
 
-- Per-game emulator overrides pointing at GameBridge.
+- Per-game emulator overrides pointing at GameBridge. A per-game Custom Emulator command was seen ignored (see the warning above).
 - Platforms other than Windows.
+- Picking an Artemis or Ariane `.gamebridge` file in LaunchBox. Their Dispatch was verified only from adb.
 - Which LaunchBox screens and field names are used for any step above.
 - The release Setup command read back from a device.
 - GOG re-checked through LaunchBox with the final setup, and Steam, Amazon and Custom Storefronts.
@@ -98,4 +106,4 @@ This is the procedure for a verified backup. Verified: LaunchBox keeps the Windo
 2. Record its checksum: `sha256sum ~/launchbox-backup/Windows.xml > ~/launchbox-backup/SHA256SUMS`
 3. Do not edit the live file while LaunchBox is using it.
 
-To restore, put the settings back through LaunchBox, or, with LaunchBox closed, `adb push` the backed-up file over the live one and compare its `sha256sum` to the recorded value. Assumed: that restoring by pushing the file works; it was not tried.
+To restore, put the settings back through LaunchBox, or, with LaunchBox closed, `adb push` the backed-up file over the live one and compare its `sha256sum` to the recorded value. Observed on 2026-11-22: a pushed `Windows.xml` was overwritten by LaunchBox, so restoring by pushing the file did not work. Restore through LaunchBox's UI.

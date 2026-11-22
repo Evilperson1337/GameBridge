@@ -17,6 +17,7 @@ import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.allourmedia.gamebridge.core.verificationLines
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -41,6 +42,15 @@ class SetupActivityTest {
     fun showsTheSetupCommandForTheInstalledBuild() {
         launch().use {
             onView(withText(expectedCommand)).check(matches(isDisplayed()))
+        }
+    }
+
+    @Test
+    fun showsTheVerifiedVersionOfEachTargetApp() {
+        launch().use {
+            for (line in verificationLines()) {
+                onView(withText(line)).check(matches(isDisplayed()))
+            }
         }
     }
 

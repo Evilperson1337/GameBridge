@@ -3,6 +3,7 @@ package com.allourmedia.gamebridge
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -20,6 +21,7 @@ import android.widget.ScrollView
 import android.widget.TextView
 import com.allourmedia.gamebridge.core.readinessLine
 import com.allourmedia.gamebridge.core.setupCommand
+import com.allourmedia.gamebridge.core.verificationLines
 
 /**
  * The app-drawer entry. Answers one question: what to paste into LaunchBox, and is everything ready. Shows a readiness line,
@@ -56,6 +58,7 @@ class SetupActivity : Activity() {
                     },
                     LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(8) },
                 )
+                for (line in verificationLines()) addView(text(line, R.color.gb_ink))
             }
         val steps =
             column().apply {
@@ -64,6 +67,8 @@ class SetupActivity : Activity() {
                 addView(commandBlock())
                 addView(copyButton())
                 addView(text("3. Clear any per-game emulator override.", R.color.gb_ink))
+                addView(text("4. Optional: scan GameNative's Shortcuts into GameBridge Shortcuts (.gamebridge).", R.color.gb_ink))
+                addView(scanButton())
             }
 
         val wide = resources.configuration.screenWidthDp >= WIDE_DP
@@ -119,6 +124,17 @@ class SetupActivity : Activity() {
                     cornerRadius = dp(8).toFloat()
                 }
             layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(4) }
+        }
+
+    /** Opens the Scan screen. After Copy in the layout, so Copy stays the first button and keeps focus on open. */
+    private fun scanButton() =
+        Button(this).apply {
+            text = SCAN_LABEL
+            isAllCaps = false
+            textSize = SIZE_BODY
+            minHeight = dp(MIN_TARGET_DP)
+            layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { topMargin = dp(4) }
+            setOnClickListener { startActivity(Intent(this@SetupActivity, ScanActivity::class.java)) }
         }
 
     private fun copyButton(): Button {
@@ -186,6 +202,7 @@ class SetupActivity : Activity() {
         const val MIN_TARGET_DP = 48
         const val WIDE_DP = 600
         const val COPY_LABEL = "Copy"
+        const val SCAN_LABEL = "Scan for games"
         const val COPIED_LABEL = "Copied"
         const val COPIED_MILLIS = 2_000L
         const val PRESSED_BLEND = 0.25f

@@ -5,6 +5,7 @@
     <queries>
         <package android:name="app.gamenative" />
         <package android:name="com.limelight.noir" />
+        <package android:name="com.limelight.ariane" />
         <package android:name="com.unbrokensoftware.launchbox" />
     </queries>
 
@@ -38,6 +39,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- The Scan screen, reached from the setup screen only. Not exported. Not noHistory: the folder picker
+             returns its result here. -->
+        <activity
+            android:name=".ScanActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GameBridge.Setup" />
     </application>
 
 </manifest>

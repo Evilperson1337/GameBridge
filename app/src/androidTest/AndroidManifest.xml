@@ -10,6 +10,26 @@
             android:exported="false"
             android:grantUriPermissions="true" />
 
+        <!-- Test-only SAF provider standing in for shared storage folders. DocumentsProvider requires exported plus
+             MANAGE_DOCUMENTS; the app under test reaches it only through the grants the provider itself makes. -->
+        <provider
+            android:name="com.allourmedia.gamebridge.FolderProvider"
+            android:authorities="com.allourmedia.gamebridge.test.folders"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
+
+        <!-- Test-only: seeds FolderProvider and grants the app under test, from the provider's own process. -->
+        <activity
+            android:name="com.allourmedia.gamebridge.FolderSeedActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <!-- Test-only stand-in for LaunchBox: it owns the provider's package, so it can grant reads. -->
         <activity
             android:name="com.allourmedia.gamebridge.GrantTrampolineActivity"

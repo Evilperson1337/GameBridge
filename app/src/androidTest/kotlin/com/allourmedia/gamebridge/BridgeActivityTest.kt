@@ -28,6 +28,7 @@ import androidx.test.runner.lifecycle.Stage
 import com.allourmedia.gamebridge.core.BridgeFailure
 import com.allourmedia.gamebridge.core.FailureCategory
 import com.allourmedia.gamebridge.core.Storefront
+import com.allourmedia.gamebridge.core.StreamClient
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.not
 import org.junit.After
@@ -301,6 +302,30 @@ class BridgeActivityTest {
     @Test
     fun customShortcutIsDispatchedAsCustomGame() = assertDispatched("Synthetic.pcgame", 2342, "CUSTOM_GAME")
 
+    @Test
+    fun bridgeShortcutIsDispatchedToGameNativeWithoutForwardingTheUri() {
+        assertDispatched("Synthetic.gamebridge", 274190, "STEAM")
+        val dispatched = dispatches().single()
+        assertEquals(null, dispatched.data)
+        assertEquals(0, dispatched.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    @Test
+    fun bridgeShortcutFromANewerGameBridgeShowsUpdateReason() {
+        interpretationFailure("Synthetic-newer-version.gamebridge", FailureCategory.NewerVersion)
+    }
+
+    @Test
+    fun bridgeShortcutWithAnUnknownFieldIsRejectedAndNothingIsStarted() {
+        interpretationFailure("Synthetic-unknown-field.gamebridge", FailureCategory.InvalidContents)
+        assertEquals(0, artemisDispatches().size)
+    }
+
+    @Test
+    fun bridgeShortcutWithOutOfRangeStoreIdShowsInvalidContents() {
+        interpretationFailure("Synthetic-above-int-max.gamebridge", FailureCategory.InvalidContents)
+    }
+
     private val artemis = ComponentName(ArtemisDispatcher.PACKAGE, ArtemisDispatcher.TRAMPOLINE_CLASS)
 
     private fun artemisDispatches() = Intents.getIntents().filter { it.component?.packageName == ArtemisDispatcher.PACKAGE }
@@ -357,6 +382,48 @@ class BridgeActivityTest {
         assertEquals(0, dispatches().size)
         tapClose()
         awaitFinished(activity)
+    }
+
+    @Test
+    fun artemisBridgeShortcutIsDispatchedToArtemisAsExtrasWithoutAnyFile() {
+        stubArtemis()
+        awaitFinished(start(bridgeIntent(fixtureUri("Synthetic-artemis.gamebridge"))))
+        intended(
+            allOf(
+                hasAction(Intent.ACTION_VIEW),
+                hasComponent(artemis),
+                hasExtra("UUID", "11111111-2222-4333-8444-555555555555"),
+                hasExtra("Name", "Synthetic Host"),
+                hasExtra("AppUUID", "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"),
+                hasExtra("AppName", "Desktop"),
+            ),
+        )
+        val dispatched = artemisDispatches().single()
+        assertEquals(setOf("UUID", "Name", "AppUUID", "AppName"), dispatched.extras!!.keySet())
+        // No file and no grant: the Bridge Shortcut's URI is never forwarded.
+        assertEquals(null, dispatched.data)
+        assertEquals(0, dispatched.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        assertEquals(0, dispatches().size)
+    }
+
+    @Test
+    fun artemisBridgeShortcutWithArtemisAbsentShowsNotInstalledAndNeverFallsBack() {
+        // Artemis is not installed on the test emulator, so this is a real, unstubbed Dispatch.
+        failureDialogFor(
+            bridgeIntent(fixtureUri("Synthetic-artemis.gamebridge")),
+            BridgeFailure(FailureCategory.ArtemisNotInstalled, "Synthetic-artemis.gamebridge"),
+        )
+        assertEquals(0, Intents.getIntents().count { it.component?.packageName == "com.limelight.ariane" })
+    }
+
+    @Test
+    fun arianeBridgeShortcutWithArianeAbsentShowsNotInstalledAndNeverFallsBack() {
+        // Ariane is verified (ticket 06) but not installed on the test emulator, so this is a real, unstubbed Dispatch.
+        failureDialogFor(
+            bridgeIntent(fixtureUri("Synthetic-ariane.gamebridge")),
+            BridgeFailure(FailureCategory.ArianeNotInstalled, "Synthetic-ariane.gamebridge"),
+        )
+        assertEquals(0, artemisDispatches().size)
     }
 
     @Test
