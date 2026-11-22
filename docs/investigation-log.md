@@ -589,3 +589,24 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 - A second Scan's "unchanged" result was not observed. The file's modification time was unchanged afterwards, but whether a rescan ran is unknown.
 - Revoking a grant (for example by clearing the app's data) and choosing a folder again were not tried.
 - The written file was not Dispatched. A Store ID of 2068449424 for GOG is within the signed 32-bit range.
+
+## 2026-11-22: LaunchBox hand-off of a `.gamebridge` file (ticket 02)
+
+Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Windows platform: Custom Emulator (With Code) with a Scoped Storage folder set. All changes were approved by the maintainer. `Windows.xml` was backed up with a checksum before any change, outside the repo.
+
+### Verified
+
+- **Import:** LaunchBox accepted a temporary `.gamebridge` file in the platform's Scoped Storage folder as a Windows game.
+- **Hand-off:** with Scoped Storage set, LaunchBox started GameBridge with the DISPATCH action, a `content://com.android.externalstorage.documents/…` URI and flags `0x10000001` (NEW_TASK and GRANT_READ_URI_PERMISSION). This happened on three picks, the same as for native Shortcuts.
+- **Debug build:** with the platform command pointing at the debug build, GameBridge read the file and Dispatched. Logcat showed `START act=app.gamenative.LAUNCH_GAME … cmp=app.gamenative/.MainActivity` and `GameBridge: storefront=GOG storeId=2068449424 scheme=content dispatch=Dispatched`. The maintainer reported that the game launched. The display name LaunchBox's URI gives ends in `.gamebridge`: any other name would have been rejected, not Dispatched.
+- **Release build (0.1.1):** it received the same file and showed `UnsupportedType`, as expected for a build without `.gamebridge` support.
+- **Per-game override:** LaunchBox 1.23 used the platform's Custom Emulator (With Code) command, not a per-game override's command of the same emulator type. The override was saved in `Windows.xml` but did not take effect, on two picks.
+- **Side effect of importing:** the import re-created all five existing Windows games. Each got a new `ID`, `DateAdded` and `DateModified`. Two lost downloaded screenshot and background image references, and one had its `PlayCount` and `LastPlayedDate` changed. Titles, application paths and emulator settings were unchanged. The maintainer chose to keep this state instead of restoring the backup.
+- **LaunchBox rewrites its own file:** a corrected `Windows.xml` pushed while LaunchBox was force-stopped was overwritten when LaunchBox next ran, which put the debug command back. Changing the platform command in LaunchBox's own UI is what restored the release command. Final state: release command on the platform, five games, no temporary game. Two later picks went to the release build with no failure.
+- **Cleanup:** the temporary `.gamebridge` file was already gone from `Games/pc` before I went to delete it. The debug build was uninstalled.
+
+### Assumed / not verified
+
+- Not tested: Scoped Storage unset (what `{file.uri}` becomes), an upper-case `.GAMEBRIDGE` name, and Android 14–16.
+- Why the per-game override was ignored; why the import re-created the existing games (Update Games may rescan the whole folder); whether LaunchBox deleted the temporary file when its game was deleted. The cause of a "critical permissions" message the maintainer briefly saw is unknown. It resolved without any permission change by me.
+- That LaunchBox keeps its library in a cache or in memory and writes it back. This is inferred from the overwrite, not from its code.

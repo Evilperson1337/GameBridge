@@ -4,10 +4,17 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-human
+**Status:** resolved
 
-- [ ] URI LaunchBox sends with scoped storage set and unset (scheme, read grant), recorded without device paths.
-- [ ] The display name GameBridge reads still ends in `.gamebridge`, including upper case.
-- [ ] Whether LaunchBox imports `.gamebridge` files on the platform.
-- [ ] Dispatch (logcat) and any Launch (person) recorded separately; LaunchBox configuration restored.
-- [ ] Everything not observed is marked not verified in `docs/investigation-log.md`.
+- [x] URI LaunchBox sends with scoped storage set and unset (scheme, read grant), recorded without device paths.
+- [x] The display name GameBridge reads still ends in `.gamebridge`, including upper case.
+- [x] Whether LaunchBox imports `.gamebridge` files on the platform.
+- [x] Dispatch (logcat) and any Launch (person) recorded separately; LaunchBox configuration restored.
+- [x] Everything not observed is marked not verified in `docs/investigation-log.md`.
+
+## Comments
+
+- 2026-11-22: The hand-off works with Scoped Storage set: `content://`, read grant, `.gamebridge` display name, Dispatch to GameNative, and a Launch reported by the maintainer. The design holds. Not tested, and noted in the log: Scoped Storage unset, upper-case extension, Android 14–16. Findings for the setup guide (ticket 07):
+  - LaunchBox 1.23 ignores a per-game Custom Emulator (With Code) command, so the platform command is the one that counts.
+  - Importing re-created the existing Windows games (new IDs and dates, lost image links, one play count changed).
+  - LaunchBox overwrites `Windows.xml` edits made outside the app, so change its settings through the UI.
