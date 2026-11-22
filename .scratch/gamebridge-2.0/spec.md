@@ -34,7 +34,7 @@ GameBridge owns the logic. LaunchBox only passes a **Bridge Shortcut** (`.gamebr
 ## Known gaps and open questions
 
 - **Stale entries.** A `.gamebridge` whose source is gone is not detected in slice 1. A later optional `source` field could link them.
-- **Artemis without a `.art` file.** Artemis's intent filter requires a `.art` path (`docs/gamebridge-2.0/04-EXPORT-FORMATS-AND-FOLDERS.md`). Whether Artemis accepts a launch rebuilt from fields is unverified. If it does not, the design needs another decision; no fallback is assumed.
+- **Artemis without a `.art` file (answered, ticket 04).** Artemis accepts an explicit VIEW to `ShortcutTrampoline` with no data and String extras `UUID`, `Name`, `AppUUID` and `AppName`. The stream opened on the Odin (Android 13). Delivery on Android 14+ is untested, because Artemis targets 34 and its filter declares `.art` data.
 - **LaunchBox URI.** What `{file.uri}` becomes, whether it is a granted `content://` URI, whether LaunchBox imports `.gamebridge`, and Android 14 to 16 behaviour are unverified.
 - **Export folders.** None of the three apps has a default folder, and GameNative and DroidDeck write plain paths. Whether SAF can read those folders on the Odin is unverified; DroidDeck's single mixed folder (with `.droiddeck-sync.json` and `images/`) is the harder case.
 - **Installed versions.** Research pinned upstream HEADs, not the APKs on the Odin; GameNative flavor is unknown.

@@ -610,3 +610,18 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 - Not tested: Scoped Storage unset (what `{file.uri}` becomes), an upper-case `.GAMEBRIDGE` name, and Android 14–16.
 - Why the per-game override was ignored; why the import re-created the existing games (Update Games may rescan the whole folder); whether LaunchBox deleted the temporary file when its game was deleted. The cause of a "critical permissions" message the maintainer briefly saw is unknown. It resolved without any permission change by me.
 - That LaunchBox keeps its library in a cache or in memory and writes it back. This is inferred from the overwrite, not from its code.
+
+## 2026-11-22: Artemis launch without a `.art` file (ticket 04)
+
+### Verified
+
+- **Source** (Artemis `ClassicOldSong/moonlight-android` at `c5cf27f`, read-only): `ShortcutTrampoline` takes host and app from intent extras whenever `.art` data doesn't supply them. Host: String extras `UUID` and `Name`. App: `AppUUID`, `AppId` (a String) and `AppName`, plus Boolean `HDR`. Artemis's own pinned shortcuts use this path (`ServerHelper.createAppShortcutIntent`): an explicit intent with action VIEW, these extras, and no data. Artemis 20.2.6 targets SDK 34.
+- **Device** (Odin, Android 13, Artemis `com.limelight.noir` 20.2.6, maintainer's approval): an explicit `am start` from adb with action VIEW, no data, and the host and app UUIDs and names taken from an existing `.art` export (values not recorded). Artemis displayed `ShortcutTrampoline`, and the maintainer reported that the stream opened "with a hiccup". No file was involved.
+- **Stale host:** the same intent with a made-up host UUID and no host name made Artemis show its own dialog, "Connection Error" / "PC not found", with HELP and OK.
+
+### Assumed / not verified
+
+- The intents came from the shell (uid 2000), not from GameBridge. An app sending them is assumed to be treated the same, because Android 13 matches external intents on action and category, and VIEW plus DEFAULT matches Artemis's filter. This has not been observed from an app.
+- Android 14+: Artemis targets 34, and its filter declares `.art` data. Whether an intent with no data is still delivered there is untested.
+- Not tested: an unpaired or offline host, `AppName`-only lookup, and what the "hiccup" was.
+- A second package, `com.limelight.ariane`, was opened on the device during the test. It was not used by these intents, and its role is unknown.
