@@ -673,3 +673,14 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 - The Ariane hand-off came from adb, not LaunchBox. The release build (0.1.1) predates `.gamebridge` and rejected the file as an unsupported type, as expected. A LaunchBox launch of a `.gamebridge` file needs a release with slice 1.
 - Revocation was tested by clearing app data, not by revoking one grant from system settings.
 - A stale host session gives Ariane's "app already running" message. GameBridge cannot detect this, and this log does not record what clears it short of a host restart.
+
+## 2026-11-22: Release v0.2.0
+
+### Verified
+
+- `v0.2.0` was tagged on `main` after PR #2 (slice 1) was merged, with `versionName` 0.2.0 and `versionCode` 3. The `Release` workflow ran `check`, built and signed the APK, and published the pre-release `v0.2.0` with `GameBridge-v0.2.0.apk`.
+- The downloaded APK reports package `com.allourmedia.gamebridge`, versionName 0.2.0 and versionCode 3, and verifies with APK Signature Scheme v2. Its signing certificate matches the one on the 0.1.1 release installed on the Odin, so it installs as an update.
+
+### Assumed / not verified
+
+- The 0.2.0 release build has not been installed or run on a device. Bridge Shortcuts, Scan and Ariane were verified with debug builds of the same code (tickets 01 to 06).
