@@ -301,6 +301,30 @@ class BridgeActivityTest {
     @Test
     fun customShortcutIsDispatchedAsCustomGame() = assertDispatched("Synthetic.pcgame", 2342, "CUSTOM_GAME")
 
+    @Test
+    fun bridgeShortcutIsDispatchedToGameNativeWithoutForwardingTheUri() {
+        assertDispatched("Synthetic.gamebridge", 274190, "STEAM")
+        val dispatched = dispatches().single()
+        assertEquals(null, dispatched.data)
+        assertEquals(0, dispatched.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    @Test
+    fun bridgeShortcutFromANewerGameBridgeShowsUpdateReason() {
+        interpretationFailure("Synthetic-newer-version.gamebridge", FailureCategory.NewerVersion)
+    }
+
+    @Test
+    fun bridgeShortcutWithAnUnknownFieldIsRejectedAndNothingIsStarted() {
+        interpretationFailure("Synthetic-unknown-field.gamebridge", FailureCategory.InvalidContents)
+        assertEquals(0, artemisDispatches().size)
+    }
+
+    @Test
+    fun bridgeShortcutWithOutOfRangeStoreIdShowsInvalidContents() {
+        interpretationFailure("Synthetic-above-int-max.gamebridge", FailureCategory.InvalidContents)
+    }
+
     private val artemis = ComponentName(ArtemisDispatcher.PACKAGE, ArtemisDispatcher.TRAMPOLINE_CLASS)
 
     private fun artemisDispatches() = Intents.getIntents().filter { it.component?.packageName == ArtemisDispatcher.PACKAGE }

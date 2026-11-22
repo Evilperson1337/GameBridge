@@ -28,6 +28,7 @@ enum class FailureCategory(
         "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
             "not another file.",
     ),
+    NewerVersion("This Shortcut was made by a newer GameBridge. Update GameBridge, then pick the game again."),
     GameNativeNotInstalled(
         "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
     ),
@@ -61,6 +62,7 @@ fun Rejection.toFailure(fileName: String): BridgeFailure =
         is Rejection.StorefrontNotVerified -> BridgeFailure(FailureCategory.StorefrontNotVerified, fileName, storefront)
         Rejection.InvalidContents -> BridgeFailure(FailureCategory.InvalidContents, fileName)
         Rejection.TooLarge -> BridgeFailure(FailureCategory.TooLarge, fileName)
+        Rejection.NewerVersion -> BridgeFailure(FailureCategory.NewerVersion, fileName)
     }
 
 const val DISPATCH_ACTION = "com.allourmedia.gamebridge.action.DISPATCH"

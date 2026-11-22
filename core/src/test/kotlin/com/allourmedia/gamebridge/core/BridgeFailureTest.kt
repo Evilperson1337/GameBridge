@@ -12,6 +12,7 @@ class BridgeFailureTest {
                 Rejection.StorefrontNotVerified(Storefront.Steam) to FailureCategory.StorefrontNotVerified,
                 Rejection.InvalidContents to FailureCategory.InvalidContents,
                 Rejection.TooLarge to FailureCategory.TooLarge,
+                Rejection.NewerVersion to FailureCategory.NewerVersion,
             )
         for ((rejection, category) in expected) assertEquals(category, rejection.toFailure("x.gog").category)
     }
@@ -75,6 +76,8 @@ class BridgeFailureTest {
                 FailureCategory.TooLarge to
                     "This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, " +
                     "not another file.",
+                FailureCategory.NewerVersion to
+                    "This Shortcut was made by a newer GameBridge. Update GameBridge, then pick the game again.",
                 FailureCategory.GameNativeNotInstalled to
                     "GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases",
                 FailureCategory.GameNativeRefused to "GameNative refused the request.",

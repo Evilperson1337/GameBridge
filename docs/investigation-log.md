@@ -532,3 +532,17 @@ Assumptions and limits: repository default-branch HEADs are treated as the reque
 ### Assumed / not verified
 
 - That the platform Scoped Storage Permission is what makes `{file.uri}` a granted `content://` URI. That `.gamebridge` survives in `DISPLAY_NAME` and imports on the Windows platform. Any Android 14–16 or other-version LaunchBox behaviour. No device, APK or LaunchBox configuration was touched. Dispatch does not prove Launch.
+
+## 2026-11-22: Ticket 01, GameNative `.gamebridge` Dispatch (gamebridge-2.0)
+
+### Verified
+
+- `:core` reads the version 1 Bridge Shortcut format (ADR 0002) through the existing `interpretShortcut` entry, so `BridgeActivity` needed no change. `./gradlew --offline :core:test --rerun-tasks`: 63 tests, 0 failures (18 new in `BridgeShortcutTest`).
+- `./gradlew --offline check :app:assembleDebug :app:pixel2api33DebugAndroidTest` succeeded: 52 instrumented tests, 0 failures, on the Gradle-managed Pixel 2 API 33 emulator. The new tests show a `.gamebridge` content URI Dispatched to GameNative with the same Int `app_id` and `game_source` extras as a `.steam` Shortcut, no URI or grant forwarded, and the newer-version, unknown-field and out-of-range dialogs with no Dispatch.
+- The JSON reader is a strict in-house reader for one flat object of strings and integers. No new dependency was added.
+
+### Assumed / not verified
+
+- No physical device was used. Dispatch from adb on the Odin with a temporary `.gamebridge` copy is still to do, and needs the maintainer's approval for the temporary copy.
+- Whether LaunchBox delivers a `.gamebridge` file at all is ticket 02, not established here. A Dispatch is not a Launch.
+- The JSON key names (`version`, `target`, `storefront`, `store_id`) and the lowercase Storefront names are a design choice for version 1, not an upstream contract.

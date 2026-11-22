@@ -62,6 +62,7 @@ When something is wrong, GameBridge shows a dialog with the Shortcut's filename 
 | Artemis refused the request. | Android refused the hand-off to Artemis. This was simulated in tests, never seen on a device. |
 | This Shortcut's contents aren't valid. | The file must hold exactly one positive whole number that fits in a signed 32-bit integer. GameNative writes `0` for some GOG games, which is rejected. |
 | This file is too large to be a Shortcut. Check that LaunchBox is passing the Shortcut, not another file. | The file is over 4 KiB. |
+| This Shortcut was made by a newer GameBridge. Update GameBridge, then pick the game again. | A `.gamebridge` file uses a format version this build doesn't know. |
 | GameNative is not installed. Get it from https://github.com/utkarshdalal/GameNative/releases | Install the standard GameNative build. |
 | GameNative refused the request. | Android refused the hand-off. Make sure the standard GameNative build is installed and up to date. |
 
