@@ -2,7 +2,7 @@
 
 GameBridge lets LaunchBox for Android start your GameNative games and your Artemis or Ariane streams. Pick a game in LaunchBox and GameBridge hands it to the right app. GameBridge can also Scan the Shortcuts those apps export and write its own Bridge Shortcuts (`.gamebridge`) for LaunchBox to import. It asks for no permissions and does nothing in the background. Scan only reads the folders you choose and only writes to the Output Folder you choose.
 
-> **Bridge Shortcuts and Scan need GameBridge 0.2.0 or newer.** Release 0.1.1 and earlier treat a `.gamebridge` file as an unsupported type. The 0.2.0 release build itself has not yet been tried on a device; the evidence below is from debug builds of the same code.
+> **Bridge Shortcuts and Scan need GameBridge 0.2.0 or newer.** Release 0.1.1 and earlier treat a `.gamebridge` file as an unsupported type.
 
 **Download:** the latest APK is on the [Releases page](https://github.com/Evilperson1337/GameBridge/releases/latest). Releases are pre-releases until every Storefront below has been checked on a device.
 
@@ -64,18 +64,17 @@ A row moves to verified only when a device observation of that Storefront (the g
 
 ### Bridge Shortcuts (`.gamebridge`)
 
-A Bridge Shortcut is Dispatched only to a Target App with a recorded version. The setup screen shows these versions. All checks were made on an AYN Odin 2 Portal running Android 13.
+A Bridge Shortcut is Dispatched only to a Target App with a recorded version. The setup screen shows these versions. All checks were made on an AYN Odin 2 Portal running Android 13. On 2026-11-22 the signed 0.2.0 release also Scanned all three export folders, and one game per Target App picked in LaunchBox started (reported by the maintainer).
 
 | Target App | Verified with | Evidence |
 |---|---|---|
 | GameNative | 1.4.0 | 2026-11-22: a `.gamebridge` file for a GOG game, picked in LaunchBox 1.23, was Dispatched by a debug build, and the game started (reported by the maintainer). |
 | Artemis (`com.limelight.noir`) | 20.2.6 | 2026-11-22: a `.gamebridge` file created by Scan from an Artemis export was Dispatched by GameBridge, and the stream started (reported by the maintainer). |
-| Ariane (`com.limelight.ariane`) | 1.1.0 | 2026-11-22: a `.gamebridge` file created by Scan from an Ariane export was Dispatched by GameBridge, and the stream started (reported by the maintainer). It was sent from adb, not LaunchBox. |
+| Ariane (`com.limelight.ariane`) | 1.1.0 | 2026-11-22: a `.gamebridge` file created by Scan from an Ariane export was Dispatched by GameBridge, and the stream started (reported by the maintainer). |
 
 Not verified:
 
 - Android 14, 15 and 16.
-- Picking an Artemis or Ariane `.gamebridge` file in LaunchBox. The GameNative row shows that LaunchBox passes `.gamebridge` files to GameBridge.
 - Any app version other than those listed.
 
 When the host PC still has a game running, Ariane reports that an app is already running and does not stream. Quit that game, or restart the host, then pick the game again.

@@ -684,3 +684,14 @@ Odin 2 Portal, Android 13, LaunchBox 1.23 (target SDK 36), GameNative 1.4.0. Win
 ### Assumed / not verified
 
 - The 0.2.0 release build has not been installed or run on a device. Bridge Shortcuts, Scan and Ariane were verified with debug builds of the same code (tickets 01 to 06).
+
+## 2026-11-22: v0.2.0 release on the Odin, LaunchBox picks
+
+### Verified
+
+- The maintainer installed the 0.2.0 release over 0.1.1 and cleared the earlier Output Folder. Scan with the GameNative, Artemis and Ariane Shortcut Folders reported "Added 4".
+- With the `.gamebridge` files imported into LaunchBox 1.23 and LaunchBox's release Setup command unchanged, the maintainer picked one game per Target App. All three started, as reported by the maintainer: a GameNative game (Warhammer Survivors), an Artemis stream (Yakuza 0) and an Ariane stream (Battlefield 4). This is the first time an Artemis or Ariane Bridge Shortcut was picked in LaunchBox rather than sent from adb.
+
+### Assumed / not verified
+
+- No logcat was captured for these picks, so Dispatch is inferred from the reported Launches. Android 14 to 16 are still not tested.
